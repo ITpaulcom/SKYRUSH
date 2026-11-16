@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Sky Rush – Zentrale</title>
+<style>
+  :root{--ink:#1B1240;--paper:#FFF8EC;--card:#fff;--sun:#FFC83D;--mint:#3BE8A4;--coral:#FF5A7A;--sky:#38C6FF;--grape:#7B4DFF;--line:#ECE3D3;--muted:#6b6386;--ok:#0B8F5A;--bad:#D3264E}
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+  button,input,select{font:inherit;color:inherit}
+  a{color:inherit}
+  .muted{color:var(--muted)} .small{font-size:13px} .num{font-variant-numeric:tabular-nums}
+  .btn{font-weight:700;padding:8px 14px;border:2px solid var(--ink);border-radius:11px;background:var(--sun);cursor:pointer;box-shadow:0 2px 0 var(--ink);white-space:nowrap}
+  .btn:active{transform:translateY(2px);box-shadow:none}
+  .btn.w{background:#fff}.btn.r{background:#FFE1E7;color:var(--bad);border-color:var(--bad);box-shadow:0 2px 0 var(--bad)}.btn.g{background:#D9FFEE}
+  .btn.s{padding:4px 9px;font-size:13px;border-radius:9px}
+  .btn[disabled]{opacity:.5;cursor:default}
+  input,select{padding:8px 10px;border:2px solid var(--ink);border-radius:10px;background:#fff;min-width:0}
+  input[type=number]{width:92px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .grow{flex:1;min-width:0}
+  /* Anmeldung */
+  #login{min-height:100vh;display:grid;place-items:center;padding:20px}
+  #login .box{width:min(420px,100%);background:#fff;border:3px solid var(--ink);border-radius:22px;padding:26px;box-shadow:0 6px 0 var(--ink)}
+  #login h1{margin:0 0 4px;font-size:26px}
+  #login input{width:100%;margin:16px 0 10px;font-size:16px;padding:12px}
+  #login .btn{width:100%;padding:12px;font-size:16px}
+  #lmsg{min-height:22px;margin:12px 0 0;font-weight:700}
+  #lmsg.bad{color:var(--bad)} #lmsg.lock{color:#fff;background:var(--bad);border-radius:10px;padding:10px 12px}
+  /* Kopf + Navigation */
+  header{position:sticky;top:0;z-index:20;background:var(--ink);color:#fff}
+  header .in{max-width:1200px;margin:0 auto;padding:10px 16px;display:flex;gap:12px;align-items:center}
+  header b{font-size:17px;white-space:nowrap}
+  nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;flex:1}
+  nav::-webkit-scrollbar{display:none}
+  nav button{background:none;border:0;color:#cfc8ea;padding:8px 11px;border-radius:9px;cursor:pointer;font-weight:600;white-space:nowrap}
+  nav button.on{background:var(--sun);color:var(--ink)}
+  nav .cnt{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:var(--coral);color:#fff;font-size:11px;margin-left:4px;text-align:center}
+  header .out{background:none;border:2px solid #fff;color:#fff;border-radius:9px;padding:5px 10px;cursor:pointer;font-weight:700}
+  main{max-width:1200px;margin:0 auto;padding:18px 16px 70px}
+  h2{margin:4px 0 12px;font-size:22px} h3{margin:0 0 10px;font-size:16px}
+  .card{background:var(--card);border:2px solid var(--ink);border-radius:16px;padding:14px 16px;margin-bottom:14px}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+  .kpi{background:#fff;border:2px solid var(--ink);border-radius:14px;padding:10px 12px}
+  .kpi span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .kpi b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);white-space:nowrap}
+  th.sort{cursor:pointer} th.sort.on::after{content:' ▼'}
+  tr.click{cursor:pointer} tr.click:hover td{background:#FFF4D6}
+  .wrap{overflow-x:auto}
+  .badge{display:inline-block;padding:1px 7px;border-radius:8px;font-size:11.5px;font-weight:700;border:1.5px solid currentColor}
+  .badge.bad{color:var(--bad)} .badge.ok{color:var(--ok)} .badge.warn{color:#B36B00} .badge.info{color:#2E6FD8}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{padding:5px 11px;border:2px solid var(--ink);border-radius:20px;background:#fff;cursor:pointer;font-weight:600;font-size:13.5px}
+  .chip.on{background:var(--ink);color:#fff}
+  .empty{padding:20px;text-align:center;color:var(--muted)}
+  .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:12px}
+  .chart{display:flex;align-items:flex-end;gap:3px;height:160px;border-bottom:2px solid var(--ink);padding-top:10px;overflow-x:auto}
+  .bar{flex:1;min-width:9px;display:flex;flex-direction:column-reverse;height:100%;position:relative}
+  .bar i{display:block}
+  .bar:hover::after{content:attr(data-tip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:4px 8px;border-radius:8px;white-space:nowrap;font-size:12px;z-index:2}
+  .legend{display:flex;gap:14px;margin-top:8px;font-size:13px}
+  .legend span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--c)}
+  .podium{display:grid;gap:8px}
+  .pod{display:flex;gap:10px;align-items:center;border:2px solid var(--ink);border-radius:12px;padding:8px 10px}
+  .pod .m{font-size:24px}
+  /* Spieler-Ansicht */
+  #drawer{position:fixed;inset:0;z-index:40;display:none}
+  #drawer.on{display:block}
+  #drawer .bg{position:absolute;inset:0;background:rgba(27,18,64,.45)}
+  #drawer .pane{position:absolute;top:0;right:0;bottom:0;width:min(760px,100%);background:var(--paper);overflow-y:auto;border-left:3px solid var(--ink);box-shadow:-8px 0 30px rgba(0,0,0,.2)}
+  #drawer .ph{position:sticky;top:0;z-index:2;background:var(--ink);color:#fff;padding:12px 16px;display:flex;gap:10px;align-items:center}
+  #drawer .ph b{font-size:18px}
+  #drawer .ph .x{margin-left:auto;background:none;border:2px solid #fff;color:#fff;border-radius:9px;padding:4px 10px;cursor:pointer;font-weight:700}
+  #drawer .pb{padding:14px 16px 60px}
+  .why{position:sticky;top:52px;z-index:1;background:#FFF1C9;border:2px solid var(--ink);border-radius:12px;padding:8px 10px;margin-bottom:12px}
+  .why input{width:100%}
+  .vals{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+  .val{border:2px solid var(--line);border-radius:12px;padding:8px 10px;background:#fff}
+  .val span{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block}
+  .val b{font-size:18px}
+  .val .row{margin-top:6px}
+  .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{display:inline-flex;gap:6px;align-items:center;border:2px solid var(--ink);border-radius:10px;padding:3px 4px 3px 9px;background:#fff;font-size:13.5px;font-weight:600}
+  .tag button{border:0;background:#FFE1E7;color:var(--bad);border-radius:7px;cursor:pointer;font-weight:900;padding:1px 7px}
+  .tag.lock{background:#F2EEF9;color:var(--muted)}
+  .chars{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+  .chars label{display:flex;gap:6px;align-items:center;border:2px solid var(--line);border-radius:10px;padding:5px 8px;background:#fff;font-size:14px;cursor:pointer}
+  .chars label.on{border-color:var(--ok);background:#E9FFF5}
+  .danger{border-color:var(--bad)}
+  #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;z-index:60;display:none;max-width:90vw}
+  #toast.bad{background:var(--bad)}
+  td.small,td.num,#ptab td{white-space:nowrap}
+  /* Einstellungen */
+  .form{display:grid;gap:10px}
+  .fl{display:grid;grid-template-columns:minmax(180px,260px) 1fr;gap:10px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
+  .fl:last-child{border-bottom:0}
+  .fl>span b{display:block}.fl>span small{color:var(--muted)}
+  .fl input[type=text]{width:100%}
+  .sw{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:600}
+  .sw input{width:20px;height:20px;accent-color:var(--ink)}
+  .prov{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+  .prov label{display:flex;gap:10px;align-items:flex-start;border:2px solid var(--ink);border-radius:14px;padding:10px 12px;background:#fff;cursor:pointer}
+  .prov label input{width:20px;height:20px;margin-top:2px;accent-color:var(--ink);flex:none}
+  .prov label.off{opacity:.6;background:#F4F1FA}
+  .savebar{position:sticky;bottom:12px;display:flex;gap:10px;align-items:center;justify-content:flex-end;background:#FFF1C9;border:2px solid var(--ink);border-radius:14px;padding:10px 12px;box-shadow:0 4px 0 var(--ink)}
+  .ferr{outline:3px solid var(--bad)}
+  .tblwrap{overflow-x:auto} .shoptbl input[type=number]{width:100px} .shoptbl tr.off td{opacity:.45} .shoptbl td.eff{white-space:nowrap} .shoptbl input[type=checkbox]{width:18px;height:18px}
+  .links{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px} .links a{display:block;padding:10px 12px;border:2px solid var(--ink);border-radius:12px;background:#fff;color:var(--ink);text-decoration:none;font-weight:700;box-shadow:0 2px 0 var(--ink)} .links a small{display:block;font-weight:400;color:var(--muted)}
+  @media (max-width:640px){ .fl{grid-template-columns:1fr} }
+  @media (max-width:640px){ header .in{flex-wrap:wrap} nav{order:3;flex-basis:100%} th,td{padding:7px 5px} .hide-s{display:none} }
+</style>
+</head>
+<body>
+<div id="login">
+  <form class="box" id="lf" autocomplete="off">
+    <h1>🔒 Zentrale</h1>
+    <p class="muted small">Sky Rush · nur für dich. Nach 3 falschen Versuchen wird die Anmeldung von diesem Anschluss aus gesperrt.</p>
+    <input id="key" type="password" placeholder="Zentrale-Schlüssel" autocomplete="off" spellcheck="false" required>
+    <button class="btn" id="lbtn">Anmelden</button>
+    <p id="lmsg"></p>
+  </form>
+</div>
+<div id="app" hidden>
+  <header><div class="in"><b>☁️ Sky Rush · Zentrale</b>
+    <nav id="nav"></nav>
+    <button class="out" id="out" title="Abmelden">Abmelden</button></div></header>
+  <main id="main"></main>
+</div>
+<div id="drawer"><div class="bg" data-close></div><div class="pane"><div class="ph"><b id="dt">Spieler</b><span id="dbadges"></span><button class="x" data-close>✕ Schließen</button></div><div class="pb" id="db"></div></div></div>
+<div id="toast"></div>
+<script type="module">
+import { CHARS, STYLE } from './catalog.js';
+import { CHEST, TOUR_PRIZES, DAILY_TIERS, dailyTier } from './meta.js';
+
+const $ = id => document.getElementById(id);
+const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = n => Number(n || 0).toLocaleString('de-DE');
+const money = (v, c) => Number(v || 0).toLocaleString('de-DE', { style: 'currency', currency: c || 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const dt = t => t ? new Date(t).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : '–';
+const ago = t => { if (!t) return '–'; const s = (Date.now() - t) / 1000; return s < 60 ? 'gerade' : s < 3600 ? `vor ${Math.floor(s / 60)} Min` : s < 86400 ? `vor ${Math.floor(s / 3600)} Std` : s < 86400 * 60 ? `vor ${Math.floor(s / 86400)} T` : dt(t); };
+const flag = cc => cc && /^[A-Z]{2}$/.test(cc) ? String.fromCodePoint(...[...cc].map(c => 127397 + c.charCodeAt(0))) : '🏳';
+const MEDAL = ['🥇', '🥈', '🥉'], POW = { jet: '🚀 Jetpack', magnet: '🧲 Magnet', shield: '🛡️ Schild', boots: '👟 Sprungschuhe' };
+const toast = (m, bad = false) => { const t = $('toast'); t.textContent = m; t.className = bad ? 'bad' : ''; t.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 3200); };
+try { localStorage.removeItem('skyrush.admin'); } catch {}   // alter Speicherort des Schlüssels – wird nicht mehr benutzt
+
+// ---------- Anmeldung / Sitzung ----------
+let TOKEN = ''; try { TOKEN = sessionStorage.getItem('skyrush.adm') || ''; } catch {}
+async function api(qs = '', body = null) {
+  const r = await fetch('/api/admin' + qs, { method: body ? 'POST' : 'GET', headers: { authorization: 'Bearer ' + TOKEN, ...(body ? { 'content-type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined, cache: 'no-store' }).catch(() => null);
+  if (!r) throw new Error('Server nicht erreichbar');
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401) { showLogin('Sitzung abgelaufen – bitte neu anmelden.'); throw new Error('auth'); }
+  if (!r.ok) throw Object.assign(new Error(j.error || 'Fehler ' + r.status), { j });
+  return j;
+}
+function showLogin(msg = '') { TOKEN = ''; try { sessionStorage.removeItem('skyrush.adm'); } catch {} $('app').hidden = true; $('drawer').classList.remove('on'); $('login').hidden = false; $('lmsg').textContent = msg; $('lmsg').className = msg ? 'bad' : ''; $('key').value = ''; $('key').focus(); }
+$('lf').onsubmit = async e => {
+  e.preventDefault();
+  const key = $('key').value.trim(); if (!key) return;
+  $('lbtn').disabled = true; $('lmsg').textContent = 'Prüfe …'; $('lmsg').className = '';
+  const r = await fetch('/api/admin', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'login', key }) }).catch(() => null);
+  const j = r ? await r.json().catch(() => ({})) : {};
+  $('lbtn').disabled = false; $('key').value = '';
+  if (r && r.ok && j.token) { TOKEN = j.token; try { sessionStorage.setItem('skyrush.adm', TOKEN); } catch {} $('login').hidden = true; $('app').hidden = false; go(location.hash.slice(1) || 'dash'); return; }
+  const m = $('lmsg');
+  if (!r) { m.textContent = 'Server nicht erreichbar.'; m.className = 'bad'; }
+  else if (j.error === 'locked') { m.textContent = `🔒 Gesperrt bis ${dt(j.until)}${j.all ? ' (zu viele Fehlversuche insgesamt)' : ''}. Sofort wieder frei: neuen Schlüssel erzeugen und deployen.`; m.className = 'lock'; }
+  else if (j.error === 'nokey') { m.textContent = 'Auf dem Server ist kein (sicherer) Schlüssel gesetzt. im Projektordner „SKY-RUSH-ZENTRALE-SCHLUESSEL.bat“ ausführen.'; m.className = 'bad'; }
+  else { m.textContent = `Falscher Schlüssel. Noch ${j.left} Versuch${j.left === 1 ? '' : 'e'}, dann wird gesperrt.`; m.className = 'bad'; }
+};
+$('out').onclick = async () => { try { await api('', { action: 'logout' }); } catch {} showLogin('Abgemeldet.'); };
+
+// ---------- Navigation ----------
+const VIEWS = { dash: 'Übersicht', players: 'Spieler', boards: 'Ranglisten', ac: 'Anti-Cheat', ads: 'Werbung', shop: 'Shop', cfg: 'Einstellungen', log: 'Protokoll', sec: 'Sicherheit' };
+let VIEW = 'dash', DASH = null, PLAYERS = null;
+function navRender(counts = {}) { $('nav').innerHTML = Object.entries(VIEWS).map(([k, v]) => `<button data-v="${k}" class="${k === VIEW ? 'on' : ''}">${v}${counts[k] ? `<span class="cnt">${counts[k]}</span>` : ''}</button>`).join(''); }
+$('nav').onclick = e => { const b = e.target.closest('[data-v]'); if (b) go(b.dataset.v); };
+async function go(v) {
+  if (!VIEWS[v]) v = 'dash'; VIEW = v; history.replaceState(null, '', '#' + v); navRender(go.counts);
+  $('main').innerHTML = '<p class="muted">Lädt …</p>';
+  try { await ({ dash: vDash, players: vPlayers, boards: vBoards, ac: vAc, ads: vAds, shop: vShop, cfg: vCfg, log: vLog, sec: vSec })[v](); }
+  catch (e) { if (e.message !== 'auth') $('main').innerHTML = `<p class="card" style="color:var(--bad)">Fehler: ${esc(e.message)}</p>`; }
+}
+const loadDash = async (force = false) => (DASH && !force ? DASH : (DASH = await api('?view=dash&days=30')));
+const loadPlayers = async (force = false) => (PLAYERS && !force ? PLAYERS : (PLAYERS = (await api('?view=players')).players));
+const WHY = { fast: 'schneller als Echtzeit (Speedhack/Bot)', slow: 'Zeitlupe', burst: 'übermenschlich schnelle Eingaben', score: 'falsche Punktzahl gemeldet', save: 'Spielstand verändert', hit: 'Kollision gefälscht (Duell)', seeds: 'viele abgebrochene Starts', 'iap-unverified': 'Kauf ohne Server-Prüfung (RevenueCat-Secret fehlt)' };
+const why = w => String(w).split(',').map(x => WHY[x] || (x.startsWith('replay') ? 'Lauf nicht nachspielbar (manipuliert)' : x.startsWith('burst') ? 'sehr schnelle Eingaben (' + esc(x.slice(5)) + '/s)' : x.startsWith('top') ? 'Platz ' + esc(x.slice(3)) + ' erreicht' : x.startsWith('init:') ? 'Spielstand übernommen, teils gekürzt (' + esc(x.slice(5)) + ')' : x.startsWith('restored:') ? '✅ Spielstand wiederhergestellt (' + esc(x.slice(9)) + ')' : x.startsWith('admin-h:') ? '✅ Rekord bestätigt: ' + esc(x.slice(8)) + ' m' : x.startsWith('admin-lv:') ? '✅ Stufen zurückgegeben: ' + esc(x.slice(9)) : x.startsWith('tourprize:') ? '🏆 Turnierpreis ausgezahlt: Platz ' + esc(x.slice(10)) : esc(x))).join(' · ');
+const sev = w => /replay|fast|slow|burst|score|save|hit|rejected/.test(w) ? 'bad' : /top|seeds|iap/.test(w) ? 'warn' : 'ok';
+const nameCell = (n, c, uid) => `<a href="#" data-p="${esc(uid)}" style="white-space:nowrap">${c ? flag(c) + ' ' : ''}${esc(n || 'Spieler')}</a>`;
+document.addEventListener('click', e => { const a = e.target.closest('[data-p]'); if (a) { e.preventDefault(); openPlayer(a.dataset.p); } });
+
+// ---------- Übersicht ----------
+const LINKS = [
+  ['Google Play Console', 'https://play.google.com/console/u/0/developers/7829093855860564632/app/4976021817400735669/app-dashboard', 'Tests, Versionen, Produkte'],
+  ['AdMob', 'https://admob.google.com/v2/home', 'Werbung & Einnahmen'],
+  ['RevenueCat', 'https://app.revenuecat.com/', 'Käufe & Kunden'],
+  ['Microsoft Partner Center', 'https://partner.microsoft.com/dashboard/apps-and-games/overview', 'Windows-Store'],
+  ['Netlify', 'https://app.netlify.com/', 'Hosting & Deploys'],
+  ['Spiel öffnen', 'https://myskyrush.com/', 'myskyrush.com'],
+];
+async function vDash() {
+  const [d, pl] = await Promise.all([loadDash(true), loadPlayers(true)]);
+  const now = Date.now(), cur = (d.days.find(x => x.impressions) || {}).currency || 'USD', sum = n => d.days.slice(0, n).reduce((a, x) => a + x.revenue, 0);
+  const act1 = pl.filter(p => now - (p.at || 0) < 864e5).length, act7 = pl.filter(p => now - (p.at || 0) < 7 * 864e5).length, new1 = pl.filter(p => now - (p.cr || 0) < 864e5).length;
+  const fl24 = d.flags.filter(f => now - f.at < 864e5 && sev(f.why) !== 'ok').length, bans = Object.keys(d.bans || {}).length;
+  go.counts = { ac: fl24 }; navRender(go.counts);
+  const tp = d.boards.tourPrev, wait = (tp.top || []).filter(e => e.prize === 'waiting').length;
+  $('main').innerHTML = `<h2>Übersicht</h2>
+    <div class="kpis">${[['Spieler', fmt(pl.length)], ['Aktiv heute', fmt(act1)], ['Aktiv 7 Tage', fmt(act7)], ['Neu heute', fmt(new1)], ['Umsatz heute', money(d.days[0].revenue, cur)], ['Umsatz 30 Tage', money(sum(30), cur)], ['Mit Google gesichert', fmt(pl.filter(p => p.g).length)], ['Auffällig (24 Std)', fmt(fl24)], ['Gesperrt', fmt(bans)]].map(([k, v]) => `<div class="kpi"><span>${k}</span><b>${v}</b></div>`).join('')}</div>
+    <div class="grid">
+      <div class="card"><h3>🏆 Turnier ${esc(tp.period)} – Preise</h3>${podium(tp)}</div>
+      <div class="card"><h3>☀️ Tages-Run ${esc(d.boards.dailyPrev.period)} – Auswertung</h3>${podium(d.boards.dailyPrev, true)}</div>
+      <div class="card"><h3>⚠️ Zuletzt auffällig</h3>${flagTable(d.flags.filter(f => sev(f.why) !== 'ok').slice(0, 6), true)}<div class="row" style="margin-top:8px"><button class="btn w s" onclick="location.hash='ac'">Alle ansehen</button></div></div>
+      <div class="card"><h3>⭐ Neueste Spieler</h3>${playerMini(pl.slice().sort((a, b) => (b.cr || 0) - (a.cr || 0)).slice(0, 6))}</div>
+      <div class="card"><h3>🔥 Gerade aktiv</h3>${playerMini(pl.slice().sort((a, b) => (b.at || 0) - (a.at || 0)).slice(0, 6))}</div>
+    </div>
+    <div class="card"><h3>🔗 Schnellzugriff</h3><div class="links">${LINKS.map(([n, u, t]) => `<a href="${u}" target="_blank" rel="noopener">${n}<small>${t}</small></a>`).join('')}</div>
+      <p class="small muted" style="margin:8px 0 0">Werbe-IDs (AdMob, AdSense, Häufigkeit) änderst du unter <b>Einstellungen</b>, Preise und Rabatte unter <b>Shop</b>.</p></div>`;
+  if (wait) toast(`${wait} Turnierpreis${wait > 1 ? 'e warten' : ' wartet'} noch auf den Spieler (kommt beim nächsten Start).`);
+}
+function podium(tp, daily = false) {
+  const pod = (tp.top || []).filter(e => e.place);
+  if (!pod.length) return '<p class="muted">Noch keine Teilnehmer.</p>';
+  const st = { paid: '<span class="badge ok">✓ ausgezahlt</span>', soon: `<span class="badge info">Auszahlung ab ${dt(tp.payAt)}</span>`, waiting: '<span class="badge warn">wartet auf Spieler</span>' };
+  return `<div class="podium">${pod.map(e => `<div class="pod"><span class="m">${MEDAL[e.place - 1]}</span><div class="grow">${nameCell(e.name, e.country, e.uid)} <span class="muted small num">${fmt(e.score)} Pkt.</span><div class="small">${st[e.prize] || ''}</div></div>${e.prize !== 'paid' ? `<button class="btn s w" data-prize="${esc(e.uid)}" data-pl="${e.place}" data-wk="${esc(tp.period)}" ${daily ? `data-daily="${e.total}"` : ''}>Jetzt vergeben</button>` : ''}</div>`).join('')}</div>
+    <p class="small muted" style="margin:8px 0 0">${daily ? 'Alle in der Tages-Rangliste bekommen ihre Belohnung automatisch beim nächsten App-Start (Platz 1–3, Top 10 %, dabei sein).' : 'Preise kommen automatisch beim nächsten App-Start des Spielers.'} „Jetzt vergeben“ schreibt sie sofort gut.</p>`;
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-prize]'); if (!b) return;
+  if (!confirm(`Preis für Platz ${b.dataset.pl} (${b.dataset.wk}) jetzt vergeben?`)) return;
+  const op = b.dataset.daily ? { kind: 'dprize', d: b.dataset.wk, r: +b.dataset.pl, n: +b.dataset.daily } : { kind: 'prize', pl: +b.dataset.pl, p: b.dataset.wk };
+  try { const r = await api('', { action: 'op', uid: b.dataset.prize, op, why: b.dataset.daily ? 'Tagesauswertung von Hand' : 'Turnierpreis von Hand' }); toast(r.msg); go(VIEW); } catch (x) { toast(x.message === 'dup' ? 'Preis ist schon vergeben.' : 'Ging nicht: ' + x.message, true); }
+});
+const playerMini = l => l.length ? `<table>${l.map(p => `<tr><td>${nameCell(p.n, p.c, p.u)}</td><td class="num">${fmt(p.h)} m</td><td class="muted small">${ago(p.at || p.cr)}</td></tr>`).join('')}</table>` : '<p class="muted">–</p>';
+const flagTable = (l, mini = false) => l.length ? `<div class="wrap"><table>${mini ? '' : '<tr><th>Wann</th><th>Spieler</th><th>Grund</th><th class="hide-s">Modus</th><th class="hide-s">Höhe</th></tr>'}${l.map(f => `<tr><td class="small muted">${ago(f.at)}</td><td>${f.u ? nameCell(f.n, null, f.u) : '–'}</td><td><span class="badge ${sev(f.why)}">${why(f.why)}</span></td>${mini ? '' : `<td class="hide-s">${esc(f.mode || '')}</td><td class="hide-s num">${f.h != null ? fmt(f.h) + ' m' : ''}</td>`}</tr>`).join('')}</table></div>` : '<p class="muted">Nichts Auffälliges.</p>';
+
+// ---------- Spieler ----------
+const PS = { q: '', f: 'all', sort: 'at', page: 0 };
+async function vPlayers() {
+  await loadPlayers(true);
+  $('main').innerHTML = `<h2>Spieler <span class="muted" id="pcount"></span></h2>
+    <div class="card"><div class="row"><input id="pq" class="grow" placeholder="Name, E-Mail (Google) oder Spieler-ID suchen …" value="${esc(PS.q)}">
+      <select id="psort"><option value="at">Zuletzt aktiv</option><option value="h">Rekord</option><option value="co">Münzen</option><option value="l">Level</option><option value="t">Pokale</option><option value="cr">Neueste</option><option value="n">Name</option></select></div>
+      <div class="chips" style="margin-top:10px" id="pf">${[['all', 'Alle'], ['act', 'Aktiv 7 Tage'], ['new', 'Neu (7 Tage)'], ['top', 'Mit Pokalen'], ['g', '🔐 Mit Google'], ['ban', 'Gesperrt']].map(([k, v]) => `<button class="chip ${PS.f === k ? 'on' : ''}" data-f="${k}">${v}</button>`).join('')}</div></div>
+    <div class="card"><div class="wrap" id="ptab"></div><div class="pager" id="ppg"></div></div>
+    <p class="small muted">Fehlen Spieler, die lange nicht mehr gespielt haben? <button class="btn w s" id="rix">Verzeichnis vervollständigen</button> <span id="rixs"></span></p>`;
+  $('psort').value = PS.sort;
+  $('pq').oninput = e => { PS.q = e.target.value; PS.page = 0; pTable(); };
+  $('psort').onchange = e => { PS.sort = e.target.value; pTable(); };
+  $('pf').onclick = e => { const c = e.target.closest('[data-f]'); if (!c) return; PS.f = c.dataset.f; PS.page = 0; $('pf').querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === c)); pTable(); };
+  $('rix').onclick = async () => { $('rix').disabled = true; let r = { next: 0 }; try { while (r.next !== null) { r = await api('', { action: 'reindex', offset: r.next }); $('rixs').textContent = `${r.done} / ${r.total}`; } toast('Verzeichnis vollständig'); await loadPlayers(true); pTable(); } catch (e) { toast('Abgebrochen: ' + e.message, true); } $('rix').disabled = false; };
+  pTable();
+}
+function pTable() {
+  const now = Date.now(), q = PS.q.trim().toLowerCase();
+  let l = PLAYERS.filter(p => (!q || (p.n || '').toLowerCase().includes(q) || p.u.includes(q) || (p.g || '').toLowerCase().includes(q)) && (PS.f === 'all' || (PS.f === 'g' && p.g) || (PS.f === 'act' && now - (p.at || 0) < 7 * 864e5) || (PS.f === 'new' && now - (p.cr || 0) < 7 * 864e5) || (PS.f === 'top' && (p.t || []).some(Boolean)) || (PS.f === 'ban' && p.b)));
+  const k = PS.sort, val = p => k === 't' ? (p.t || [0, 0, 0])[0] * 1e6 + (p.t || [0, 0, 0])[1] * 1e3 + (p.t || [0, 0, 0])[2] : p[k] || 0;
+  l.sort((a, b) => k === 'n' ? String(a.n).localeCompare(String(b.n)) : val(b) - val(a));
+  $('pcount').textContent = `(${fmt(l.length)}${l.length !== PLAYERS.length ? ' von ' + fmt(PLAYERS.length) : ''})`;
+  const per = 50, pages = Math.max(1, Math.ceil(l.length / per)); PS.page = Math.min(PS.page, pages - 1);
+  const part = l.slice(PS.page * per, PS.page * per + per);
+  $('ptab').innerHTML = part.length ? `<table><tr><th>Name</th><th>Rekord</th><th>Münzen</th><th class="hide-s">Level</th><th class="hide-s">Stufen</th><th>Pokale</th><th>Zuletzt</th><th></th></tr>
+    ${part.map(p => `<tr class="click" data-p="${esc(p.u)}"><td>${flag(p.c)} <b>${esc(p.n || 'Spieler')}</b>${p.g ? ` <span title="${esc(p.g)}">🔐</span>` : ''}</td><td class="num">${fmt(p.h)} m</td><td class="num">${fmt(p.co)}</td><td class="hide-s num">${p.l || 1}</td><td class="hide-s num">${p.gl || 0}</td><td>${(p.t || []).map((n, i) => n ? MEDAL[i] + n : '').join(' ') || '<span class="muted">–</span>'}</td><td class="small muted">${ago(p.at)}</td><td>${p.b ? '<span class="badge bad">gesperrt</span>' : ''}${!p.v ? '<span class="badge warn" title="Noch kein Server-Spielstand">alt</span>' : ''}</td></tr>`).join('')}</table>` : '<p class="empty">Keine Spieler gefunden.</p>';
+  $('ppg').innerHTML = pages > 1 ? `<button class="btn w s" ${PS.page ? '' : 'disabled'} data-pg="-1">‹ Zurück</button><span class="small">Seite ${PS.page + 1} / ${pages}</span><button class="btn w s" ${PS.page < pages - 1 ? '' : 'disabled'} data-pg="1">Weiter ›</button>` : '';
+  $('ppg').onclick = e => { const b = e.target.closest('[data-pg]'); if (b) { PS.page += +b.dataset.pg; pTable(); } };
+}
+
+// ---------- Spieler-Ansicht (Hoch- und Runterstufen) ----------
+let CUR = null;
+async function openPlayer(uid) {
+  $('drawer').classList.add('on'); $('db').innerHTML = '<p class="muted">Lädt …</p>'; $('dt').textContent = 'Spieler'; $('dbadges').innerHTML = '';
+  try { CUR = await api('?view=player&uid=' + encodeURIComponent(uid)); } catch (e) { $('db').innerHTML = `<p style="color:var(--bad)">Fehler: ${esc(e.message)}</p>`; return; }
+  renderPlayer();
+}
+$('drawer').addEventListener('click', e => { if (e.target.closest('[data-close]')) { $('drawer').classList.remove('on'); if (VIEW === 'players' && PLAYERS) loadPlayers(true).then(pTable).catch(() => {}); } });
+function renderPlayer() {
+  const d = CUR, p = d.player || {}, v = d.vault, s = v ? v.s : null;
+  $('dt').textContent = `${flag(p.country)} ${p.name || 'Spieler'}`;
+  $('dbadges').innerHTML = d.ban ? '<span class="badge bad" style="background:#fff">gesperrt</span>' : '';
+  const wk = (() => { const t = new Date(Date.now() - 7 * 864e5), u = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate())); const dd = u.getUTCDay() || 7; u.setUTCDate(u.getUTCDate() + 4 - dd); const y0 = new Date(Date.UTC(u.getUTCFullYear(), 0, 1)); return `${u.getUTCFullYear()}-W${String(Math.ceil(((u - y0) / 864e5 + 1) / 7)).padStart(2, '0')}`; })();
+  const val = (k, label, value, input) => `<div class="val"><span>${label}</span><b class="num">${value}</b>${input ? `<div class="row">${input}</div>` : ''}</div>`;
+  const allStyles = Object.entries(STYLE).flatMap(([c, cc]) => Object.entries(cc.items).filter(([, it]) => it.price > 0 || it.season).map(([k, it]) => [c + ':' + k, `${cc.ico} ${it.name}${it.tour ? ' (Turnier)' : it.season ? ' (Saison)' : ''}`]));
+  $('db').innerHTML = `
+    <div class="why"><label class="small"><b>Grund</b> (steht im Protokoll, z. B. „Fehler bei der Vergabe“)</label><input id="why" placeholder="optional" maxlength="160"></div>
+    <div class="card"><div class="row small muted"><span>ID <code>${esc(d.uid)}</code></span><button class="btn w s" id="cp">kopieren</button></div>
+      <div class="row small" style="margin-top:6px"><span>Dabei seit <b>${dt(p.created || (v && v.created))}</b></span><span>· zuletzt <b>${ago(v && v.at)}</b></span>${p.devices > 1 ? `<span>· ${p.devices} Geräte</span>` : ''}</div>
+      <div class="row small" style="margin-top:6px">${d.google ? `<span>🔐 Google: <b>${esc(d.google.email || '–')}</b> <span class="muted">seit ${dt(d.google.at)}</span></span><button class="btn w s" data-a="unlinkGoogle">Google trennen</button>` : '<span class="muted">Nicht mit Google gesichert</span>'}</div>
+      <div class="row" style="margin-top:10px">${d.ban ? `<button class="btn g s" data-a="unban">Entsperren</button>` : `<button class="btn r s" data-a="ban">Sperren</button>`}<button class="btn w s" data-a="unboard">Aus Ranglisten nehmen</button><button class="btn w s" data-a="rename">Umbenennen</button></div>
+      ${d.ban ? `<p class="small" style="color:var(--bad);margin:8px 0 0">Gesperrt seit ${dt(d.ban.at)}: ${esc(d.ban.why)}</p>` : ''}</div>
+    ${!s ? '<div class="card"><p>Dieser Spieler hat noch keinen Server-Spielstand (alte App-Version). Änderungen sind möglich, sobald er das Spiel einmal mit Internet startet.</p></div>' : `
+    <div class="card"><h3>Spielstand</h3><div class="vals">
+      ${val('co', 'Münzen', fmt(s.coins), `<input type="number" id="coN" min="0" placeholder="Menge"><button class="btn s g" data-op="coins:add">+</button><button class="btn s r" data-op="coins:sub">−</button><button class="btn s w" data-op="coins:set">=</button>`)}
+      ${val('h', 'Rekord', fmt(s.bestH) + ' m', `<input type="number" id="hN" min="0" value="${s.bestH}"><button class="btn s w" data-op="height">Setzen</button>`)}
+      ${val('l', 'Level', s.level, `<input type="number" id="lN" min="1" max="999" value="${s.level}"><button class="btn s w" data-op="level">Setzen</button>`)}
+      ${val('m', 'Multiplikator', '×' + s.mult, `<input type="number" id="mN" min="1" max="30" value="${s.mult}"><button class="btn s w" data-op="mult">Setzen</button>`)}
+      ${val('t', 'Kopfstarts', fmt(s.tokens && s.tokens.headstart), `<input type="number" id="tN" min="0" max="999" value="${s.tokens ? s.tokens.headstart : 0}"><button class="btn s w" data-op="tokens">Setzen</button>`)}
+      ${val('g', 'Läufe gesamt', fmt(s.games))}
+    </div></div>
+    <div class="card"><h3>Gadget-Stufen</h3><div class="row">${Object.entries(POW).map(([k, n]) => `<label class="small">${n}<br><input type="number" min="0" max="15" id="lv-${k}" value="${(s.levels || {})[k] || 0}"></label>`).join('')}<button class="btn w" data-op="levels">Stufen speichern</button></div><p class="small muted" style="margin:8px 0 0">Hoch und runter möglich (0–15).</p></div>
+    <div class="card"><h3>Truhen (${s.chests.length})</h3><div class="tags">${s.chests.map((c, i) => `<span class="tag">${esc(CHEST[c] ? CHEST[c].name : c)}<button data-chdel="${i}" title="entfernen">×</button></span>`).join('') || '<span class="muted">keine</span>'}</div>
+      <div class="row" style="margin-top:10px"><select id="chT">${Object.entries(CHEST).map(([k, c]) => `<option value="${k}">${c.name}</option>`).join('')}</select><input type="number" id="chN" min="1" max="50" value="1"><button class="btn s g" data-op="chestAdd">Hinzufügen</button>${s.chests.length ? '<button class="btn s r" data-op="chestAll">Alle entfernen</button>' : ''}</div></div>
+    <div class="card"><h3>Pokale & Turnierpreise <span class="muted small">🥇${s.trophies.g} 🥈${s.trophies.s} 🥉${s.trophies.b}</span></h3>
+      ${(s.trophies.wins || []).length ? `<table>${s.trophies.wins.map(w => `<tr><td>${MEDAL[w.pl - 1]} <b>${esc(w.p)}</b></td><td class="small">${fmt(w.coins)} Münzen · ${esc(CHEST[w.chest] ? CHEST[w.chest].name : w.chest)}${w.token ? ` · ${w.token}× Kopfstart` : ''}${w.item ? ' · Siegerkranz' : ''}</td><td>${w.seen ? '<span class="badge ok">gesehen</span>' : '<span class="badge info">Siegerehrung offen</span>'}</td><td class="row"><button class="btn s r" data-wdel="${esc(w.p)}" data-rev="1">Preis zurücknehmen</button><button class="btn s w" data-wdel="${esc(w.p)}">nur Pokal weg</button></td></tr>`).join('')}</table>` : '<p class="muted">Noch keine.</p>'}
+      <div class="row" style="margin-top:10px"><span class="small">Preis vergeben:</span><input id="pzW" value="${wk}" style="width:110px" placeholder="2026-W46"><select id="pzP"><option value="1">🥇 Platz 1</option><option value="2">🥈 Platz 2</option><option value="3">🥉 Platz 3</option></select><button class="btn s g" data-op="prize">Vergeben</button></div>
+      <p class="small muted" style="margin:6px 0 0">Preise: ${TOUR_PRIZES.map((z, i) => `${MEDAL[i]} ${fmt(z.coins)} Münzen + ${CHEST[z.chest].name}${z.token ? ` + ${z.token}× Kopfstart` : ''}${z.item ? ' + Siegerkranz' : ''}`).join(' · ')}. „Preis zurücknehmen“ zieht Münzen ab, entfernt die Truhe (falls noch zu) und den Siegerkranz.</p></div>
+    <div class="card"><h3>☀️ Tagesauswertungen</h3>
+      ${(s.dwins || []).length ? `<table>${s.dwins.map(w => `<tr><td><b>${esc(w.d)}</b></td><td class="small">Platz ${fmt(w.r)} von ${fmt(w.n)} · ${fmt(w.coins)} Münzen + ${esc(CHEST[w.chest] ? CHEST[w.chest].name : w.chest)}</td><td>${w.seen ? '<span class="badge ok">gesehen</span>' : '<span class="badge info">offen</span>'}</td><td class="row"><button class="btn s r" data-ddel="${esc(w.d)}" data-rev="1">zurücknehmen</button><button class="btn s w" data-ddel="${esc(w.d)}">nur Eintrag weg</button></td></tr>`).join('')}</table>` : '<p class="muted">Noch keine.</p>'}
+      <div class="row" style="margin-top:10px"><span class="small">Nachreichen:</span><input id="dzD" value="${new Date(Date.now() - 864e5).toISOString().slice(0, 10)}" style="width:120px"><input type="number" id="dzR" min="1" value="1" title="Platz"><input type="number" id="dzN" min="1" value="10" title="Teilnehmer"><button class="btn s g" data-op="dprize">Vergeben</button></div>
+      <p class="small muted" style="margin:6px 0 0">Stufen: ${DAILY_TIERS.map(t => `${{ p1: '🥇', p2: '🥈', p3: '🥉', top: '🏅 Top 10 %', all: '☀️ dabei' }[t.id]} ${fmt(t.coins)} + ${CHEST[t.chest].name}`).join(' · ')}</p></div>
+    <div class="card"><h3>Figuren</h3><div class="chars">${Object.entries(CHARS).map(([k, c]) => `<label class="${s.owned.includes(k) ? 'on' : ''}"><input type="checkbox" data-char="${k}" ${s.owned.includes(k) ? 'checked' : ''} ${k === 'hops' ? 'disabled' : ''}> ${esc(c.name)}${c.unlock ? ` <span class="muted small">${fmt(c.unlock)} m</span>` : ''}</label>`).join('')}</div></div>
+    <div class="card"><h3>Style-Teile (${s.ownedStyle.length - 6})</h3><div class="tags">${s.ownedStyle.map(k => { const [c, id] = k.split(':'), it = STYLE[c] && STYLE[c].items[id]; if (!it) return ''; const base = it.price === 0 && !it.season; return `<span class="tag ${base ? 'lock' : ''}">${STYLE[c].ico} ${esc(it.name)}${base ? '' : `<button data-sdel="${esc(k)}" title="entfernen">×</button>`}</span>`; }).join('')}</div>
+      <div class="row" style="margin-top:10px"><select id="stK" class="grow">${allStyles.filter(([k]) => !s.ownedStyle.includes(k)).map(([k, n]) => `<option value="${k}">${esc(n)}</option>`).join('')}</select><button class="btn s g" data-op="styleAdd">Geben</button></div></div>
+    <div class="card"><h3>Ranglisten-Plätze</h3><table>${d.ranks.map(r => `<tr><td>${{ daily: 'Tages-Run heute', tournament: 'Turnier ' + r.per, endless: 'Höhe (Endlos)' }[r.m]}</td><td class="num">${r.rank ? '#' + r.rank + ' von ' + fmt(r.total) : '<span class="muted">–</span>'}</td><td class="num">${r.rank ? fmt(r.score) + (r.m === 'endless' ? ' m' : ' Pkt.') : ''}</td></tr>`).join('')}</table></div>
+    <div class="card danger"><h3 style="color:var(--bad)">Gefahrenzone</h3><p class="small">Setzt den ganzen Spielstand auf Anfang (Münzen, Figuren, Style, Stufen, Pokale). Echtgeld-Käufe bleiben erhalten.</p><button class="btn r" data-op="reset">Spielstand zurücksetzen</button></div>`}
+    <div class="card"><h3>Änderungen aus der Zentrale</h3>${d.ops.length ? `<table>${d.ops.map(o => `<tr><td class="small muted">${dt(o.at)}</td><td>${esc(o.kind)}</td><td class="small">${esc(o.why || '')}</td><td>${o.done ? '<span class="badge ok">angewendet</span>' : '<span class="badge warn">beim nächsten Start</span>'}</td></tr>`).join('')}</table>` : '<p class="muted">Keine.</p>'}</div>
+    <div class="card"><h3>Protokoll</h3>${d.log.length ? `<table>${d.log.map(l => `<tr><td class="small muted">${dt(l.at)}</td><td>${esc(l.a)}</td><td class="small">${esc(l.d)}</td></tr>`).join('')}</table>` : '<p class="muted">Keine Einträge.</p>'}</div>
+    <div class="card"><h3>Auffälligkeiten</h3>${flagTable(d.flags)}</div>`;
+  $('cp').onclick = () => { navigator.clipboard?.writeText(d.uid); toast('ID kopiert'); };
+}
+async function op(o, confirmText = '') {
+  if (confirmText && !confirm(confirmText)) return;
+  try { const r = await api('', { action: 'op', uid: CUR.uid, op: o, why: $('why') ? $('why').value.trim() : '' }); toast('✓ ' + r.msg); CUR = await api('?view=player&uid=' + CUR.uid); renderPlayer(); }
+  catch (e) { toast({ dup: 'Dafür gibt es schon einen Eintrag.', week: 'Woche bitte als 2026-W46 angeben.', day: 'Tag bitte als 2026-11-14 angeben.', none: 'Nicht (mehr) vorhanden.', novault: 'Noch kein Server-Spielstand.' }[e.message] || 'Ging nicht: ' + e.message, true); }
+}
+async function act(body, confirmText = '') {
+  if (confirmText && !confirm(confirmText)) return;
+  try { await api('', { ...body, uid: CUR.uid, why: $('why') ? $('why').value.trim() : '' }); toast('✓ Erledigt'); CUR = await api('?view=player&uid=' + CUR.uid); renderPlayer(); }
+  catch (e) { toast('Ging nicht: ' + e.message, true); }
+}
+$('db').addEventListener('click', e => {
+  const t = e.target, s = CUR && CUR.vault ? CUR.vault.s : null, num = id => Math.max(0, Math.floor(Number($(id).value) || 0));
+  const a = t.closest('[data-a]');
+  if (a) {
+    const k = a.dataset.a;
+    if (k === 'ban') return act({ action: 'ban' }, 'Spieler sperren? Er verschwindet aus allen Ranglisten, neue Läufe zählen nicht.');
+    if (k === 'unban') return act({ action: 'unban' });
+    if (k === 'unboard') return act({ action: 'unboard' }, 'Aus allen aktuellen Ranglisten entfernen (ohne Sperre)?');
+    if (k === 'unlinkGoogle') return act({ action: 'unlinkGoogle' }, 'Verbindung zum Google-Konto trennen? Der Spielstand bleibt erhalten; der Spieler kann sich später neu verbinden.');
+    if (k === 'rename') { const n = prompt('Neuer Name (3–16 Zeichen):', CUR.player && CUR.player.name || ''); if (n) act({ action: 'rename', name: n }); return; }
+  }
+  const b = t.closest('[data-op]');
+  if (b && s) {
+    const [k, mode] = b.dataset.op.split(':');
+    if (k === 'coins') { const n = num('coN'); if (!n && mode !== 'set') return toast('Menge eingeben', true); return op({ kind: 'coins', mode, n }, mode === 'sub' ? `${fmt(n)} Münzen abziehen?` : mode === 'set' ? `Münzen auf ${fmt(n)} setzen?` : ''); }
+    if (k === 'height') { const h = num('hN'); return op({ kind: 'height', h }, h < s.bestH ? `Rekord auf ${fmt(h)} m senken? Höhen-Figuren über diesem Wert werden entfernt.` : ''); }
+    if (k === 'level') return op({ kind: 'level', n: num('lN') });
+    if (k === 'mult') return op({ kind: 'mult', n: num('mN') }, 'Multiplikator ändern? Die Missionen werden dabei neu gesetzt.');
+    if (k === 'tokens') return op({ kind: 'tokens', n: num('tN') });
+    if (k === 'levels') { const lv = Object.fromEntries(Object.keys(POW).map(x => [x, Math.min(15, num('lv-' + x))])); const down = Object.keys(lv).some(x => lv[x] < (s.levels[x] || 0)); return op({ kind: 'levels', lv }, down ? 'Stufen herabsetzen?' : ''); }
+    if (k === 'chestAdd') return op({ kind: 'chestAdd', type: $('chT').value, n: Math.max(1, num('chN')) });
+    if (k === 'chestAll') return op({ kind: 'chestDel', all: true }, 'Alle Truhen entfernen?');
+    if (k === 'prize') return op({ kind: 'prize', p: $('pzW').value.trim(), pl: +$('pzP').value }, `Turnierpreis Platz ${$('pzP').value} für ${$('pzW').value.trim()} vergeben?`);
+    if (k === 'styleAdd') { if (!$('stK').value) return; return op({ kind: 'styleAdd', key: $('stK').value }); }
+    if (k === 'dprize') { const r = num('dzR'), n = Math.max(r, num('dzN')), t = dailyTier(r, n); return op({ kind: 'dprize', d: $('dzD').value.trim(), r, n }, `Tagesauswertung ${$('dzD').value.trim()} vergeben: Platz ${r} von ${n} → ${fmt(t.coins)} Münzen + ${CHEST[t.chest].name}?`); }
+    if (k === 'reset') { const n = prompt(`Zum Bestätigen den Namen eintippen: ${CUR.player && CUR.player.name}`); if (n !== (CUR.player && CUR.player.name)) return toast('Abgebrochen', true); return op({ kind: 'reset' }); }
+  }
+  const cd = t.closest('[data-chdel]'); if (cd) return op({ kind: 'chestDel', i: +cd.dataset.chdel }, 'Diese Truhe entfernen?');
+  const sd = t.closest('[data-sdel]'); if (sd) return op({ kind: 'styleDel', key: sd.dataset.sdel }, 'Dieses Style-Teil wegnehmen?');
+  const dd = t.closest('[data-ddel]'); if (dd) return op({ kind: 'dprizeDel', d: dd.dataset.ddel, revoke: !!dd.dataset.rev }, dd.dataset.rev ? 'Tagesbelohnung zurücknehmen? Münzen werden abgezogen und die Truhe (falls noch zu) entfernt.' : 'Nur den Eintrag entfernen (Belohnung bleibt)?');
+  const wd = t.closest('[data-wdel]'); if (wd) return op({ kind: 'prizeDel', p: wd.dataset.wdel, revoke: !!wd.dataset.rev }, wd.dataset.rev ? 'Preis zurücknehmen? Münzen werden abgezogen, die Truhe (falls noch zu) und der Siegerkranz entfernt.' : 'Nur den Pokal entfernen (Preise bleiben)?');
+});
+$('db').addEventListener('change', e => { const c = e.target.closest('[data-char]'); if (!c) return; const k = c.dataset.char; op({ kind: c.checked ? 'charAdd' : 'charDel', k }, c.checked ? '' : `${CHARS[k].name} wegnehmen?${CHARS[k].unlock ? ' Der Rekord wird dafür unter ' + fmt(CHARS[k].unlock) + ' m gesetzt.' : ''}`).then(() => { if (CUR) renderPlayer(); }); });
+
+// ---------- Ranglisten ----------
+async function vBoards() {
+  const d = await loadDash(true), names = { daily: '☀️ Tages-Run heute', dailyPrev: '🌙 Tages-Run gestern', tournament: '🏆 Turnier diese Woche', tourPrev: '🏅 Turnier Vorwoche', endless: '🚀 Höhe (Endlos)' };
+  $('main').innerHTML = `<h2>Ranglisten</h2><div class="grid">${Object.entries(d.boards).map(([k, b]) => `<div class="card"><h3>${names[k]} <span class="muted small">${esc(b.period)} · ${fmt(b.players)} Spieler</span></h3>
+    ${k === 'tourPrev' || k === 'dailyPrev' ? podium(b, k === 'dailyPrev') + '<hr style="border:0;border-top:1px solid var(--line);margin:12px 0">' : ''}
+    ${b.top.length ? `<table>${b.top.map((t, i) => `<tr><td class="num">${MEDAL[i] || '#' + (i + 1)}</td><td>${nameCell(t.name, t.country, t.uid)}</td><td class="num">${fmt(t.score)}${k === 'endless' ? ' m' : ''}</td></tr>`).join('')}</table>` : '<p class="muted">noch leer</p>'}</div>`).join('')}</div>
+    <p class="small muted">Name antippen öffnet den Spieler – dort lässt er sich sperren, aus den Ranglisten nehmen oder korrigieren.</p>`;
+}
+
+// ---------- Anti-Cheat ----------
+let AF = 'bad';
+async function vAc() {
+  const d = await loadDash(true);
+  const list = d.flags.filter(f => AF === 'all' || (AF === 'bad' && sev(f.why) === 'bad') || (AF === 'warn' && sev(f.why) === 'warn') || (AF === 'ok' && sev(f.why) === 'ok'));
+  $('main').innerHTML = `<h2>Anti-Cheat</h2><p class="muted">Jeder Lauf wird auf dem Server nachgerechnet. Rot = abgelehnt/manipuliert, Gelb = prüfen (z. B. Top 3), Grün = Info (Preise, Wiederherstellungen).</p>
+    <div class="chips" style="margin-bottom:12px" id="af">${[['bad', 'Abgelehnt'], ['warn', 'Prüfen'], ['ok', 'Info'], ['all', 'Alle']].map(([k, v]) => `<button class="chip ${AF === k ? 'on' : ''}" data-af="${k}">${v}</button>`).join('')}</div>
+    <div class="card">${flagTable(list)}</div>
+    <div class="card"><h3>Gesperrt (${Object.keys(d.bans || {}).length})</h3>${Object.keys(d.bans || {}).length ? `<table>${Object.entries(d.bans).map(([u, b]) => `<tr><td><a href="#" data-p="${esc(u)}">${esc(u.slice(0, 8))}…</a></td><td>${esc(b.why)}</td><td class="small muted">${dt(b.at)}</td></tr>`).join('')}</table>` : '<p class="muted">niemand</p>'}</div>`;
+  $('af').onclick = e => { const c = e.target.closest('[data-af]'); if (c) { AF = c.dataset.af; vAc(); } };
+}
+
+// ---------- Werbung ----------
+async function vAds() {
+  const d = await loadDash(true), days = d.days, cur = (days.find(x => x.impressions) || {}).currency || 'USD';
+  const sum = n => days.slice(0, n).reduce((a, x) => a + x.revenue, 0), imp = days.reduce((a, x) => a + x.impressions, 0), rev = sum(30), u0 = days[0].users || 0;
+  const max = Math.max(0.0001, ...days.map(x => x.revenue));
+  const PL = { rescue: 'Zweite Chance', double_coins: 'Münzen verdoppeln', tournament_attempt: 'Turnier-Versuch', headstart: 'Kopfstart', chest_double: 'Truhe verdoppeln', wheel_spin: 'Glücksrad', streak_double: 'Tagesserie doppelt', free_coins: 'Gratis-Münzen', between_games: 'Werbepause', rewarded: 'Video (alt)', interstitial: 'Pause (alt)' };
+  const agg = {}; for (const x of days) for (const [k, v] of Object.entries(x.placements || {})) { const a = agg[k] || (agg[k] = { n: 0, revenue: 0 }); a.n += v.n; a.revenue += v.revenue; }
+  $('main').innerHTML = `<h2>Werbung <button class="btn w s" onclick="location.hash='cfg'" style="vertical-align:middle;margin-left:8px">⚙️ Werbung &amp; Anbieter einstellen</button></h2>
+    <div class="kpis">${[['Heute', money(days[0].revenue, cur)], ['7 Tage', money(sum(7), cur)], ['30 Tage', money(rev, cur)], ['eCPM (30 T.)', money(imp ? rev / imp * 1000 : 0, cur)], ['Werbe-Nutzer heute', fmt(u0)], ['Umsatz / Nutzer heute', money(u0 ? days[0].revenue / u0 : 0, cur)]].map(([k, v]) => `<div class="kpi"><span>${k}</span><b>${v}</b></div>`).join('')}</div>
+    <div class="card"><h3>Umsatz pro Tag</h3><div class="chart">${days.slice().reverse().map(x => { const rw = (x.formats.rewarded || {}).revenue || 0, it = (x.formats.interstitial || {}).revenue || 0; return `<div class="bar" data-tip="${x.day}: ${money(x.revenue, cur)}"><i style="height:${rw / max * 100}%;background:var(--mint)"></i><i style="height:${it / max * 100}%;background:var(--sky)"></i></div>`; }).join('')}</div>
+      <div class="legend"><span style="--c:var(--mint)">Belohnte Videos</span><span style="--c:var(--sky)">Werbepausen</span></div></div>
+    <div class="card"><h3>Platzierungen (30 Tage)</h3><div class="wrap"><table><tr><th>Platzierung</th><th>Anzeigen</th><th>Umsatz</th><th>Anteil</th><th>eCPM</th></tr>${Object.entries(agg).sort((a, b) => b[1].revenue - a[1].revenue).map(([k, v]) => `<tr><td>${PL[k] || esc(k)}</td><td>${fmt(v.n)}</td><td>${money(v.revenue, cur)}</td><td>${rev ? (v.revenue / rev * 100).toFixed(1) : 0} %</td><td>${money(v.n ? v.revenue / v.n * 1000 : 0, cur)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Noch keine Daten</td></tr>'}</table></div></div>
+    <div class="card"><h3>Tage</h3><div class="wrap"><table><tr><th>Tag</th><th>Umsatz</th><th>Impr.</th><th>Videos</th><th>Pausen</th><th>Nutzer</th><th class="hide-s">geschätzt</th></tr>${days.map(x => `<tr><td>${x.day}</td><td>${money(x.revenue, cur)}</td><td>${x.impressions}</td><td>${(x.formats.rewarded || {}).n || 0}</td><td>${(x.formats.interstitial || {}).n || 0}</td><td>${x.users}</td><td class="hide-s">${money(x.estimated, cur)}</td></tr>`).join('')}</table></div></div>`;
+}
+
+// ---------- Einstellungen: Werbung, Werbe-Anbieter, Google-Anmeldung (gelten sofort, ohne App-Update) ----------
+const PLN = { rescue: 'Zweite Chance (Video)', double_coins: 'Münzen verdoppeln', tournament_attempt: 'Turnier-Extraversuch', free_coins: 'Gratis-Münzen im Shop', streak_double: 'Tagesserie doppelt', chest_double: 'Truhe verdoppeln', wheel_spin: 'Glücksrad nochmal', headstart: 'Kopfstart per Video', between_games: 'Werbepause zwischen Läufen' };
+async function vCfg() {
+  const d = await api('?view=config'), c = d.cfg || {}, a = c.ads || {}, B = d.base || {}, pr = a.providers || {}, pl = a.placements || {}, it = a.interstitial || {}, bi = B.interstitial || {};
+  const on = (o, k) => o[k] !== false;
+  const txt = (id, val, ph, hint = '') => `<input type="text" id="${id}" value="${esc(val || '')}" placeholder="${esc(ph ? 'Standard: ' + ph : 'leer = aus config.js')}" spellcheck="false" autocomplete="off">${hint ? `<small class="muted">${hint}</small>` : ''}`;
+  const numIn = (id, val, base, min, max) => `<input type="number" id="${id}" min="${min}" max="${max}" value="${val ?? ''}" placeholder="${base ?? ''}"> <small class="muted">Standard ${base ?? '–'} · erlaubt ${min}–${max}</small>`;
+  $('main').innerHTML = `<h2>Einstellungen</h2><p class="muted">Gilt für alle Spieler ohne App-Update (spätestens beim nächsten Spielstart). Leere Felder = Wert aus <code>config.js</code>. ${d.updated ? 'Zuletzt geändert: ' + dt(d.updated) : ''}</p>
+    <div class="card"><h3>📣 Werbe-Anbieter</h3><div class="prov">
+      <label class="${on(pr, 'admob') ? '' : 'off'}"><input type="checkbox" id="pv-admob" ${on(pr, 'admob') ? 'checked' : ''}><span><b>Google AdMob</b><br><small class="muted">Android- und iOS-App (Videos + Werbepausen)</small></span></label>
+      <label class="${on(pr, 'web') ? '' : 'off'}"><input type="checkbox" id="pv-web" ${on(pr, 'web') ? 'checked' : ''}><span><b>Google H5 Games Ads</b><br><small class="muted">Web-Version (AdSense-Konto nötig)</small></span></label>
+      <label class="${on(pr, 'house') ? '' : 'off'}"><input type="checkbox" id="pv-house" ${on(pr, 'house') ? 'checked' : ''}><span><b>Eigenwerbung</b><br><small class="muted">FAX Messenger / ITpaul – springt ein, wenn kein anderer Anbieter da ist (kein Umsatz)</small></span></label></div>
+      <div class="fl" style="margin-top:10px"><span><b>Testmodus</b><small>nur Google-Test-Anzeigen</small></span><span><select id="tm"><option value="">Standard (config.js: ${B.testMode ? 'an' : 'aus'})</option><option value="1" ${a.testMode === true ? 'selected' : ''}>An – nur Test-Anzeigen</option><option value="0" ${a.testMode === false ? 'selected' : ''}>Aus – echte Werbung</option></select></span></div></div>
+    <div class="card"><h3>🧱 Anzeigenblöcke (AdMob)</h3><div class="form">
+      <div class="fl"><span><b>Android · Belohnung</b><small>Rewarded</small></span><span>${txt('u-ar', (a.android || {}).rewarded, (B.android || {}).rewarded)}</span></div>
+      <div class="fl"><span><b>Android · Werbepause</b><small>Interstitial</small></span><span>${txt('u-ai', (a.android || {}).interstitial, (B.android || {}).interstitial)}</span></div>
+      <div class="fl"><span><b>iOS · Belohnung</b><small>Rewarded</small></span><span>${txt('u-ir', (a.ios || {}).rewarded, (B.ios || {}).rewarded)}</span></div>
+      <div class="fl"><span><b>iOS · Werbepause</b><small>Interstitial</small></span><span>${txt('u-ii', (a.ios || {}).interstitial, (B.ios || {}).interstitial)}</span></div>
+      <div class="fl"><span><b>Web · Publisher-ID</b><small>H5 Games Ads (ca-pub-…)</small></span><span>${txt('u-web', a.webPublisherId, B.webPublisherId)}</span></div>
+      <div class="fl"><span><b>Eigene Testgeräte</b><small>AdMob-Geräte-IDs, mit Komma</small></span><span>${txt('u-dev', (a.testDeviceIds || []).join(', '), (B.testDeviceIds || []).join(', '))}</span></div>
+      <p class="small muted" style="margin:4px 0 0">App-IDs stehen fest in der App und ändern sich nur mit einem neuen App-Build: Android <code>${esc(B.androidAppId || '–')}</code> · iOS <code>${esc(B.iosAppId || '–')}</code></p></div></div>
+    <div class="card"><h3>⏱️ Taktung (faire Werbung)</h3><div class="form">
+      <div class="fl"><span><b>Werbefreie erste Läufe</b></span><span>${numIn('i-grace', it.graceGames, bi.graceGames, 2, 30)}</span></div>
+      <div class="fl"><span><b>Werbepause höchstens nach jedem … Lauf</b></span><span>${numIn('i-every', it.everyGames, bi.everyGames, 1, 20)}</span></div>
+      <div class="fl"><span><b>Mindestabstand (Sekunden)</b></span><span>${numIn('i-min', it.minSeconds, bi.minSeconds, 90, 3600)}</span></div>
+      <div class="fl"><span><b>Werbepausen pro Tag (max.)</b></span><span>${numIn('i-max', it.maxPerDay, bi.maxPerDay, 0, 20)}</span></div>
+      <div class="fl"><span><b>Belohnungsvideos pro Tag (max.)</b></span><span>${numIn('r-max', a.rewardedMaxPerDay, B.rewardedMaxPerDay, 0, 60)}</span></div>
+      <p class="small muted" style="margin:4px 0 0">Die Grenzen sind fest eingebaut: Werbung lässt sich seltener, aber nie aufdringlicher einstellen als die Richtlinien von AdMob, Google Play und Apple erlauben.</p></div></div>
+    <div class="card"><h3>📍 Platzierungen</h3><div class="prov">${d.placements.map(k => `<label class="${on(pl, k) ? '' : 'off'}"><input type="checkbox" data-pl="${k}" ${on(pl, k) ? 'checked' : ''}><span><b>${PLN[k] || esc(k)}</b><br><small class="muted">${k === 'between_games' ? 'Werbepause' : 'freiwilliges Video'}</small></span></label>`).join('')}</div>
+      <p class="small muted" style="margin:8px 0 0">Ausgeschaltete Platzierungen verschwinden im Spiel ganz (kein toter Knopf).</p></div>
+    <div class="card"><h3>💶 Schätzwerte (eCPM in USD)</h3><p class="small muted" style="margin:0 0 8px">Nur für Web und Geräte ohne genaue Umsatzmeldung – native AdMob-Werte kommen exakt.</p><div class="form">
+      <div class="fl"><span><b>Belohnungsvideo</b></span><span>${numIn('e-r', (a.estimatedEcpm || {}).rewarded, (B.estimatedEcpm || {}).rewarded, 0, 100)}</span></div>
+      <div class="fl"><span><b>Werbepause</b></span><span>${numIn('e-i', (a.estimatedEcpm || {}).interstitial, (B.estimatedEcpm || {}).interstitial, 0, 100)}</span></div></div></div>
+    <div class="card"><h3>🔐 Google-Anmeldung (Spielstand sichern)</h3><div class="form">
+      <div class="fl"><span><b>OAuth-Client-ID</b><small>Typ „Webanwendung“ aus der Google Cloud Console</small></span><span>${txt('g-id', (c.google || {}).clientId, d.envClientId ? '(aus Netlify-Umgebung)' : '', '…apps.googleusercontent.com · leer = „Spielstand sichern“ ist im Spiel ausgeblendet')}</span></div>
+      <p class="small muted" style="margin:4px 0 0">Autorisierte JavaScript-Quelle in der Google Cloud Console: <code>${esc(location.origin)}</code>. Anleitung: README → „Spielstand mit Google sichern“.</p></div></div>
+    <div class="savebar"><span class="small grow" id="cfgmsg"></span><button class="btn w" id="cfgreset">Alles auf Standard</button><button class="btn" id="cfgsave">Speichern</button></div>`;
+  $('main').querySelectorAll('.prov input').forEach(i => i.onchange = () => i.closest('label').classList.toggle('off', !i.checked));
+  const val = id => $(id).value.trim(), nn = id => (val(id) === '' ? undefined : Number(val(id)));
+  $('cfgsave').onclick = async () => {
+    $('main').querySelectorAll('.ferr').forEach(x => x.classList.remove('ferr'));
+    const cfg = { ads: {
+      providers: { admob: $('pv-admob').checked, web: $('pv-web').checked, house: $('pv-house').checked },
+      ...(val('tm') ? { testMode: val('tm') === '1' } : {}),
+      android: { rewarded: val('u-ar'), interstitial: val('u-ai') }, ios: { rewarded: val('u-ir'), interstitial: val('u-ii') },
+      webPublisherId: val('u-web'),
+      ...(val('u-dev') ? { testDeviceIds: val('u-dev').split(/[\s,;]+/).filter(Boolean) } : {}),
+      interstitial: { graceGames: nn('i-grace'), everyGames: nn('i-every'), minSeconds: nn('i-min'), maxPerDay: nn('i-max') },
+      rewardedMaxPerDay: nn('r-max'),
+      placements: Object.fromEntries([...$('main').querySelectorAll('[data-pl]')].map(i => [i.dataset.pl, i.checked])),
+      estimatedEcpm: { rewarded: nn('e-r'), interstitial: nn('e-i') },
+    }, google: { clientId: val('g-id') } };
+    // Zahlen außerhalb der erlaubten Grenzen schon hier markieren
+    let bad = false;
+    for (const i of $('main').querySelectorAll('input[type=number]')) if (i.value !== '' && (+i.value < +i.min || +i.value > +i.max)) { i.classList.add('ferr'); bad = true; }
+    if (bad) return toast('Rot markierte Werte liegen außerhalb der erlaubten Grenzen.', true);
+    if (!cfg.ads.providers.admob && !cfg.ads.providers.web && !cfg.ads.providers.house && !confirm('Alle Werbe-Anbieter ausschalten? Dann gibt es keine Werbung und keine Belohnungsvideos mehr.')) return;
+    $('cfgsave').disabled = true;
+    try { await api('', { action: 'config', cfg }); toast('✓ Gespeichert – gilt beim nächsten Spielstart'); $('cfgmsg').textContent = 'Gespeichert ' + dt(Date.now()); }
+    catch (e) {
+      const f = (e.j && e.j.fields) || [];
+      const map = { 'Android Belohnung': 'u-ar', 'Android Werbepause': 'u-ai', 'iOS Belohnung': 'u-ir', 'iOS Werbepause': 'u-ii', 'Web Publisher-ID': 'u-web', 'Google Client-ID': 'g-id' };
+      f.forEach(x => map[x] && $(map[x]).classList.add('ferr'));
+      toast(f.length ? 'Ungültig: ' + f.join(', ') : 'Ging nicht: ' + e.message, true);
+    }
+    $('cfgsave').disabled = false;
+  };
+  $('cfgreset').onclick = async () => {
+    if (!confirm('Alle Einstellungen aus der Zentrale löschen? Dann gelten wieder die Werte aus config.js (Google-Anmeldung wird ausgeblendet).')) return;
+    try { await api('', { action: 'config', cfg: {} }); toast('✓ Zurückgesetzt'); vCfg(); } catch (e) { toast('Ging nicht: ' + e.message, true); }
+  };
+}
+
+// ---------- Shop: Preise, Rabatte, Sichtbarkeit, Kaufpakete ----------
+async function vShop() {
+  const d = await api('?view=shop'), sh = d.shop || {}, IT = sh.items || {}, sl = sh.sale || {}, PK = sh.packs || {};
+  const RAR = { c: 'Gewöhnlich', r: 'Selten', e: 'Episch', l: 'Legendär' };
+  const toLocal = ts => { if (!ts) return ''; const x = new Date(ts); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0, 16); };
+  const groups = {};
+  for (const x of d.items) (groups[x.cat] ||= []).push(x);
+  const row = x => { const o = IT[x.id] || {}; return `<tr data-id="${x.id}" class="${o.hidden ? 'off' : ''}"><td><b>${esc(x.name)}</b>${x.rar ? `<br><small class="muted">${RAR[x.rar] || ''}</small>` : ''}</td>
+    <td class="num muted">${fmt(x.base)}</td>
+    <td><input type="number" class="sp" min="10" max="1000000" step="10" value="${o.price ?? ''}" placeholder="${x.base}"></td>
+    <td><input type="number" class="ss" min="0" max="90" value="${o.sale ?? ''}" placeholder="0"> %</td>
+    <td class="num eff"></td>
+    <td><input type="checkbox" class="sn" ${o.isNew ? 'checked' : ''}></td>
+    <td><input type="checkbox" class="sh" ${o.hidden ? 'checked' : ''}></td></tr>`; };
+  $('main').innerHTML = `<h2>Shop</h2><p class="muted">Preise in Münzen, Rabatte und Sichtbarkeit aller Artikel. Gilt für alle Spieler ohne App-Update – der Server rechnet Käufe mit denselben Werten. Leer = Standardpreis. ${d.updated ? 'Zuletzt geändert: ' + dt(d.updated) : ''}</p>
+    <div class="card"><h3>🏷️ Rabattaktion für den ganzen Shop</h3><div class="form">
+      <div class="fl"><span><b>Rabatt</b><small>gilt für alle Münz-Artikel ohne eigenen Rabatt · 0 = keine Aktion</small></span><span><input type="number" id="sl-pct" min="0" max="90" value="${sl.pct || ''}" placeholder="0"> %</span></div>
+      <div class="fl"><span><b>Ab</b><small>leer = sofort</small></span><span><input type="datetime-local" id="sl-from" value="${toLocal(sl.from)}"></span></div>
+      <div class="fl"><span><b>Bis</b><small>leer = bis du sie beendest</small></span><span><input type="datetime-local" id="sl-until" value="${toLocal(sl.until)}"></span></div>
+      <p class="small muted" style="margin:4px 0 0">Im Spiel erscheinen durchgestrichene Preise und ein „−20 %“-Abzeichen. Preise werden auf 10 Münzen gerundet.</p></div></div>
+    ${Object.entries(groups).map(([cat, list]) => `<div class="card"><h3>${esc(d.cats[cat] || cat)} <small class="muted">${list.length}</small></h3><div class="tblwrap"><table class="shoptbl"><thead><tr><th>Artikel</th><th class="num">Standard</th><th>Preis</th><th>Rabatt</th><th class="num">Im Spiel</th><th title="Abzeichen NEU">Neu</th><th title="Im Shop ausblenden – wer ihn schon hat, behält ihn">Aus</th></tr></thead><tbody>${list.map(row).join('')}</tbody></table></div></div>`).join('')}
+    <div class="card"><h3>💳 Kaufpakete (Echtgeld)</h3><p class="small muted" style="margin:0 0 8px">Preise legst du in Google Play / App Store fest. Hier: ausblenden und Hinweis-Etikett (z. B. „Bester Wert“). Inhalt und Münzmenge sind fest – sie stehen so in den Store-Beschreibungen.</p>
+      <div class="tblwrap"><table><thead><tr><th>Paket</th><th>Inhalt</th><th>Etikett</th><th>Aus</th></tr></thead><tbody>${d.packs.map(p => { const o = PK[p.id] || {}; return `<tr data-pk="${p.id}"><td><code>${esc(p.id)}</code></td><td>${fmt(p.coins)} Münzen${p.once ? ' + Krone + 3 Kopfstarts' : ''}</td><td><input type="text" class="pt" maxlength="24" value="${esc(o.tag || '')}" placeholder="${esc(p.tag || '–')}"></td><td><input type="checkbox" class="ph" ${o.hidden ? 'checked' : ''}></td></tr>`; }).join('')}</tbody></table></div></div>
+    <div class="savebar"><span class="small grow" id="shmsg"></span><button class="btn w" id="shreset">Alles auf Standard</button><button class="btn" id="shsave">Speichern</button></div>`;
+  const eff = tr => { const base = +tr.querySelector('.sp').placeholder, p = +tr.querySelector('.sp').value || base, own = +tr.querySelector('.ss').value || 0, g = +$('sl-pct').value || 0, pct = own || g;
+    const v = pct ? Math.max(10, Math.round(p * (1 - pct / 100) / 10) * 10) : p; tr.querySelector('.eff').innerHTML = (v !== base ? `<s class="muted">${fmt(base)}</s> ` : '') + `<b>${fmt(v)}</b>`; tr.classList.toggle('off', tr.querySelector('.sh').checked); };
+  const all = () => $('main').querySelectorAll('tr[data-id]').forEach(eff);
+  $('main').addEventListener('input', all); $('main').addEventListener('change', all); all();
+  const ts = id => { const v = $(id).value; return v ? new Date(v).getTime() : undefined; };
+  $('shsave').onclick = async () => {
+    $('main').querySelectorAll('.ferr').forEach(x => x.classList.remove('ferr'));
+    let bad = false;
+    for (const i of $('main').querySelectorAll('input[type=number]')) if (i.value !== '' && (+i.value < +i.min || +i.value > +i.max || !Number.isInteger(+i.value))) { i.classList.add('ferr'); bad = true; }
+    if (bad) return toast('Rot markierte Werte liegen außerhalb der erlaubten Grenzen.', true);
+    const items = {};
+    $('main').querySelectorAll('tr[data-id]').forEach(tr => { const o = {}, p = tr.querySelector('.sp').value, sa = tr.querySelector('.ss').value;
+      if (p !== '') o.price = +p; if (sa !== '' && +sa > 0) o.sale = +sa; if (tr.querySelector('.sh').checked) o.hidden = true; if (tr.querySelector('.sn').checked) o.isNew = true;
+      if (Object.keys(o).length) items[tr.dataset.id] = o; });
+    const packs = {};
+    $('main').querySelectorAll('tr[data-pk]').forEach(tr => { const o = {}, t = tr.querySelector('.pt').value.trim(); if (t) o.tag = t; if (tr.querySelector('.ph').checked) o.hidden = true; if (Object.keys(o).length) packs[tr.dataset.pk] = o; });
+    const shop = { items, packs, sale: { pct: +$('sl-pct').value || 0, from: ts('sl-from'), until: ts('sl-until') } };
+    $('shsave').disabled = true;
+    try { await api('', { action: 'shop', shop }); toast('✓ Gespeichert – gilt beim nächsten Spielstart'); $('shmsg').textContent = 'Gespeichert ' + dt(Date.now()); }
+    catch (e) { toast('Ging nicht: ' + ((e.j && e.j.fields) || [e.message]).join(', '), true); }
+    $('shsave').disabled = false;
+  };
+  $('shreset').onclick = async () => {
+    if (!confirm('Alle Shop-Anpassungen löschen? Dann gelten wieder die Standardpreise, alles ist sichtbar und keine Rabattaktion läuft.')) return;
+    try { await api('', { action: 'shop', shop: {} }); toast('✓ Zurückgesetzt'); vShop(); } catch (e) { toast('Ging nicht: ' + e.message, true); }
+  };
+}
+
+// ---------- Protokoll ----------
+async function vLog() {
+  const { log } = await api('?view=log');
+  const A = { login: '🔓 Anmeldung', 'login-fail': '⛔ Fehlversuch', 'logout-all': 'Alle abgemeldet', ban: '🚫 Gesperrt', unban: 'Entsperrt', unboard: 'Aus Rangliste', rename: 'Umbenannt', height: 'Rekord', levels: 'Stufen', config: '⚙️ Einstellungen', 'unlink-google': '🔐 Google getrennt' };
+  $('main').innerHTML = `<h2>Protokoll</h2><p class="muted">Alles, was in der Zentrale passiert ist – mit Grund. Anschluss nur als Kürzel.</p>
+    <div class="card"><div class="wrap">${log.length ? `<table><tr><th>Wann</th><th>Was</th><th>Spieler</th><th>Details</th><th class="hide-s">Anschluss</th></tr>${log.map(l => `<tr><td class="small muted">${dt(l.at)}</td><td>${A[l.a] || (l.a.startsWith('op:') ? '✏️ ' + esc(l.a.slice(3)) : esc(l.a))}</td><td>${l.u ? nameCell(l.n, null, l.u) : ''}</td><td class="small">${esc(l.d)}</td><td class="hide-s small muted">${esc(l.ip)}</td></tr>`).join('')}</table>` : '<p class="empty">Noch leer.</p>'}</div></div>`;
+}
+
+// ---------- Sicherheit ----------
+async function vSec() {
+  const s = await api('?view=security');
+  $('main').innerHTML = `<h2>Sicherheit</h2>
+    <div class="grid">
+      <div class="card"><h3>Regeln</h3><ul class="small" style="margin:0;padding-left:18px">
+        <li>Anmeldung nur mit dem Zentrale-Schlüssel (${s.keyLength} Zeichen). Der Schlüssel wird nicht im Browser gespeichert.</li>
+        <li>3 falsche Versuche → dieser Anschluss 1 Stunde gesperrt, beim nächsten Mal 24 Stunden.</li>
+        <li>10 falsche Versuche insgesamt in 24 Stunden → Anmeldung für alle 1 Stunde gesperrt.</li>
+        <li>Sitzungen enden nach 8 Stunden oder beim Schließen des Tabs.</li>
+        <li>Neuer Schlüssel: im Projektordner <b>SKY-RUSH-ZENTRALE-SCHLUESSEL.bat</b> starten (stellt ihn auch gleich online) – alle Sitzungen und Sperren sind damit weg.</li></ul></div>
+      <div class="card"><h3>Fehlversuche</h3><p>Letzte 24 Std: <b>${s.global.fails24h}</b> / ${s.rules.globalTries}${s.global.until ? ` · <span class="badge bad">Anmeldung gesperrt bis ${dt(s.global.until)}</span>` : ''}</p>
+        ${s.locks.length ? `<table><tr><th>Anschluss</th><th>Fehlversuche</th><th>Gesperrt bis</th></tr>${s.locks.map(l => `<tr><td class="small">${esc(l.ip)}</td><td>${l.fails}</td><td>${l.until ? dt(l.until) : '–'}</td></tr>`).join('')}</table>` : '<p class="muted">Keine Sperren.</p>'}</div>
+      <div class="card"><h3>Angemeldet (${s.sessions.length})</h3>${s.sessions.length ? `<table>${s.sessions.map(x => `<tr><td class="small">${dt(x.at)}</td><td class="small muted">${esc(x.ip)}</td><td class="small muted hide-s">${esc((x.ua || '').slice(0, 60))}</td></tr>`).join('')}</table>` : ''}
+        <button class="btn r" id="lall" style="margin-top:10px">Alle Sitzungen abmelden</button></div>
+    </div>`;
+  $('lall').onclick = async () => { if (!confirm('Alle Sitzungen (auch diese) abmelden?')) return; try { await api('', { action: 'logoutAll' }); } catch {} showLogin('Alle Sitzungen abgemeldet.'); };
+}
+
+addEventListener('hashchange', () => { const v = location.hash.slice(1); if (v && v !== VIEW && !$('app').hidden) go(v); });
+if (TOKEN) { $('login').hidden = true; $('app').hidden = false; go(location.hash.slice(1) || 'dash'); } else showLogin();
+</script>
+</body>
+</html>

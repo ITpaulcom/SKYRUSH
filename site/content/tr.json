@@ -1,0 +1,160 @@
+{
+ "name": "Türkçe",
+ "locale": "tr_TR",
+ "title": "Sky Rush – Gökyüzüne ücretsiz zıplama oyunu | Tarayıcı, Android ve iPhone",
+ "desc": "Sky Rush ücretsiz bir arcade zıplama oyunu: platformdan platforma gökyüzüne zıpla, fırtınadan kaç ve dört kişilik canlı düelloları kazan. Kayıt olmadan hemen tarayıcında oyna.",
+ "kicker": "Ücretsiz arcade oyunu",
+ "h1": "Gökyüzüne zıpla.",
+ "lead": "Hops kendi kendine zıplar – sen sadece nereye gideceğine karar verirsin. Dokun ya da kaydır, jeton topla, dronlardan kaç ve fırtınayı geride bırak.",
+ "play": "Hemen ücretsiz oyna",
+ "play_note": "Tarayıcıda · kayıt yok · indirme yok",
+ "stores_h": "Uygulama olarak da",
+ "what_h": "Sky Rush nedir?",
+ "what": "Sky Rush, ITpaul tarafından geliştirilen ücretsiz bir arcade zıplama oyunudur; Doodle Jump ile Subway Surfers’ın karışımı. Karakterin platformdan platforma kendiliğinden zıplar, sen de dokunarak, kaydırarak ya da telefonu eğerek şerit değiştirirsin. Amaç: aşağıdaki fırtına sana yetişmeden olabildiğince yükseğe çıkmak. Sky Rush doğrudan tarayıcıda ve Android ile iPhone için uygulama olarak çalışır.",
+ "feat_h": "Sky Rush’ı özel yapan şeyler",
+ "feats": [
+  [
+   "🌌",
+   "Sonsuz dünyalar",
+   "Şehrin çatılarından bulutlara, kutup ışıklarına ve uzaya, oradan hiper uzaya. Her 10.000 m’de bir Gök Kapısı seni bekliyor."
+  ],
+  [
+   "⚔️",
+   "Dört kişilik canlı düellolar",
+   "Dünyanın dört bir yanından oyunculara karşı yarış ya da arkadaşlarını oda koduyla davet et: zamana karşı, nakavt modu ve çarpışma."
+  ],
+  [
+   "👆",
+   "Tek başparmak yeter",
+   "Dokun, kaydır ya da eğ; dikey veya yatay. Öğrenmesi kolay, ustalaşması zor."
+  ],
+  [
+   "🎨",
+   "14 karakter, 55’ten fazla stil parçası",
+   "Jetpack’ler, kanatlar, şapkalar ve yüzler. Aurum, Platina ve Kristallo sadece gerçekten yükseğe uçanlara."
+  ],
+  [
+   "🏆",
+   "Her gün yeni bir şey",
+   "Günlük koşu, haftalık turnuva, 100 seviyeli sezon yolu ve dünya sıralamaları."
+  ],
+  [
+   "🛡️",
+   "Herkes için adil",
+   "Ücretli ganimet kutusu yok, şanslar açıkça görülür ve her rekor sunucuda kontrol edilir."
+  ]
+ ],
+ "modes_h": "Oyun modları",
+ "modes": [
+  [
+   "🚀",
+   "Sonsuz",
+   "Olabildiğince yükseğe zıpla – rekorun dünya yükseklik sıralamasında sayılır."
+  ],
+  [
+   "☀️",
+   "Günlük koşu",
+   "Her gün herkes için aynı parkur: tek deneme, tek sıralama."
+  ],
+  [
+   "🏆",
+   "Turnuva",
+   "Bir hafta, bir parkur, birkaç deneme. En yükseğe kim çıkacak?"
+  ],
+  [
+   "⚔️",
+   "Düello",
+   "Tek parkurda canlı dört oyuncuya kadar: hızlı maç ya da kendi kurallarınla kendi odan."
+  ]
+ ],
+ "how_h": "Nasıl oynanır",
+ "how": [
+  [
+   "Dokun ya da kaydır",
+   "Sola ya da sağa şerit değiştirir. Yukarı kaydırırsan çift zıplama, aşağı kaydırırsan platformdan geçip düşersin."
+  ],
+  [
+   "Topla ve ateşle",
+   "Jetonlar ve yıldızlar RUSH’ı doldurur: süper zıplamalar, mıknatıs ve çift jeton."
+  ],
+  [
+   "Fırtınadan kaç",
+   "Altında giderek hızlanan bir fırtına yükseliyor. Hareket etmeye devam et!"
+  ]
+ ],
+ "shots_h": "Ekran görüntüleri",
+ "shots_alt": [
+  "Sky Rush ana ekranı",
+  "Sky Rush’ta dört kişilik canlı düello",
+  "Sky Rush dünyalarında zıplama",
+  "Sky Rush’ta altın Gök Kapısı"
+ ],
+ "faq_h": "Sık sorulan sorular",
+ "faq": [
+  [
+   "Sky Rush ücretsiz mi?",
+   "Evet. Sky Rush tamamen ücretsiz oynanır. İsteğe bağlı ödüllü videolar ve isteğe bağlı satın alımlar (jeton paketleri, başlangıç paketi, reklamsız) vardır. Reklam araları sadece iki koşu arasında gelir."
+  ],
+  [
+   "Sky Rush hangi cihazlarda çalışır?",
+   "Sky Rush, {{HOST}} adresinde telefon, tablet ve bilgisayarda doğrudan tarayıcıda çalışır; indirme gerekmez. Tarayıcıda onu uygulama olarak ana ekrana da ekleyebilirsin."
+  ],
+  [
+   "Hesap gerekiyor mu?",
+   "Hayır. Sky Rush kayıt ve e-posta olmadan hemen başlar. Sadece bir oyuncu adı seçersin."
+  ],
+  [
+   "Arkadaşlarıma karşı oynayabilir miyim?",
+   "Evet. Düelloda dört oyuncuya kadar canlı yarışır. Arkadaşlarını oda koduyla davet et ve zamana karşı (1–5 dakika), tek canlı nakavt ya da çarpışma modunu seç. İnternetsiz botlara karşı antrenman yaparsın."
+  ],
+  [
+   "Sky Rush çevrimdışı çalışır mı?",
+   "Evet. Sonsuz mod ve botlara karşı antrenman internetsiz de çalışır. Sıralamalar ve canlı düellolar bağlantı gerektirir."
+  ],
+  [
+   "Ganimet kutusu ya da pay-to-win var mı?",
+   "Hayır. Sandıklar ve çark sadece oyun içi eşyalar içerir, satın alınamaz ve şansları oyunda görülebilir. Her rekor sunucuda kontrol edilir – hile işe yaramaz."
+  ],
+  [
+   "Sky Rush’ı kim geliştirdi?",
+   "Sky Rush, Almanya’dan bağımsız bir geliştirici olan ITpaul tarafından geliştiriliyor."
+  ],
+  [
+   "Sky Rush hangi dillerde var?",
+   "11 dilde: Almanca, İngilizce, İspanyolca, Fransızca, İtalyanca, Portekizce, Türkçe, Lehçe, Endonezce, Japonca ve Korece."
+  ]
+ ],
+ "faq_apps": "Sky Rush, Android ve iPhone için uygulama olarak da mevcut.",
+ "faq_brand": [
+  "MySkyRush nedir?",
+  "MySkyRush ({{HOST}}) Sky Rush’ın resmi web sitesidir. Orada doğrudan tarayıcıda oynar, tüm bilgileri ve uygulama bağlantılarını bulursun."
+ ],
+ "about_h": "Sky Rush hakkında her şey",
+ "cta_h": "Kalkışa hazır mısın?",
+ "cta_t": "Tek dokunuş yeter.",
+ "press": "Basın ve bağlantılar",
+ "imprint": "Künye",
+ "privacy": "Gizlilik",
+ "langs_h": "Diller",
+ "made_by": "ITpaul’ün bir oyunu",
+ "home": "Ana sayfa",
+ "play_short": "Oyna",
+ "demo_play": "Burada hemen oyna",
+ "demo_full": "Tam ekran",
+ "worlds_h": "Hiper uzaya kadar 9 dünya",
+ "from_m": "{} m’den itibaren",
+ "every_m": "her {} m’de",
+ "lb_h": "Şu an zirvede",
+ "lb_cta": "Rekoru kır",
+ "hop_done_h": "Tüm jetonlar toplandı!",
+ "hop_done_t": "Profesyonel gibi zıplıyorsun. Gerçek oyunda ne kadar yükseğe çıkarsın?",
+ "hop_hide": "Hops’u gizle",
+ "hop_show": "🟡 Hops’u göster",
+ "hop_hint": "Kaydır ya da bir karta dokun – Hops seninle zıplar ve jeton toplar!",
+ "keys_h": "PC’de oyna",
+ "key_lr": "Şerit değiştir",
+ "key_up": "Çift zıplama",
+ "key_down": "Aşağı düş",
+ "key_f": "Tam ekran",
+ "key_pad": "Oyun kumandası: Xbox, PlayStation, Switch"
+}

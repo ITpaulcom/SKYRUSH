@@ -1,0 +1,160 @@
+{
+ "name": "Français",
+ "locale": "fr_FR",
+ "title": "Sky Rush – Jeu de saut gratuit vers le ciel | Navigateur, Android et iPhone",
+ "desc": "Sky Rush est un jeu d’arcade gratuit : saute de plateforme en plateforme vers le ciel, échappe à la tempête et remporte des duels en direct à quatre. Joue tout de suite dans ton navigateur, sans inscription.",
+ "kicker": "Jeu d’arcade gratuit",
+ "h1": "Saute vers le ciel.",
+ "lead": "Hops saute tout seul – toi, tu choisis où. Touche ou glisse, ramasse des pièces, évite les drones et laisse la tempête derrière toi.",
+ "play": "Jouer gratuitement",
+ "play_note": "Dans le navigateur · sans inscription · sans téléchargement",
+ "stores_h": "Aussi en appli",
+ "what_h": "Qu’est-ce que Sky Rush ?",
+ "what": "Sky Rush est un jeu d’arcade de saut gratuit créé par ITpaul, un mélange de Doodle Jump et de Subway Surfers. Ton personnage saute tout seul de plateforme en plateforme, et tu changes de couloir en touchant, en glissant ou en inclinant ton téléphone. Le but : monter le plus haut possible avant que la tempête ne te rattrape. Sky Rush fonctionne directement dans le navigateur et en appli pour Android et iPhone.",
+ "feat_h": "Ce qui rend Sky Rush unique",
+ "feats": [
+  [
+   "🌌",
+   "Des mondes sans fin",
+   "Des toits de la ville aux nuages, aurores et à l’espace, jusqu’à l’hyperespace. Une Porte céleste t’attend tous les 10 000 m."
+  ],
+  [
+   "⚔️",
+   "Duels en direct à quatre",
+   "Affronte des joueurs du monde entier ou invite tes amis avec un code de salon : course contre la montre, mode K.O. et collisions."
+  ],
+  [
+   "👆",
+   "Un pouce suffit",
+   "Touche, glisse ou incline, en portrait ou en paysage. Facile à prendre en main, difficile à maîtriser."
+  ],
+  [
+   "🎨",
+   "14 personnages, plus de 55 objets",
+   "Jetpacks, ailes, chapeaux et visages. Aurum, Platina et Kristallo sont réservés aux vrais as de la hauteur."
+  ],
+  [
+   "🏆",
+   "Du nouveau chaque jour",
+   "Course du jour, tournoi hebdomadaire, passe de saison à 100 paliers et classements mondiaux."
+  ],
+  [
+   "🛡️",
+   "Équitable pour tous",
+   "Pas de coffres payants, des chances affichées et chaque record est vérifié sur le serveur."
+  ]
+ ],
+ "modes_h": "Modes de jeu",
+ "modes": [
+  [
+   "🚀",
+   "Infini",
+   "Saute aussi haut que possible : ton record compte dans le classement mondial."
+  ],
+  [
+   "☀️",
+   "Course du jour",
+   "Le même parcours pour tous chaque jour : un essai, un classement."
+  ],
+  [
+   "🏆",
+   "Tournoi",
+   "Une semaine, un parcours, plusieurs essais. Qui ira le plus haut ?"
+  ],
+  [
+   "⚔️",
+   "Duel",
+   "Jusqu’à quatre joueurs en direct sur un parcours : partie rapide ou salon privé avec tes propres règles."
+  ]
+ ],
+ "how_h": "Comment jouer",
+ "how": [
+  [
+   "Touche ou glisse",
+   "Gauche ou droite pour changer de couloir. Glisse vers le haut pour un double saut, vers le bas pour traverser la plateforme."
+  ],
+  [
+   "Ramasse et déclenche",
+   "Pièces et étoiles chargent le RUSH : super sauts, aimant et pièces doublées."
+  ],
+  [
+   "Échappe à la tempête",
+   "Sous toi monte une tempête de plus en plus rapide. Ne t’arrête pas !"
+  ]
+ ],
+ "shots_h": "Captures d’écran",
+ "shots_alt": [
+  "Écran d’accueil de Sky Rush",
+  "Duel en direct à quatre dans Sky Rush",
+  "Saut à travers les mondes de Sky Rush",
+  "Porte céleste dorée dans Sky Rush"
+ ],
+ "faq_h": "Questions fréquentes",
+ "faq": [
+  [
+   "Sky Rush est-il gratuit ?",
+   "Oui. Sky Rush est entièrement gratuit. Il propose des vidéos facultatives contre récompense et des achats facultatifs (packs de pièces, pack de départ, sans publicité). Les pauses publicitaires n’apparaissent qu’entre deux parties."
+  ],
+  [
+   "Sur quels appareils fonctionne Sky Rush ?",
+   "Sky Rush fonctionne directement dans le navigateur sur téléphone, tablette et ordinateur sur {{HOST}}, sans téléchargement. Dans le navigateur, tu peux aussi l’ajouter à l’écran d’accueil comme une appli."
+  ],
+  [
+   "Faut-il un compte ?",
+   "Non. Sky Rush démarre tout de suite, sans inscription ni adresse e-mail. Tu choisis simplement un nom de joueur."
+  ],
+  [
+   "Puis-je jouer contre mes amis ?",
+   "Oui. En duel, jusqu’à quatre joueurs s’affrontent en direct. Invite tes amis avec un code de salon et choisis la course contre la montre (1 à 5 minutes), le K.O. avec une seule vie ou les collisions. Hors ligne, tu t’entraînes contre des bots."
+  ],
+  [
+   "Sky Rush fonctionne-t-il hors ligne ?",
+   "Oui. Le mode infini et l’entraînement contre les bots fonctionnent sans internet. Les classements et les duels en direct nécessitent une connexion."
+  ],
+  [
+   "Y a-t-il des loot boxes ou du pay-to-win ?",
+   "Non. Les coffres et la roue ne contiennent que des objets du jeu, ne s’achètent pas et leurs chances sont affichées dans le jeu. Chaque record est vérifié sur le serveur : tricher ne sert à rien."
+  ],
+  [
+   "Qui a créé Sky Rush ?",
+   "Sky Rush est développé par ITpaul, un développeur indépendant basé en Allemagne."
+  ],
+  [
+   "En quelles langues Sky Rush est-il disponible ?",
+   "En 11 langues : allemand, anglais, espagnol, français, italien, portugais, turc, polonais, indonésien, japonais et coréen."
+  ]
+ ],
+ "faq_apps": "Sky Rush existe aussi en appli pour Android et iPhone.",
+ "faq_brand": [
+  "Qu’est-ce que MySkyRush ?",
+  "MySkyRush ({{HOST}}) est le site officiel de Sky Rush. Tu y joues directement dans le navigateur et tu y trouves toutes les infos et les liens vers les applis."
+ ],
+ "about_h": "Tout sur Sky Rush",
+ "cta_h": "Prêt pour le décollage ?",
+ "cta_t": "Une seule touche suffit.",
+ "press": "Presse et liens",
+ "imprint": "Mentions légales",
+ "privacy": "Confidentialité",
+ "langs_h": "Langues",
+ "made_by": "Un jeu de ITpaul",
+ "home": "Accueil",
+ "play_short": "Jouer",
+ "demo_play": "Jouer ici",
+ "demo_full": "Plein écran",
+ "worlds_h": "9 mondes jusqu’à l’hyperespace",
+ "from_m": "dès {} m",
+ "every_m": "tous les {} m",
+ "lb_h": "Tout en haut en ce moment",
+ "lb_cta": "Bats le record",
+ "hop_done_h": "Toutes les pièces !",
+ "hop_done_t": "Tu sautes comme un pro. Jusqu’où iras-tu dans le vrai jeu ?",
+ "hop_hide": "Masquer Hops",
+ "hop_show": "🟡 Afficher Hops",
+ "hop_hint": "Fais défiler ou touche une carte – Hops saute avec toi et ramasse des pièces !",
+ "keys_h": "Jouer sur PC",
+ "key_lr": "Changer de voie",
+ "key_up": "Double saut",
+ "key_down": "Traverser",
+ "key_f": "Plein écran",
+ "key_pad": "Manette : Xbox, PlayStation, Switch"
+}

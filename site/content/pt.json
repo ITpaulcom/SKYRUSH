@@ -1,0 +1,160 @@
+{
+ "name": "Português",
+ "locale": "pt_BR",
+ "title": "Sky Rush – Jogo de pulo grátis rumo ao céu | Navegador, Android e iPhone",
+ "desc": "Sky Rush é um jogo arcade de pulo grátis: pule de plataforma em plataforma rumo ao céu, fuja da tempestade e vença duelos ao vivo com quatro jogadores. Jogue agora no navegador, sem cadastro.",
+ "kicker": "Jogo arcade grátis",
+ "h1": "Pule rumo ao céu.",
+ "lead": "Hops pula sozinho – você só decide para onde. Toque ou deslize, pegue moedas, desvie dos drones e deixe a tempestade para trás.",
+ "play": "Jogar grátis agora",
+ "play_note": "No navegador · sem cadastro · sem download",
+ "stores_h": "Também como app",
+ "what_h": "O que é Sky Rush?",
+ "what": "Sky Rush é um jogo arcade de pulo grátis da ITpaul, uma mistura de Doodle Jump e Subway Surfers. Seu personagem pula sozinho de plataforma em plataforma e você troca de faixa tocando, deslizando ou inclinando o celular. O objetivo: subir o mais alto possível antes que a tempestade te alcance. Sky Rush roda direto no navegador e como app para Android e iPhone.",
+ "feat_h": "Por que jogar Sky Rush",
+ "feats": [
+  [
+   "🌌",
+   "Mundos sem fim",
+   "Dos telhados da cidade, passando por nuvens, auroras e o espaço, até o hiperespaço. A cada 10.000 m te espera um Portal do Céu."
+  ],
+  [
+   "⚔️",
+   "Duelos ao vivo com quatro",
+   "Enfrente jogadores do mundo todo ou chame amigos com um código de sala: corrida contra o tempo, modo K.O. e colisões."
+  ],
+  [
+   "👆",
+   "Um polegar basta",
+   "Toque, deslize ou incline, em retrato ou paisagem. Fácil de aprender, difícil de dominar."
+  ],
+  [
+   "🎨",
+   "14 personagens, mais de 55 itens",
+   "Jetpacks, asas, chapéus e rostos. Aurum, Platina e Kristallo só para quem voa bem alto."
+  ],
+  [
+   "🏆",
+   "Novidade todo dia",
+   "Corrida do dia, torneio semanal, passe de temporada com 100 níveis e rankings mundiais."
+  ],
+  [
+   "🛡️",
+   "Justo para todos",
+   "Sem caixas de recompensa pagas, chances visíveis e cada recorde é verificado no servidor."
+  ]
+ ],
+ "modes_h": "Modos de jogo",
+ "modes": [
+  [
+   "🚀",
+   "Infinito",
+   "Pule o mais alto que puder: seu recorde conta no ranking mundial de altura."
+  ],
+  [
+   "☀️",
+   "Corrida do dia",
+   "Todo dia o mesmo percurso para todos: uma tentativa, um ranking."
+  ],
+  [
+   "🏆",
+   "Torneio",
+   "Uma semana, um percurso, várias tentativas. Quem chega mais alto?"
+  ],
+  [
+   "⚔️",
+   "Duelo",
+   "Até quatro jogadores ao vivo no mesmo percurso: partida rápida ou sala própria com suas regras."
+  ]
+ ],
+ "how_h": "Como jogar",
+ "how": [
+  [
+   "Toque ou deslize",
+   "Esquerda ou direita troca de faixa. Deslize para cima para o pulo duplo e para baixo para atravessar a plataforma."
+  ],
+  [
+   "Colete e ative",
+   "Moedas e estrelas carregam o RUSH: superpulos, ímã e moedas em dobro."
+  ],
+  [
+   "Fuja da tempestade",
+   "Abaixo de você surge uma tempestade cada vez mais rápida. Não pare!"
+  ]
+ ],
+ "shots_h": "Capturas de tela",
+ "shots_alt": [
+  "Tela inicial do Sky Rush",
+  "Duelo ao vivo com quatro no Sky Rush",
+  "Pulando pelos mundos do Sky Rush",
+  "Portal do Céu dourado no Sky Rush"
+ ],
+ "faq_h": "Perguntas frequentes",
+ "faq": [
+  [
+   "Sky Rush é grátis?",
+   "Sim. Sky Rush é totalmente grátis. Há vídeos opcionais com recompensa e compras opcionais (pacotes de moedas, pacote inicial, sem anúncios). Pausas de anúncio só aparecem entre duas partidas."
+  ],
+  [
+   "Em quais aparelhos Sky Rush funciona?",
+   "Sky Rush roda direto no navegador do celular, tablet e computador em {{HOST}}, sem download. No navegador você também pode adicioná-lo à tela inicial como app."
+  ],
+  [
+   "Preciso de uma conta?",
+   "Não. Sky Rush começa na hora, sem cadastro e sem e-mail. Você só escolhe um nome de jogador."
+  ],
+  [
+   "Posso jogar contra amigos?",
+   "Sim. No duelo, até quatro jogadores competem ao vivo. Chame amigos com um código de sala e escolha corrida contra o tempo (1 a 5 minutos), K.O. com uma só vida ou colisões. Sem internet, você treina contra bots."
+  ],
+  [
+   "Sky Rush funciona offline?",
+   "Sim. O modo infinito e o treino contra bots funcionam sem internet. Rankings e duelos ao vivo precisam de conexão."
+  ],
+  [
+   "Tem caixas de recompensa ou pay-to-win?",
+   "Não. Baús e roleta só têm itens do jogo, não podem ser comprados e as chances aparecem no jogo. Cada recorde é verificado no servidor – trapacear não adianta."
+  ],
+  [
+   "Quem criou Sky Rush?",
+   "Sky Rush é desenvolvido pela ITpaul, um desenvolvedor independente da Alemanha."
+  ],
+  [
+   "Em quais idiomas Sky Rush está disponível?",
+   "Em 11 idiomas: alemão, inglês, espanhol, francês, italiano, português, turco, polonês, indonésio, japonês e coreano."
+  ]
+ ],
+ "faq_apps": "Sky Rush também está disponível como app para Android e iPhone.",
+ "faq_brand": [
+  "O que é MySkyRush?",
+  "MySkyRush ({{HOST}}) é o site oficial do Sky Rush. Lá você joga direto no navegador e encontra todas as informações e os links para os apps."
+ ],
+ "about_h": "Tudo sobre Sky Rush",
+ "cta_h": "Pronto para decolar?",
+ "cta_t": "Um toque é tudo que você precisa.",
+ "press": "Imprensa e links",
+ "imprint": "Informações legais",
+ "privacy": "Privacidade",
+ "langs_h": "Idiomas",
+ "made_by": "Um jogo da ITpaul",
+ "home": "Início",
+ "play_short": "Jogar",
+ "demo_play": "Jogue aqui mesmo",
+ "demo_full": "Tela cheia",
+ "worlds_h": "9 mundos até o hiperespaço",
+ "from_m": "a partir de {} m",
+ "every_m": "a cada {} m",
+ "lb_h": "No topo agora",
+ "lb_cta": "Bata o recorde",
+ "hop_done_h": "Todas as moedas!",
+ "hop_done_t": "Você pula como um profissional. Até onde chega no jogo de verdade?",
+ "hop_hide": "Esconder o Hops",
+ "hop_show": "🟡 Mostrar o Hops",
+ "hop_hint": "Role ou toque num card – o Hops pula junto e coleta moedas!",
+ "keys_h": "Jogar no PC",
+ "key_lr": "Trocar de faixa",
+ "key_up": "Pulo duplo",
+ "key_down": "Atravessar",
+ "key_f": "Tela cheia",
+ "key_pad": "Controle: Xbox, PlayStation, Switch"
+}

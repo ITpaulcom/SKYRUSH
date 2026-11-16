@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Sky Rush</string>
+    <string name="title_activity_main">Sky Rush</string>
+    <string name="package_name">com.itpaul.skyrush</string>
+    <string name="custom_url_scheme">com.itpaul.skyrush</string>
+    <string name="admob_app_id">ca-app-pub-1764627877115679~2249290128</string>
+</resources>

@@ -1,0 +1,161 @@
+{
+ "name": "Deutsch",
+ "locale": "de_DE",
+ "num": "10.000",
+ "title": "Sky Rush – kostenloses Sprungspiel in den Himmel | Browser, Android & iPhone",
+ "desc": "Sky Rush ist ein kostenloses Arcade-Sprungspiel: Hüpf von Plattform zu Plattform in den Himmel, entkomme dem Sturm und gewinne Live-Duelle zu viert. Sofort im Browser spielen – ohne Anmeldung.",
+ "kicker": "Kostenloses Arcade-Spiel",
+ "h1": "Spring in den Himmel.",
+ "lead": "Hops springt von allein – du entscheidest nur, wohin. Tippe oder wische, sammle Münzen, weich Drohnen aus und lass den Sturm unter dir.",
+ "play": "Jetzt kostenlos spielen",
+ "play_note": "Im Browser · ohne Anmeldung · ohne Download",
+ "stores_h": "Auch als App",
+ "what_h": "Was ist Sky Rush?",
+ "what": "Sky Rush ist ein kostenloses Arcade-Sprungspiel von ITpaul – eine Mischung aus Doodle Jump und Subway Surfers. Deine Figur springt automatisch von Plattform zu Plattform, du wechselst mit Tippen, Wischen oder Neigen die Bahn. Ziel ist es, so hoch wie möglich zu kommen, bevor dich der Sturm von unten einholt. Sky Rush läuft direkt im Browser und als App für Android und iPhone.",
+ "feat_h": "Das macht Sky Rush aus",
+ "feats": [
+  [
+   "🌌",
+   "Endlose Welten",
+   "Von den Dächern der Stadt durch Wolken, Polarlicht und Weltall bis in den Hyperraum. Alle 10.000 m wartet ein Himmelstor."
+  ],
+  [
+   "⚔️",
+   "Live-Duelle zu viert",
+   "Spiel gegen Leute aus aller Welt oder lade Freunde per Raum-Code ein – mit Zeitrennen, K.O.-Modus und Kollision."
+  ],
+  [
+   "👆",
+   "Ein Daumen reicht",
+   "Tippen, Wischen oder Handy neigen, hochkant oder quer. Leicht zu lernen, schwer zu meistern."
+  ],
+  [
+   "🎨",
+   "14 Figuren, 55+ Style-Teile",
+   "Jetpacks, Flügel, Hüte und Gesichter. Aurum, Platina und Kristallo gibt’s nur für echte Höhenflüge."
+  ],
+  [
+   "🏆",
+   "Jeden Tag neu",
+   "Tages-Run, Wochenturnier, Saison-Pfad mit 100 Stufen und weltweite Ranglisten."
+  ],
+  [
+   "🛡️",
+   "Fair für alle",
+   "Keine bezahlten Lootboxen, offene Chancen und jeder Rekord wird auf dem Server geprüft."
+  ]
+ ],
+ "modes_h": "Spielmodi",
+ "modes": [
+  [
+   "🚀",
+   "Endlos",
+   "Spring so hoch du kannst – dein Rekord zählt in der weltweiten Höhen-Rangliste."
+  ],
+  [
+   "☀️",
+   "Tages-Run",
+   "Jeden Tag dieselbe Strecke für alle: ein Versuch, eine Rangliste."
+  ],
+  [
+   "🏆",
+   "Turnier",
+   "Eine Woche, eine Strecke, mehrere Versuche. Wer kommt am höchsten?"
+  ],
+  [
+   "⚔️",
+   "Duell",
+   "Bis zu vier Spieler live auf einer Strecke – Schnellspiel oder eigener Raum mit eigenen Regeln."
+  ]
+ ],
+ "how_h": "So spielst du",
+ "how": [
+  [
+   "Tippen oder wischen",
+   "Links oder rechts wechselt die Bahn. Nach oben wischen ist ein Doppelsprung, nach unten fällst du durch die Plattform."
+  ],
+  [
+   "Sammeln und zünden",
+   "Münzen und Sterne laden den RUSH auf: Supersprünge, Magnet und doppelte Münzen."
+  ],
+  [
+   "Dem Sturm entkommen",
+   "Unter dir zieht ein Sturm auf, der immer schneller wird. Bleib in Bewegung!"
+  ]
+ ],
+ "shots_h": "Screenshots",
+ "shots_alt": [
+  "Startbildschirm von Sky Rush",
+  "Live-Duell zu viert in Sky Rush",
+  "Sprung durch die Welten von Sky Rush",
+  "Goldenes Himmelstor in Sky Rush"
+ ],
+ "faq_h": "Häufige Fragen",
+ "faq": [
+  [
+   "Ist Sky Rush kostenlos?",
+   "Ja. Sky Rush ist komplett kostenlos spielbar. Es gibt freiwillige Werbevideos gegen Belohnungen und optionale Käufe (Münzpakete, Starterpaket, Werbefrei). Werbepausen kommen nur zwischen zwei Läufen."
+  ],
+  [
+   "Auf welchen Geräten läuft Sky Rush?",
+   "Sky Rush läuft direkt im Browser auf Handy, Tablet und Computer unter {{HOST}} – ohne Download. Im Browser kannst du es auch als App auf den Startbildschirm legen."
+  ],
+  [
+   "Brauche ich ein Konto?",
+   "Nein. Sky Rush startet sofort, ohne Anmeldung und ohne E-Mail-Adresse. Du wählst nur einen Spielernamen."
+  ],
+  [
+   "Kann ich gegen Freunde spielen?",
+   "Ja. Im Duell springen bis zu vier Spieler live gegeneinander. Lade Freunde per Raum-Code ein und wähle Zeitrennen (1 bis 5 Minuten), K.O. mit nur einem Leben oder Kollision. Ohne Internet trainierst du gegen Bots."
+  ],
+  [
+   "Funktioniert Sky Rush offline?",
+   "Ja. Der Endlos-Modus und das Training gegen Bots laufen auch ohne Internet. Ranglisten und Live-Duelle brauchen eine Verbindung."
+  ],
+  [
+   "Gibt es Lootboxen oder Pay-to-Win?",
+   "Nein. Truhen und Glücksrad enthalten nur Spielinhalte, sind nicht käuflich und ihre Chancen sind im Spiel einsehbar. Jeder Rekord wird auf dem Server geprüft – Schummeln bringt nichts."
+  ],
+  [
+   "Wer hat Sky Rush entwickelt?",
+   "Sky Rush wird von ITpaul entwickelt, einem unabhängigen Entwickler aus Deutschland."
+  ],
+  [
+   "In welchen Sprachen gibt es Sky Rush?",
+   "In 11 Sprachen: Deutsch, Englisch, Spanisch, Französisch, Italienisch, Portugiesisch, Türkisch, Polnisch, Indonesisch, Japanisch und Koreanisch."
+  ]
+ ],
+ "faq_apps": "Außerdem gibt es Sky Rush als App für Android und iPhone.",
+ "faq_brand": [
+  "Was ist MySkyRush?",
+  "MySkyRush ({{HOST}}) ist die offizielle Website von Sky Rush. Dort spielst du direkt im Browser und findest alle Infos und die Links zu den Apps."
+ ],
+ "about_h": "Alles über Sky Rush",
+ "cta_h": "Bereit für den Absprung?",
+ "cta_t": "Ein Tipp genügt – und los geht’s.",
+ "press": "Presse & Verlinken",
+ "imprint": "Impressum",
+ "privacy": "Datenschutz",
+ "langs_h": "Sprachen",
+ "made_by": "Ein Spiel von ITpaul",
+ "home": "Start",
+ "play_short": "Spielen",
+ "demo_play": "Hier direkt spielen",
+ "demo_full": "Vollbild",
+ "worlds_h": "9 Welten bis in den Hyperraum",
+ "from_m": "ab {} m",
+ "every_m": "alle {} m",
+ "lb_h": "Ganz oben gerade",
+ "lb_cta": "Schlag den Rekord",
+ "hop_done_h": "Alle Münzen gesammelt!",
+ "hop_done_t": "Du springst wie ein Profi. Wie hoch kommst du im echten Spiel?",
+ "hop_hide": "Hops ausblenden",
+ "hop_show": "🟡 Hops zeigen",
+ "hop_hint": "Scroll oder tipp auf eine Karte – Hops springt mit und sammelt Münzen!",
+ "keys_h": "Am PC spielen",
+ "key_lr": "Bahn wechseln",
+ "key_up": "Doppelsprung",
+ "key_down": "Durchfallen",
+ "key_f": "Vollbild",
+ "key_pad": "Controller: Xbox, PlayStation, Switch"
+}

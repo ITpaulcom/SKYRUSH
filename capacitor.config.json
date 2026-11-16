@@ -1,0 +1,12 @@
+{
+  "appId": "com.itpaul.skyrush",
+  "appName": "Sky Rush",
+  "webDir": "www",
+  "backgroundColor": "#2A1B5C",
+  "android": { "backgroundColor": "#2A1B5C" },
+  "ios": { "backgroundColor": "#2A1B5C", "contentInset": "never" },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 1200, "launchAutoHide": false, "backgroundColor": "#2A1B5C", "showSpinner": false },
+    "AdMob": {}
+  }
+}

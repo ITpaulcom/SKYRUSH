@@ -1,0 +1,160 @@
+{
+ "name": "Italiano",
+ "locale": "it_IT",
+ "title": "Sky Rush – Gioco di salti gratis verso il cielo | Browser, Android e iPhone",
+ "desc": "Sky Rush è un gioco arcade di salti gratuito: salta di piattaforma in piattaforma verso il cielo, sfuggi alla tempesta e vinci duelli dal vivo in quattro. Gioca subito nel browser, senza registrazione.",
+ "kicker": "Gioco arcade gratuito",
+ "h1": "Salta verso il cielo.",
+ "lead": "Hops salta da solo: tu decidi solo dove. Tocca o scorri, raccogli monete, schiva i droni e lasciati la tempesta alle spalle.",
+ "play": "Gioca gratis ora",
+ "play_note": "Nel browser · senza registrazione · senza download",
+ "stores_h": "Anche come app",
+ "what_h": "Che cos’è Sky Rush?",
+ "what": "Sky Rush è un gioco arcade di salti gratuito di ITpaul, un mix tra Doodle Jump e Subway Surfers. Il tuo personaggio salta da solo di piattaforma in piattaforma e tu cambi corsia toccando, scorrendo o inclinando il telefono. L’obiettivo: salire il più in alto possibile prima che la tempesta ti raggiunga. Sky Rush funziona direttamente nel browser e come app per Android e iPhone.",
+ "feat_h": "Perché giocare a Sky Rush",
+ "feats": [
+  [
+   "🌌",
+   "Mondi infiniti",
+   "Dai tetti della città tra nuvole, aurore e spazio fino all’iperspazio. Ogni 10.000 m ti aspetta una Porta del cielo."
+  ],
+  [
+   "⚔️",
+   "Duelli dal vivo in quattro",
+   "Sfida giocatori di tutto il mondo o invita gli amici con un codice stanza: corsa a tempo, modalità K.O. e collisioni."
+  ],
+  [
+   "👆",
+   "Basta un pollice",
+   "Tocca, scorri o inclina, in verticale o in orizzontale. Facile da imparare, difficile da padroneggiare."
+  ],
+  [
+   "🎨",
+   "14 personaggi, oltre 55 oggetti",
+   "Jetpack, ali, cappelli e facce. Aurum, Platina e Kristallo solo per chi vola davvero in alto."
+  ],
+  [
+   "🏆",
+   "Ogni giorno qualcosa di nuovo",
+   "Corsa del giorno, torneo settimanale, pass stagionale con 100 livelli e classifiche mondiali."
+  ],
+  [
+   "🛡️",
+   "Corretto per tutti",
+   "Niente loot box a pagamento, probabilità visibili e ogni record viene verificato sul server."
+  ]
+ ],
+ "modes_h": "Modalità di gioco",
+ "modes": [
+  [
+   "🚀",
+   "Infinito",
+   "Salta più in alto che puoi: il tuo record conta nella classifica mondiale."
+  ],
+  [
+   "☀️",
+   "Corsa del giorno",
+   "Ogni giorno lo stesso percorso per tutti: un tentativo, una classifica."
+  ],
+  [
+   "🏆",
+   "Torneo",
+   "Una settimana, un percorso, più tentativi. Chi arriva più in alto?"
+  ],
+  [
+   "⚔️",
+   "Duello",
+   "Fino a quattro giocatori dal vivo su un percorso: partita veloce o stanza tua con le tue regole."
+  ]
+ ],
+ "how_h": "Come si gioca",
+ "how": [
+  [
+   "Tocca o scorri",
+   "Sinistra o destra cambia corsia. Scorri in su per il doppio salto, in giù per scendere attraverso la piattaforma."
+  ],
+  [
+   "Raccogli e scatena",
+   "Monete e stelle caricano il RUSH: super salti, magnete e monete doppie."
+  ],
+  [
+   "Sfuggi alla tempesta",
+   "Sotto di te sale una tempesta sempre più veloce. Non fermarti!"
+  ]
+ ],
+ "shots_h": "Screenshot",
+ "shots_alt": [
+  "Schermata iniziale di Sky Rush",
+  "Duello dal vivo in quattro in Sky Rush",
+  "Salti tra i mondi di Sky Rush",
+  "Porta del cielo dorata in Sky Rush"
+ ],
+ "faq_h": "Domande frequenti",
+ "faq": [
+  [
+   "Sky Rush è gratis?",
+   "Sì. Sky Rush è completamente gratuito. Ci sono video facoltativi con ricompensa e acquisti facoltativi (pacchetti di monete, pacchetto iniziale, senza pubblicità). Le pause pubblicitarie compaiono solo tra due partite."
+  ],
+  [
+   "Su quali dispositivi funziona Sky Rush?",
+   "Sky Rush funziona direttamente nel browser su telefono, tablet e computer su {{HOST}}, senza download. Nel browser puoi anche aggiungerlo alla schermata Home come app."
+  ],
+  [
+   "Serve un account?",
+   "No. Sky Rush parte subito, senza registrazione né indirizzo e-mail. Scegli solo un nome giocatore."
+  ],
+  [
+   "Posso giocare contro gli amici?",
+   "Sì. Nel duello fino a quattro giocatori si sfidano dal vivo. Invita gli amici con un codice stanza e scegli la corsa a tempo (da 1 a 5 minuti), il K.O. con una sola vita o le collisioni. Senza internet ti alleni contro i bot."
+  ],
+  [
+   "Sky Rush funziona offline?",
+   "Sì. La modalità infinita e l’allenamento contro i bot funzionano senza internet. Classifiche e duelli dal vivo richiedono una connessione."
+  ],
+  [
+   "Ci sono loot box o pay-to-win?",
+   "No. Forzieri e ruota contengono solo oggetti di gioco, non si possono comprare e le probabilità sono visibili nel gioco. Ogni record viene verificato sul server: barare non serve."
+  ],
+  [
+   "Chi ha creato Sky Rush?",
+   "Sky Rush è sviluppato da ITpaul, uno sviluppatore indipendente tedesco."
+  ],
+  [
+   "In quali lingue è disponibile Sky Rush?",
+   "In 11 lingue: tedesco, inglese, spagnolo, francese, italiano, portoghese, turco, polacco, indonesiano, giapponese e coreano."
+  ]
+ ],
+ "faq_apps": "Sky Rush è disponibile anche come app per Android e iPhone.",
+ "faq_brand": [
+  "Che cos’è MySkyRush?",
+  "MySkyRush ({{HOST}}) è il sito ufficiale di Sky Rush. Lì giochi direttamente nel browser e trovi tutte le informazioni e i link alle app."
+ ],
+ "about_h": "Tutto su Sky Rush",
+ "cta_h": "Pronto al decollo?",
+ "cta_t": "Basta un tocco.",
+ "press": "Stampa e link",
+ "imprint": "Note legali",
+ "privacy": "Privacy",
+ "langs_h": "Lingue",
+ "made_by": "Un gioco di ITpaul",
+ "home": "Home",
+ "play_short": "Gioca",
+ "demo_play": "Gioca qui",
+ "demo_full": "Schermo intero",
+ "worlds_h": "9 mondi fino all’iperspazio",
+ "from_m": "da {} m",
+ "every_m": "ogni {} m",
+ "lb_h": "In cima adesso",
+ "lb_cta": "Batti il record",
+ "hop_done_h": "Tutte le monete!",
+ "hop_done_t": "Salti come un professionista. Fin dove arrivi nel gioco vero?",
+ "hop_hide": "Nascondi Hops",
+ "hop_show": "🟡 Mostra Hops",
+ "hop_hint": "Scorri o tocca una scheda: Hops salta con te e raccoglie monete!",
+ "keys_h": "Giocare su PC",
+ "key_lr": "Cambia corsia",
+ "key_up": "Doppio salto",
+ "key_down": "Scendi giù",
+ "key_f": "Schermo intero",
+ "key_pad": "Controller: Xbox, PlayStation, Switch"
+}

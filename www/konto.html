@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Sky Rush – Spielstand sichern</title>
+<link rel="icon" href="icons/icon-192.png">
+<style>
+@font-face{font-family:'Space Grotesk';font-weight:700;font-display:swap;src:url(fonts/space-grotesk-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Space Grotesk';font-weight:500;font-display:swap;src:url(fonts/space-grotesk-latin-500-normal.woff2) format('woff2')}
+:root{--ink:#1B1240;--paper:#FFF8EC;--sun:#FFC83D;--mint:#3BE8A4}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(180deg,#2A1B5C,#7B4DFF 55%,#FF9AA8);color:var(--ink);font:16px/1.5 'Space Grotesk',system-ui,sans-serif}
+.card{width:100%;max-width:420px;background:var(--paper);border:3px solid var(--ink);border-radius:26px;box-shadow:0 8px 0 var(--ink);padding:26px 22px 22px;text-align:center}
+.logo{font-weight:700;font-size:44px;line-height:.85;letter-spacing:-.04em;margin:0 0 14px}.logo b{display:block;color:#fff;-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:0 5px 0 var(--ink)}.logo b+b{color:var(--sun);transform:rotate(-3deg)}
+h1{font-size:24px;margin:6px 0 8px}
+p{margin:8px 0}
+.small{font-size:13px;opacity:.75}
+#gbtn{display:flex;justify-content:center;min-height:48px;margin:18px 0 8px}
+.msg{border:3px solid var(--ink);border-radius:16px;padding:12px 14px;margin:14px 0 4px;font-weight:700;background:#fff}
+.msg.ok{background:#E3FFF0}.msg.warn{background:#FFF6D6}.msg.bad{background:#FFE1E7}
+a{color:var(--ink);font-weight:700}
+.btn{display:inline-block;margin-top:10px;padding:11px 18px;border:3px solid var(--ink);border-radius:14px;background:var(--sun);box-shadow:0 4px 0 var(--ink);text-decoration:none}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="logo" aria-label="Sky Rush"><b>SKY</b><b>RUSH</b></div>
+  <h1 id="h"></h1>
+  <p id="intro"></p>
+  <div id="gbtn"></div>
+  <div class="msg" id="msg" hidden></div>
+  <a class="btn" id="back" href="/" hidden></a>
+  <p class="small" id="note"></p>
+</main>
+<script>
+(function () {
+  var T = {
+    de: ['Spielstand sichern', 'Melde dich mit Google an, um deinen Sky-Rush-Spielstand zu sichern.', 'Einen Moment …', '✓ Gesichert! Du kannst jetzt zurück ins Spiel wechseln.', 'Spielstand gefunden! Wechsle zurück ins Spiel – dort kannst du ihn laden.', 'Dieses Gerät ist schon mit einem anderen Google-Konto verbunden.', 'Dieser Link ist abgelaufen. Starte die Anmeldung im Spiel neu: Optionen → Spielstand sichern.', 'Öffne diese Seite aus dem Spiel: Optionen → Spielstand sichern.', 'Die Google-Anmeldung ist gerade nicht eingerichtet.', 'Das hat nicht geklappt. Bitte nochmal versuchen.', 'Zurück zum Spiel', 'Gespeichert werden nur deine Google-Konto-Nummer und E-Mail-Adresse.', 'Datenschutz'],
+    en: ['Save your progress', 'Sign in with Google to save your Sky Rush progress.', 'One moment …', '✓ Saved! You can switch back to the game now.', 'Saved progress found! Switch back to the game to load it.', 'This device is already linked to a different Google account.', 'This link has expired. Start again in the game: Settings → Save progress.', 'Open this page from the game: Settings → Save progress.', 'Google sign-in is not set up right now.', 'That didn’t work. Please try again.', 'Back to the game', 'We only store your Google account ID and email address.', 'Privacy'],
+    es: ['Guardar progreso', 'Inicia sesión con Google para guardar tu progreso de Sky Rush.', 'Un momento …', '✓ ¡Guardado! Ya puedes volver al juego.', '¡Progreso encontrado! Vuelve al juego para cargarlo.', 'Este dispositivo ya está vinculado a otra cuenta de Google.', 'Este enlace ha caducado. Empieza de nuevo en el juego: Opciones → Guardar progreso.', 'Abre esta página desde el juego: Opciones → Guardar progreso.', 'El inicio de sesión con Google no está configurado ahora mismo.', 'No ha funcionado. Inténtalo de nuevo.', 'Volver al juego', 'Solo guardamos el ID de tu cuenta de Google y tu correo.', 'Privacidad'],
+    fr: ['Sauvegarder ta partie', 'Connecte-toi avec Google pour sauvegarder ta progression dans Sky Rush.', 'Un instant …', '✓ Sauvegardé ! Tu peux revenir au jeu.', 'Progression trouvée ! Reviens au jeu pour la charger.', 'Cet appareil est déjà lié à un autre compte Google.', 'Ce lien a expiré. Recommence dans le jeu : Options → Sauvegarder ta partie.', 'Ouvre cette page depuis le jeu : Options → Sauvegarder ta partie.', 'La connexion Google n’est pas configurée pour le moment.', 'Ça n’a pas marché. Réessaie.', 'Retour au jeu', 'Nous enregistrons seulement l’ID de ton compte Google et ton e-mail.', 'Confidentialité'],
+    it: ['Salva i progressi', 'Accedi con Google per salvare i tuoi progressi in Sky Rush.', 'Un momento …', '✓ Salvato! Ora puoi tornare al gioco.', 'Progressi trovati! Torna al gioco per caricarli.', 'Questo dispositivo è già collegato a un altro account Google.', 'Questo link è scaduto. Ricomincia nel gioco: Opzioni → Salva i progressi.', 'Apri questa pagina dal gioco: Opzioni → Salva i progressi.', 'L’accesso con Google al momento non è configurato.', 'Non ha funzionato. Riprova.', 'Torna al gioco', 'Salviamo solo l’ID del tuo account Google e la tua email.', 'Privacy'],
+    pt: ['Salvar progresso', 'Entre com o Google para salvar seu progresso no Sky Rush.', 'Um momento …', '✓ Salvo! Agora você pode voltar ao jogo.', 'Progresso encontrado! Volte ao jogo para carregá-lo.', 'Este aparelho já está vinculado a outra conta Google.', 'Este link expirou. Comece de novo no jogo: Opções → Salvar progresso.', 'Abra esta página pelo jogo: Opções → Salvar progresso.', 'O login com Google não está configurado no momento.', 'Não deu certo. Tente de novo.', 'Voltar ao jogo', 'Guardamos apenas o ID da sua conta Google e seu e-mail.', 'Privacidade'],
+    tr: ['İlerlemeyi kaydet', 'Sky Rush ilerlemeni kaydetmek için Google ile giriş yap.', 'Bir saniye …', '✓ Kaydedildi! Artık oyuna dönebilirsin.', 'Kayıtlı ilerleme bulundu! Yüklemek için oyuna dön.', 'Bu cihaz zaten başka bir Google hesabına bağlı.', 'Bu bağlantının süresi doldu. Oyunda yeniden başlat: Ayarlar → İlerlemeyi kaydet.', 'Bu sayfayı oyundan aç: Ayarlar → İlerlemeyi kaydet.', 'Google ile giriş şu anda ayarlı değil.', 'Olmadı. Lütfen tekrar dene.', 'Oyuna dön', 'Yalnızca Google hesap kimliğini ve e-posta adresini saklıyoruz.', 'Gizlilik'],
+    pl: ['Zapisz postęp', 'Zaloguj się przez Google, aby zapisać postęp w Sky Rush.', 'Chwila …', '✓ Zapisano! Możesz wrócić do gry.', 'Znaleziono zapis! Wróć do gry, aby go wczytać.', 'To urządzenie jest już połączone z innym kontem Google.', 'Ten link wygasł. Zacznij od nowa w grze: Opcje → Zapisz postęp.', 'Otwórz tę stronę z gry: Opcje → Zapisz postęp.', 'Logowanie przez Google nie jest teraz skonfigurowane.', 'Nie udało się. Spróbuj ponownie.', 'Wróć do gry', 'Zapisujemy tylko identyfikator konta Google i adres e-mail.', 'Prywatność'],
+    id: ['Simpan progres', 'Masuk dengan Google untuk menyimpan progres Sky Rush kamu.', 'Sebentar …', '✓ Tersimpan! Sekarang kamu bisa kembali ke game.', 'Progres ditemukan! Kembali ke game untuk memuatnya.', 'Perangkat ini sudah terhubung ke akun Google lain.', 'Tautan ini sudah kedaluwarsa. Mulai lagi di game: Opsi → Simpan progres.', 'Buka halaman ini dari game: Opsi → Simpan progres.', 'Login Google sedang belum disiapkan.', 'Gagal. Silakan coba lagi.', 'Kembali ke game', 'Kami hanya menyimpan ID akun Google dan alamat email kamu.', 'Privasi'],
+    ja: ['データを保存', 'Googleでログインして、Sky Rushのデータを保存しよう。', '少々お待ちください …', '✓ 保存しました!ゲームに戻ってOKです。', '保存データが見つかりました!ゲームに戻って読み込んでね。', 'この端末はすでに別のGoogleアカウントと連携しています。', 'このリンクは期限切れです。ゲームでやり直してください:オプション → データを保存。', 'このページはゲームから開いてください:オプション → データを保存。', 'Googleログインは現在設定されていません。', 'うまくいきませんでした。もう一度お試しください。', 'ゲームに戻る', '保存するのはGoogleアカウントIDとメールアドレスだけです。', 'プライバシー'],
+    ko: ['진행 상황 저장', 'Google로 로그인해서 Sky Rush 진행 상황을 저장하세요.', '잠시만요 …', '✓ 저장됐어요! 이제 게임으로 돌아가세요.', '저장된 진행 상황을 찾았어요! 게임으로 돌아가서 불러오세요.', '이 기기는 이미 다른 Google 계정과 연결되어 있어요.', '링크가 만료됐어요. 게임에서 다시 시작하세요: 옵션 → 진행 상황 저장.', '게임에서 이 페이지를 여세요: 옵션 → 진행 상황 저장.', '지금은 Google 로그인이 설정되어 있지 않아요.', '잘 안 됐어요. 다시 시도해 주세요.', '게임으로 돌아가기', 'Google 계정 ID와 이메일 주소만 저장해요.', '개인정보']
+  };
+  var q = new URLSearchParams(location.search), L = q.get('lang') || (navigator.language || 'de').slice(0, 2);
+  if (!T[L]) L = 'en';
+  var t = T[L], $ = function (id) { return document.getElementById(id); };
+  document.documentElement.lang = L; document.title = 'Sky Rush – ' + t[0];
+  $('h').textContent = t[0]; $('intro').textContent = t[1];
+  $('note').innerHTML = ''; $('note').appendChild(document.createTextNode(t[11] + ' '));
+  var pl = document.createElement('a'); pl.href = '/privacy.html'; pl.target = '_blank'; pl.rel = 'noopener'; pl.textContent = t[12]; $('note').appendChild(pl);
+  $('back').textContent = t[10];
+  var code = (location.hash.match(/^#([a-f0-9]{32})$/) || [])[1];
+  // Code nicht in der Adresszeile stehen lassen (Verlauf, Teilen)
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  function show(kind, text, back) { var m = $('msg'); m.hidden = false; m.className = 'msg ' + kind; m.textContent = text; $('back').hidden = !back || !!window.Capacitor; }
+  if (!code) { $('intro').hidden = true; return show('warn', t[7], true); }
+  fetch('/api/config', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (c) {
+    var id = c && c.google && c.google.clientId;
+    if (!id) return show('bad', t[8], true);
+    var s = document.createElement('script'); s.src = 'https://accounts.google.com/gsi/client'; s.async = true;
+    s.onerror = function () { show('bad', t[9], false); };
+    s.onload = function () {
+      google.accounts.id.initialize({ client_id: id, callback: done, ux_mode: 'popup', auto_select: false, itp_support: true, context: 'signin' });
+      google.accounts.id.renderButton($('gbtn'), { theme: 'filled_blue', size: 'large', shape: 'pill', text: 'signin_with', locale: L, width: 280 });
+    };
+    document.head.appendChild(s);
+  }).catch(function () { show('bad', t[9], false); });
+  function done(resp) {
+    show('warn', t[2], false); $('gbtn').hidden = true;
+    fetch('/api/account', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ action: 'finish', code: code, credential: resp && resp.credential }) })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }); })
+      .then(function (x) {
+        if (x.status === 410) return show('bad', t[6], true);
+        if (!x.ok) { $('gbtn').hidden = false; return show('bad', t[9], false); }
+        var st = x.j.state;
+        if (st === 'linked') { $('intro').hidden = true; show('ok', t[3], true); }
+        else if (st === 'switch') { $('intro').hidden = true; show('ok', t[4], true); }
+        else if (st === 'other') show('bad', t[5], true);
+        else show('warn', t[6], true);
+      }).catch(function () { $('gbtn').hidden = false; show('bad', t[9], false); });
+  }
+})();
+</script>
+</body>
+</html>

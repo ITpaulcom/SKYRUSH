@@ -1,0 +1,42 @@
+{
+  "name": "sky-rush",
+  "version": "1.5.0",
+  "private": true,
+  "description": "SKY RUSH – Doodle-Jump trifft Subway Surfers",
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "deploy": "node scripts/deploy.mjs",
+    "start": "npx --yes netlify-cli@27 dev --dir www --functions netlify/functions",
+    "test": "node scripts/test-core.mjs && node scripts/test-iap.mjs && npm run test:duel && npm run test:ac && npm run test:vault && npm run test:modes && npm run test:account && npm run test:seo",
+    "sync": "node scripts/configure-native.mjs && npx cap sync",
+    "android": "npm run sync && npx cap open android",
+    "ios": "npm run sync && npx cap open ios",
+    "assets": "npx @capacitor/assets generate --android --ios --iconBackgroundColor \"#FF9AA8\" --splashBackgroundColor \"#2A1B5C\" --splashBackgroundColorDark \"#2A1B5C\"",
+    "build:android": "node scripts/android-build.mjs",
+    "test:ac": "node --import ./scripts/mock/register.mjs scripts/test-anticheat.mjs",
+    "test:duel": "node --import ./scripts/mock/register.mjs scripts/test-duel.mjs",
+    "test:vault": "node --import ./scripts/mock/register.mjs scripts/test-vault.mjs",
+    "test:modes": "node --import ./scripts/mock/register.mjs scripts/test-duelmodes.mjs",
+    "test:account": "node --import ./scripts/mock/register.mjs scripts/test-account.mjs",
+    "test:seo": "node scripts/test-seo.mjs",
+    "seo": "node scripts/seo.mjs",
+    "sichtbarkeit": "node scripts/sichtbarkeit.mjs"
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "^8.2.1",
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.5.3",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@netlify/blobs": "^11.1.5",
+    "@revenuecat/purchases-capacitor": "^13.7.4"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.3",
+    "@fontsource/jetbrains-mono": "^5.3.0",
+    "@fontsource/space-grotesk": "^5.3.0"
+  },
+  "type": "module"
+}
