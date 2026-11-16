@@ -39,6 +39,17 @@
 			<string>cstr6suwn9.skadnetwork</string>
 		</dict>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.itpaul.skyrush</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>skyrush</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>Damit können dir passendere Anzeigen gezeigt werden. Das Spiel funktioniert auch ohne Zustimmung.</string>
 	<key>GADApplicationIdentifier</key>

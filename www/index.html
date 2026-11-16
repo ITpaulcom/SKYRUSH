@@ -4219,9 +4219,10 @@ async function openAccount() {
 }
 async function acctStart() {
   let r;
-  try { r = await Net.account('start'); } catch (e) { return toast(e.message === 'rate' ? 'Bitte kurz warten und nochmal versuchen.' : failMsg('offline')); }
+  const src = native ? Monetize.platform : 'web';
+  try { r = await Net.account('start', { src }); } catch (e) { return toast(e.message === 'rate' ? 'Bitte kurz warten und nochmal versuchen.' : failMsg('offline')); }
   ACCT.code = r.code; ACCT.until = Date.now() + (r.ttl || 9e5);
-  ACCT.url = (Net.base() || siteBase()) + r.path.replace('#', `?lang=${uiLang}#`);
+  ACCT.url = (Net.base() || siteBase()) + r.path.replace('#', `?lang=${uiLang}&src=${src}#`);
   acctKeep();
   openLink(ACCT.url);
   acctWaitSheet();
@@ -4267,6 +4268,7 @@ async function acctPoll1() {
 document.addEventListener('visibilitychange', () => { if (!document.hidden && ACCT.code) acctPoll(); });
 addEventListener('focus', () => { if (ACCT.code) acctPoll(); });
 addEventListener('pageshow', () => { if (ACCT.code) acctPoll(); });
+document.addEventListener('resume', () => { if (ACCT.code) acctPoll(); });   // App kommt aus dem Hintergrund zurück (Capacitor)
 function acctDone(state, r = {}, code = '') {
   ACCT.st = null; acctRow();
   if (state === 'linked') {

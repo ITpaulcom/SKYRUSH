@@ -132,6 +132,15 @@ export default async req => {
     applyShop(c.shop);
     return json({ shop: c.shop || {}, items, cats, packs, updated: c.updated || 0 }, 200, noStore);
   }
+  if (view === 'accounts') {   // Google-Login: letzte Anmeldeversuche und an welchem Schritt sie stehen
+    const rec = ((await st.get('acct/recent', { type: 'json' })) || { list: [] }).list.slice(0, 40);
+    const rows = await Promise.all(rec.map(async r => {
+      const [c, p] = await Promise.all([st.get(`acct/c/${r.code}`, { type: 'json' }), st.get(`players/${r.uid}`, { type: 'json' })]);
+      const tv = c && c.target ? await st.get(`vault/${c.target}`, { type: 'json' }) : null;
+      return { at: r.at, uid: r.uid, name: (p && p.name) || '', src: r.src || (c && c.src) || '', state: c ? c.state : 'gone', exp: c ? c.exp : 0, done: c && c.done || 0, seen: c && c.seen || 0, used: c && c.used || 0, email: c && c.email ? c.email.replace(/^(.).*(@.*)$/, '$1…$2') : '', target: c && c.target || '', synced: !!(tv && c && c.used && tv.at > c.used) };
+    }));
+    return json({ rows, now: Date.now() }, 200, noStore);
+  }
   if (view === 'money') return json({ sales: await salesDays(Math.min(400, Number(q.get('days') || 90))), list: LIST_EUR, rc: !!process.env.REVENUECAT_SECRET, now: Date.now() }, 200, noStore);
   if (view === 'security') return json(await securityInfo(), 200, noStore);
   if (view === 'player') {

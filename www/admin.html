@@ -179,14 +179,14 @@ $('lf').onsubmit = async e => {
 $('out').onclick = async () => { try { await api('', { action: 'logout' }); } catch {} showLogin('Abgemeldet.'); };
 
 // ---------- Navigation ----------
-const VIEWS = { dash: 'Übersicht', money: 'Einnahmen', players: 'Spieler', boards: 'Ranglisten', ac: 'Anti-Cheat', ads: 'Werbung', shop: 'Shop', cfg: 'Einstellungen', log: 'Protokoll', sec: 'Sicherheit' };
+const VIEWS = { dash: 'Übersicht', money: 'Einnahmen', players: 'Spieler', boards: 'Ranglisten', ac: 'Anti-Cheat', ads: 'Werbung', shop: 'Shop', acct: 'Google-Login', cfg: 'Einstellungen', log: 'Protokoll', sec: 'Sicherheit' };
 let VIEW = 'dash', DASH = null, PLAYERS = null;
 function navRender(counts = {}) { $('nav').innerHTML = Object.entries(VIEWS).map(([k, v]) => `<button data-v="${k}" class="${k === VIEW ? 'on' : ''}">${v}${counts[k] ? `<span class="cnt">${counts[k]}</span>` : ''}</button>`).join(''); }
 $('nav').onclick = e => { const b = e.target.closest('[data-v]'); if (b) go(b.dataset.v); };
 async function go(v) {
   if (!VIEWS[v]) v = 'dash'; VIEW = v; history.replaceState(null, '', '#' + v); navRender(go.counts);
   $('main').innerHTML = '<p class="muted">Lädt …</p>';
-  try { await ({ dash: vDash, money: vMoney, players: vPlayers, boards: vBoards, ac: vAc, ads: vAds, shop: vShop, cfg: vCfg, log: vLog, sec: vSec })[v](); }
+  try { await ({ dash: vDash, money: vMoney, players: vPlayers, boards: vBoards, ac: vAc, ads: vAds, shop: vShop, acct: vAcct, cfg: vCfg, log: vLog, sec: vSec })[v](); }
   catch (e) { if (e.message !== 'auth') $('main').innerHTML = `<p class="card" style="color:var(--bad)">Fehler: ${esc(e.message)}</p>`; }
 }
 const loadDash = async (force = false) => (DASH && !force ? DASH : (DASH = await api('?view=dash&days=30')));
@@ -404,6 +404,21 @@ async function vAds() {
       <div class="legend"><span style="--c:var(--mint)">Belohnte Videos</span><span style="--c:var(--sky)">Werbepausen</span></div></div>
     <div class="card"><h3>Platzierungen (30 Tage)</h3><div class="wrap"><table><tr><th>Platzierung</th><th>Anzeigen</th><th>Umsatz</th><th>Anteil</th><th>eCPM</th></tr>${Object.entries(agg).sort((a, b) => b[1].revenue - a[1].revenue).map(([k, v]) => `<tr><td>${PL[k] || esc(k)}</td><td>${fmt(v.n)}</td><td>${money(v.revenue, cur)}</td><td>${rev ? (v.revenue / rev * 100).toFixed(1) : 0} %</td><td>${money(v.n ? v.revenue / v.n * 1000 : 0, cur)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Noch keine Daten</td></tr>'}</table></div></div>
     <div class="card"><h3>Tage</h3><div class="wrap"><table><tr><th>Tag</th><th>Umsatz</th><th>Impr.</th><th>Videos</th><th>Pausen</th><th>Nutzer</th><th class="hide-s">geschätzt</th></tr>${days.map(x => `<tr><td>${x.day}</td><td>${money(x.revenue, cur)}</td><td>${x.impressions}</td><td>${(x.formats.rewarded || {}).n || 0}</td><td>${(x.formats.interstitial || {}).n || 0}</td><td>${x.users}</td><td class="hide-s">${money(x.estimated, cur)}</td></tr>`).join('')}</table></div></div>`;
+}
+
+// ---------- Google-Login: an welchem Schritt hängen Anmeldung / Wiederherstellung? ----------
+async function vAcct() {
+  const d = await api('?view=accounts'), now = d.now;
+  const ST = { open: ['⏳', 'Anmeldeseite geöffnet, nicht angemeldet'], linked: ['✅', 'Gesichert (Konto verbunden)'], switch: ['🔁', 'Spielstand gefunden'], used: ['📥', 'Spielstand geladen'], other: ['⚠️', 'Gerät hat schon ein anderes Konto'], gone: ['–', 'abgelaufen/gelöscht'] };
+  const step = r => {
+    if (r.state === 'open') return r.exp && r.exp < now ? '❌ Google-Anmeldung nie abgeschlossen (Seite/Popup?)' : '⏳ läuft';
+    if (r.state === 'used') return r.synced ? '✅ fertig – neues Gerät hat den Spielstand geholt' : '⚠️ geladen, aber das Gerät hat sich danach nicht gemeldet';
+    if (!r.seen) return '❌ App/Spiel hat das Ergebnis nie abgeholt (Rückweg ins Spiel)';
+    if (r.state === 'switch') return '⚠️ Ergebnis angezeigt, „Laden“ nicht getippt oder fehlgeschlagen';
+    return '✅ fertig';
+  };
+  $('main').innerHTML = `<h2>🔐 Google-Login</h2><p class="muted small">Die letzten Versuche „Spielstand sichern / laden“. So siehst du genau, an welchem Schritt es hängt. Gerät: android/ios = App, web = Browser, leer = ältere App-Version.</p>
+    <div class="card"><div class="wrap"><table><tr><th>Zeit</th><th>Spieler</th><th>Gerät</th><th>Ergebnis</th><th>Konto</th><th>Schritt</th></tr>${d.rows.map(r => `<tr><td>${dt(r.at)}</td><td>${esc(r.name || r.uid.slice(0, 8))}</td><td>${esc(r.src || '–')}</td><td>${(ST[r.state] || ['', r.state])[0]} ${esc((ST[r.state] || ['', r.state])[1])}</td><td>${esc(r.email || '')}</td><td>${step(r)}</td></tr>`).join('') || '<tr><td colspan="6" class="muted">Noch keine Versuche seit dem Update.</td></tr>'}</table></div></div>`;
 }
 
 // ---------- Einnahmen: Werbung (AdMob-Meldungen der Geräte) + geprüfte Käufe (RevenueCat) ----------

@@ -13,7 +13,7 @@ import { indexPut } from '../lib/admin.mjs';
 
 const CODE_TTL = 15 * 60e3, CODE = /^[a-f0-9]{32}$/, MAX_DEVICES = 8;
 const rand = n => [...crypto.getRandomValues(new Uint8Array(n))].map(b => b.toString(16).padStart(2, '0')).join('');
-export const acctKeys = { g: sub => `acct/g/${sub}`, u: uid => `acct/u/${uid}`, c: code => `acct/c/${code}`, rl: uid => `acct/rl/${uid}` };
+export const acctKeys = { g: sub => `acct/g/${sub}`, u: uid => `acct/u/${uid}`, c: code => `acct/c/${code}`, rl: uid => `acct/rl/${uid}`, recent: 'acct/recent' };
 let verifier = verifyGoogle;
 export const __setVerifier = f => { verifier = f || verifyGoogle; };   // nur für Tests
 
@@ -72,8 +72,10 @@ export default async req => {
     const hour = Math.floor(Date.now() / 3600e3); let n = 0;
     await update(acctKeys.rl(uid), cur => { n = cur && cur.h === hour ? cur.n + 1 : 1; return { h: hour, n }; });
     if (n > 15) return json({ error: 'rate' }, 429);
-    const code = rand(16);
-    await st.setJSON(acctKeys.c(code), { uid, exp: Date.now() + CODE_TTL, state: 'open', at: Date.now() });
+    const code = rand(16), src = ['android', 'ios', 'web'].includes(b.src) ? b.src : '';
+    await st.setJSON(acctKeys.c(code), { uid, exp: Date.now() + CODE_TTL, state: 'open', at: Date.now(), src });
+    // Für die Zentrale („Google-Login“): die letzten Anmeldeversuche, um zu sehen, an welchem Schritt es hängt
+    await update(acctKeys.recent, cur => ({ list: [{ code, uid, at: Date.now(), src }, ...((cur && cur.list) || [])].slice(0, 60) })).catch(() => {});
     return json({ code, path: '/konto.html#' + code, ttl: CODE_TTL }, 200, noStore);
   }
   if (b.action === 'poll' || b.action === 'adopt') {
@@ -82,6 +84,7 @@ export default async req => {
     if (!c || c.uid !== uid) return json({ error: 'code' }, 404);
     if (c.state === 'open' && c.exp < Date.now()) return json({ state: 'expired' }, 200, noStore);
     if (b.action === 'poll') {
+      if (c.state !== 'open' && !c.seen) await update(acctKeys.c(b.code), cur => (cur && cur.state !== 'open' && !cur.seen ? { ...cur, seen: Date.now() } : undefined)).catch(() => {});   // Gerät hat das Ergebnis abgeholt
       const out = { state: c.state, email: maskEmail(c.email) };
       if (c.state === 'switch') { out.saved = await summaryOf(c.target); out.here = await summaryOf(uid); }
       return json(out, 200, noStore);
