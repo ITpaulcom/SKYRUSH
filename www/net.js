@@ -35,10 +35,12 @@ if (!dev) {
   try { localStorage.setItem(LS, JSON.stringify(dev)); } catch {}
 }
 
+// text/plain statt application/json: so gilt die Anfrage als „einfach“ und braucht keine CORS-Vorabanfrage –
+// die scheitert bei Netlify, und dann wären Apps (andere Herkunft) komplett offline. Der Server liest den Text als JSON.
 // Jede Anfrage hat eine Zeitgrenze – hängt das Netz, geht es mit dem nächsten Versuch weiter statt zu blockieren
 async function call(path, body, ms = 8000) {
   const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), ms);
-  const r = await fetch(BASE + path, { signal: ctl.signal, ...(body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : {}) }).finally(() => clearTimeout(tm));
+  const r = await fetch(BASE + path, { signal: ctl.signal, ...(body ? { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(body) } : {}) }).finally(() => clearTimeout(tm));
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(j.error || 'http ' + r.status);
   return j;
