@@ -47,7 +47,7 @@ export const CONFIG = {
   // ---------- In-App-Käufe (RevenueCat) ----------
   iap: {
     androidKey: 'goog_nmFtLMSQsisVtDiwEnfdEiAuSCd',       // RevenueCat (goog_…) – per npm run setup
-    iosKey: '',             // RevenueCat (appl_…) – per npm run setup
+    iosKey: 'appl_CoIvgLDwjBSqHhWJdcxgDFVlElg',             // RevenueCat (appl_…) – per npm run setup
     entitlementNoAds: 'no_ads',
     productNoAds: 'skyrush_remove_ads',     // Non-Consumable
     productCoins: 'skyrush_coins_5000',     // Consumable
