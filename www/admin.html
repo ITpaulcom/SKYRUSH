@@ -179,14 +179,14 @@ $('lf').onsubmit = async e => {
 $('out').onclick = async () => { try { await api('', { action: 'logout' }); } catch {} showLogin('Abgemeldet.'); };
 
 // ---------- Navigation ----------
-const VIEWS = { dash: 'Übersicht', players: 'Spieler', boards: 'Ranglisten', ac: 'Anti-Cheat', ads: 'Werbung', shop: 'Shop', cfg: 'Einstellungen', log: 'Protokoll', sec: 'Sicherheit' };
+const VIEWS = { dash: 'Übersicht', money: 'Einnahmen', players: 'Spieler', boards: 'Ranglisten', ac: 'Anti-Cheat', ads: 'Werbung', shop: 'Shop', cfg: 'Einstellungen', log: 'Protokoll', sec: 'Sicherheit' };
 let VIEW = 'dash', DASH = null, PLAYERS = null;
 function navRender(counts = {}) { $('nav').innerHTML = Object.entries(VIEWS).map(([k, v]) => `<button data-v="${k}" class="${k === VIEW ? 'on' : ''}">${v}${counts[k] ? `<span class="cnt">${counts[k]}</span>` : ''}</button>`).join(''); }
 $('nav').onclick = e => { const b = e.target.closest('[data-v]'); if (b) go(b.dataset.v); };
 async function go(v) {
   if (!VIEWS[v]) v = 'dash'; VIEW = v; history.replaceState(null, '', '#' + v); navRender(go.counts);
   $('main').innerHTML = '<p class="muted">Lädt …</p>';
-  try { await ({ dash: vDash, players: vPlayers, boards: vBoards, ac: vAc, ads: vAds, shop: vShop, cfg: vCfg, log: vLog, sec: vSec })[v](); }
+  try { await ({ dash: vDash, money: vMoney, players: vPlayers, boards: vBoards, ac: vAc, ads: vAds, shop: vShop, cfg: vCfg, log: vLog, sec: vSec })[v](); }
   catch (e) { if (e.message !== 'auth') $('main').innerHTML = `<p class="card" style="color:var(--bad)">Fehler: ${esc(e.message)}</p>`; }
 }
 const loadDash = async (force = false) => (DASH && !force ? DASH : (DASH = await api('?view=dash&days=30')));
@@ -201,7 +201,8 @@ document.addEventListener('click', e => { const a = e.target.closest('[data-p]')
 const LINKS = [
   ['Google Play Console', 'https://play.google.com/console/u/0/developers/7829093855860564632/app/4976021817400735669/app-dashboard', 'Tests, Versionen, Produkte'],
   ['AdMob', 'https://admob.google.com/v2/home', 'Werbung & Einnahmen'],
-  ['RevenueCat', 'https://app.revenuecat.com/', 'Käufe & Kunden'],
+  ['RevenueCat', 'https://app.revenuecat.com/projects/a31960df/overview', 'Käufe & Kunden'],
+  ['App Store Connect', 'https://appstoreconnect.apple.com/apps/6835578541/distribution', 'iOS-App, Käufe, TestFlight'],
   ['Microsoft Partner Center', 'https://partner.microsoft.com/dashboard/apps-and-games/overview', 'Windows-Store'],
   ['Netlify', 'https://app.netlify.com/', 'Hosting & Deploys'],
   ['Spiel öffnen', 'https://myskyrush.com/', 'myskyrush.com'],
@@ -403,6 +404,42 @@ async function vAds() {
       <div class="legend"><span style="--c:var(--mint)">Belohnte Videos</span><span style="--c:var(--sky)">Werbepausen</span></div></div>
     <div class="card"><h3>Platzierungen (30 Tage)</h3><div class="wrap"><table><tr><th>Platzierung</th><th>Anzeigen</th><th>Umsatz</th><th>Anteil</th><th>eCPM</th></tr>${Object.entries(agg).sort((a, b) => b[1].revenue - a[1].revenue).map(([k, v]) => `<tr><td>${PL[k] || esc(k)}</td><td>${fmt(v.n)}</td><td>${money(v.revenue, cur)}</td><td>${rev ? (v.revenue / rev * 100).toFixed(1) : 0} %</td><td>${money(v.n ? v.revenue / v.n * 1000 : 0, cur)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Noch keine Daten</td></tr>'}</table></div></div>
     <div class="card"><h3>Tage</h3><div class="wrap"><table><tr><th>Tag</th><th>Umsatz</th><th>Impr.</th><th>Videos</th><th>Pausen</th><th>Nutzer</th><th class="hide-s">geschätzt</th></tr>${days.map(x => `<tr><td>${x.day}</td><td>${money(x.revenue, cur)}</td><td>${x.impressions}</td><td>${(x.formats.rewarded || {}).n || 0}</td><td>${(x.formats.interstitial || {}).n || 0}</td><td>${x.users}</td><td class="hide-s">${money(x.estimated, cur)}</td></tr>`).join('')}</table></div></div>`;
+}
+
+// ---------- Einnahmen: Werbung (AdMob-Meldungen der Geräte) + geprüfte Käufe (RevenueCat) ----------
+const MONEY_LINKS = [
+  ['AdMob · Berichte', 'https://admob.google.com/v2/reports', 'genaue Werbe-Einnahmen, Auszahlung ab 70 € um den 21.'],
+  ['AdMob · Zahlungen', 'https://admob.google.com/v2/payments', 'Kontostand & Auszahlungen'],
+  ['RevenueCat · Umsatz', 'https://app.revenuecat.com/projects/a31960df/charts/revenue', 'alle Käufe beider Stores'],
+  ['Google Play · Finanzberichte', 'https://play.google.com/console/u/0/developers/7829093855860564632/download-reports/financial', 'Auszahlung monatlich um den 15.'],
+  ['App Store Connect · Zahlungen', 'https://appstoreconnect.apple.com/itc/payments_and_financial_reports', 'Auszahlung ca. 33 Tage nach Monatsende'],
+  ['App Store Connect · Trends', 'https://appstoreconnect.apple.com/trends', 'Downloads & Verkäufe'],
+];
+const PNAME = { skyrush_remove_ads: 'Werbefrei', skyrush_starter: 'Starterpaket', skyrush_coins_small: '2.000 Münzen', skyrush_coins_medium: '6.500 Münzen', skyrush_coins_large: '15.000 Münzen', skyrush_coins_huge: '40.000 Münzen', skyrush_coins_5000: '5.000 Münzen (alt)' };
+async function vMoney() {
+  const [d, m] = await Promise.all([loadDash(true), api('?view=money&days=90')]);
+  let fx = 0.92; try { fx = +localStorage.getItem('sr.fx') || 0.92; } catch {}
+  const ads = d.days, sales = m.sales, cur = (ads.find(x => x.impressions) || {}).currency || 'USD', toEur = v => cur === 'EUR' ? v : v * fx;
+  const adSum = n => ads.slice(0, n).reduce((a, x) => a + x.revenue, 0), saleSum = n => sales.slice(0, n).reduce((a, x) => a + x.gross, 0), saleN = n => sales.slice(0, n).reduce((a, x) => a + x.n, 0);
+  const net = g => g / 1.19 * 0.85;   // −MwSt. (DE) −15 % Store-Provision
+  const tot = n => toEur(adSum(n)) + net(saleSum(n));
+  const mStart = new Date(); mStart.setUTCDate(1); const mDays = new Date().getUTCDate();
+  const prod = {}, stores = {}; let sb = 0;
+  for (const x of sales.slice(0, 30)) { sb += x.sandbox; for (const [k, v] of Object.entries(x.products)) { const a = prod[k] || (prod[k] = { n: 0, gross: 0 }); a.n += v.n; a.gross += v.gross; } for (const [k, v] of Object.entries(x.stores)) { const a = stores[k] || (stores[k] = { n: 0, gross: 0 }); a.n += v.n; a.gross += v.gross; } }
+  const rows = sales.slice(0, 30).map((x, i) => ({ day: x.day, ad: (ads[i] || {}).revenue || 0, n: x.n, gross: x.gross }));
+  const max = Math.max(0.01, ...rows.map(r => toEur(r.ad) + net(r.gross)));
+  $('main').innerHTML = `<h2>💶 Einnahmen</h2>
+    <p class="muted small">Werbung: von den Apps gemeldete AdMob-Werte (${cur}${cur !== 'EUR' ? `, umgerechnet mit <input id="fx" type="number" step="0.01" min="0.5" max="1.5" value="${fx}" style="width:70px"> € je $` : ''}) – das ist schon dein Anteil. Käufe: vom Server bei RevenueCat geprüft, Brutto-Preis inkl. MwSt.; „netto“ ≈ ohne 19 % MwSt. und 15 % Store-Provision (Small-Business-Programm). Alles Schätzwerte – maßgeblich sind die Abrechnungen der Stores. ${m.rc ? '' : '<b style="color:var(--red,#c33)">RevenueCat-Schlüssel fehlt auf dem Server – Käufe werden nicht gezählt (Steuerzentrale → Z).</b>'}</p>
+    <div class="kpis">${[['Heute', tot(1)], ['7 Tage', tot(7)], [`Diesen Monat (${mDays} T.)`, tot(mDays)], ['30 Tage', tot(30)], ['90 Tage (Käufe)', net(saleSum(90))], ['Hochrechnung Monat', tot(7) / 7 * 30]].map(([k, v]) => `<div class="kpi"><span>${k}</span><b>${money(v, 'EUR')}</b></div>`).join('')}</div>
+    <div class="kpis">${[['Werbung 30 T.', money(adSum(30), cur)], ['Käufe 30 T.', fmt(saleN(30)) + ' Stück'], ['Käufe brutto 30 T.', money(saleSum(30), 'EUR')], ['Käufe netto 30 T.', money(net(saleSum(30)), 'EUR')], ['Testkäufe 30 T.', fmt(sb) + ' (nicht gezählt)']].map(([k, v]) => `<div class="kpi"><span>${k}</span><b>${v}</b></div>`).join('')}</div>
+    <div class="card"><h3>Pro Tag (30 Tage, €)</h3><div class="chart">${rows.slice().reverse().map(r => { const a = toEur(r.ad), b = net(r.gross); return `<div class="bar" data-tip="${r.day}: Werbung ${money(a, 'EUR')} · Käufe ${money(b, 'EUR')}"><i style="height:${a / max * 100}%;background:var(--sky)"></i><i style="height:${b / max * 100}%;background:var(--mint)"></i></div>`; }).join('')}</div>
+      <div class="legend"><span style="--c:var(--sky)">Werbung</span><span style="--c:var(--mint)">Käufe (netto)</span></div></div>
+    <div class="card"><h3>Produkte (30 Tage)</h3><div class="wrap"><table><tr><th>Produkt</th><th>Verkäufe</th><th>Brutto</th><th>≈ Netto</th><th class="hide-s">Listenpreis</th></tr>${Object.keys(m.list).map(k => [k, prod[k] || { n: 0, gross: 0 }]).concat(Object.entries(prod).filter(([k]) => !m.list[k])).filter(([k, v]) => v.n || k !== 'skyrush_coins_5000').sort((a, b) => b[1].gross - a[1].gross).map(([k, v]) => `<tr><td>${esc(PNAME[k] || k)}</td><td>${fmt(v.n)}</td><td>${money(v.gross, 'EUR')}</td><td>${money(net(v.gross), 'EUR')}</td><td class="hide-s">${m.list[k] ? money(m.list[k], 'EUR') : '–'}</td></tr>`).join('')}</table></div>
+      <p class="small muted" style="margin:6px 0 0">Nach Store: ${Object.entries(stores).map(([k, v]) => `${esc(k)} ${fmt(v.n)}× · ${money(v.gross, 'EUR')}`).join(' · ') || 'noch keine Käufe'}</p></div>
+    <div class="card"><h3>Tage</h3><div class="wrap"><table><tr><th>Tag</th><th>Werbung</th><th>Käufe</th><th>Brutto</th><th>≈ Gesamt netto</th></tr>${rows.map(r => `<tr><td>${r.day}</td><td>${money(r.ad, cur)}</td><td>${r.n}</td><td>${money(r.gross, 'EUR')}</td><td><b>${money(toEur(r.ad) + net(r.gross), 'EUR')}</b></td></tr>`).join('')}</table></div></div>
+    <div class="card"><h3>🔗 Genaue Zahlen & Auszahlungen</h3><div class="links">${MONEY_LINKS.map(([n, u, t]) => `<a href="${u}" target="_blank" rel="noopener">${n}<small>${t}</small></a>`).join('')}</div>
+      <p class="small muted" style="margin:8px 0 0">Steuer-Hinweis (keine Steuerberatung): Als Kleinunternehmer zählen die Auszahlungen der Stores und von AdMob als Einnahmen – Abrechnungen monatlich als PDF sichern und mit deinem Steuerberater klären.</p></div>`;
+  const f = $('fx'); if (f) f.onchange = () => { try { localStorage.setItem('sr.fx', String(Math.min(1.5, Math.max(0.5, +f.value || 0.92)))); } catch {} vMoney(); };
 }
 
 // ---------- Einstellungen: Werbung, Werbe-Anbieter, Google-Anmeldung (gelten sofort, ohne App-Update) ----------

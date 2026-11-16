@@ -4010,10 +4010,11 @@ function shopBuy(box, msg) {
   box.querySelectorAll('[data-buy]').forEach(b => b.onclick = async () => {
     b.disabled = true; msg('Kauf wird geöffnet …');
     const r = b.dataset.buy === 'noads' ? await Monetize.buyNoAds() : await Monetize.buyCoins(b.dataset.buy);
+    if (r.ok && b.dataset.buy === 'noads') eco({ t: 'iapSync' });
     b.disabled = false; msg(r.msg || (r.ok ? 'Danke für deinen Kauf! 💛' : ''));
     if (r.ok) shopBuy(box, msg);
   });
-  $('buy-restore').onclick = async () => { msg('Wird wiederhergestellt …'); const r = await Monetize.restore(); msg(r.ok ? 'Fertig – Werbefrei und offene Gutschriften sind wiederhergestellt.' : r.msg); shopBuy(box, msg); };
+  $('buy-restore').onclick = async () => { msg('Wird wiederhergestellt …'); const r = await Monetize.restore(); if (r.ok) eco({ t: 'iapSync' }); msg(r.ok ? 'Fertig – Werbefrei und offene Gutschriften sind wiederhergestellt.' : r.msg); shopBuy(box, msg); };
 }
 // Gutschrift gekaufter Münzen (genau einmal pro Kauf, auch nachträglich nach einem Absturz)
 Monetize.onGrant(g => {
@@ -4173,7 +4174,7 @@ function openSeason() {
 // ================= Spielstand mit Google sichern =================
 // Die Anmeldung läuft auf der eigenen Seite /konto.html im Browser (Google erlaubt sie nicht in App-Ansichten).
 // Das Spiel wartet hier auf das Ergebnis. Gibt es zu dem Google-Konto schon einen Spielstand, entscheidet der Spieler selbst, ob er ihn lädt.
-const ACCT = { st: null, code: '', timer: 0, until: 0, url: '' };
+const ACCT = { st: null, code: '', timer: 0, until: 0, url: '', fails: 0 };
 const acctOn = () => !Monetize.portal && !!(CONFIG.google && CONFIG.google.clientId) && Net.hasServer();
 async function acctStatus(force = false) {
   if (!acctOn()) return null;
@@ -4221,27 +4222,51 @@ async function acctStart() {
   try { r = await Net.account('start'); } catch (e) { return toast(e.message === 'rate' ? 'Bitte kurz warten und nochmal versuchen.' : failMsg('offline')); }
   ACCT.code = r.code; ACCT.until = Date.now() + (r.ttl || 9e5);
   ACCT.url = (Net.base() || siteBase()) + r.path.replace('#', `?lang=${uiLang}#`);
+  acctKeep();
   openLink(ACCT.url);
   acctWaitSheet();
+  clearInterval(ACCT.timer); ACCT.timer = setInterval(acctPoll, 2500);
+}
+// Laufende Anmeldung merken: Wird die App im Hintergrund beendet (Android/iOS tun das oft, während der Browser offen ist),
+// geht es beim nächsten Start genau hier weiter statt im Nichts.
+const ACCT_LS = 'skyrush.acct.pending';
+function acctKeep() { try { ACCT.code ? localStorage.setItem(ACCT_LS, JSON.stringify({ code: ACCT.code, until: ACCT.until, url: ACCT.url, uid: Net.uid() })) : localStorage.removeItem(ACCT_LS); } catch {} }
+function acctResume() {
+  let p = null; try { p = JSON.parse(localStorage.getItem(ACCT_LS) || 'null'); } catch {}
+  if (!p || !p.code || p.uid !== Net.uid() || Date.now() > p.until) { try { localStorage.removeItem(ACCT_LS); } catch {} return; }
+  Object.assign(ACCT, { code: p.code, until: p.until, url: p.url });
+  acctWaitSheet(); acctPoll();
   clearInterval(ACCT.timer); ACCT.timer = setInterval(acctPoll, 2500);
 }
 function acctWaitSheet() {
   openSheet(`<div class="mono">Spielstand</div><h2>Mit Google anmelden</h2>
     <div class="acct wait"><span class="spin">⏳</span><div><b>Warte auf die Anmeldung …</b><div class="small muted">Im Browser hat sich die Anmeldeseite geöffnet. Danach einfach hierher zurück.</div></div></div>
-    <div class="stack"><button class="btn" id="ac-again">Seite nochmal öffnen</button><button class="btn" id="ac-stop">Abbrechen</button></div>`, false);
+    <p class="small muted" id="ac-hint" hidden></p>
+    <div class="stack"><button class="btn go" id="ac-chk">Ich bin angemeldet – weiter</button><button class="btn" id="ac-again">Seite nochmal öffnen</button><button class="btn" id="ac-stop">Abbrechen</button></div>`, false);
+  $('ac-chk').onclick = async () => { $('ac-chk').disabled = true; const ok = await acctPoll(); if ($('ac-chk')) $('ac-chk').disabled = false; if (ok === 'open' && $('ac-hint')) { $('ac-hint').hidden = false; $('ac-hint').textContent = tr('Noch keine Anmeldung angekommen. Melde dich auf der geöffneten Seite mit Google an und tippe dann nochmal.'); } };
   $('ac-again').onclick = () => openLink(ACCT.url);
   $('ac-stop').onclick = () => { acctStop(); closeSheet(); };
 }
-function acctStop() { clearInterval(ACCT.timer); ACCT.timer = 0; ACCT.code = ''; }
-async function acctPoll() {
+function acctStop() { clearInterval(ACCT.timer); ACCT.timer = 0; ACCT.code = ''; ACCT.fails = 0; acctKeep(); }
+let acctPolling = null;
+function acctPoll() { return acctPolling || (acctPolling = acctPoll1().finally(() => { acctPolling = null; })); }   // nie zwei Abfragen gleichzeitig
+async function acctPoll1() {
   if (!ACCT.code) return acctStop();
   if (Date.now() > ACCT.until) { acctStop(); return acctDone('expired'); }
-  let r; try { r = await Net.account('poll', { code: ACCT.code }); } catch { return; }
-  if (r.state === 'open') return;
+  let r; try { await Net.ensure(); r = await Net.account('poll', { code: ACCT.code }); ACCT.fails = 0; }
+  catch (e) {
+    if (e && /^(code|auth)$/.test(e.message)) { acctStop(); return acctDone('expired'); }   // Code gehört nicht (mehr) zu diesem Gerät
+    if (++ACCT.fails >= 3 && $('ac-hint')) { $('ac-hint').hidden = false; $('ac-hint').textContent = tr('Keine Verbindung zum Server – prüfe dein Internet. Es geht automatisch weiter.'); }
+    return 'err';
+  }
+  if (r.state === 'open') return 'open';
   const code = ACCT.code; acctStop();
   acctDone(r.state, r, code);
+  return r.state;
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && ACCT.code) acctPoll(); });
+addEventListener('focus', () => { if (ACCT.code) acctPoll(); });
+addEventListener('pageshow', () => { if (ACCT.code) acctPoll(); });
 function acctDone(state, r = {}, code = '') {
   ACCT.st = null; acctRow();
   if (state === 'linked') {
@@ -4260,11 +4285,17 @@ function acctDone(state, r = {}, code = '') {
     $('ac-x').onclick = closeSheet;
     $('ac-load').onclick = async () => {
       $('ac-load').disabled = true;
+      $('ac-load').textContent = tr('Wird geladen …');
       try {
         const a = await Net.account('adopt', { code });
+        if (a.state === 'expired') return acctDone('expired');
         if (!a.uid || !a.secret) throw new Error('x');
         acctAdopt(a.uid, a.secret, (r.saved || {}).name);
-      } catch { $('ac-load').disabled = false; toast(failMsg('offline')); }
+      } catch (e) {
+        if (e && /^(state|code|gone)$/.test(e.message)) return acctDone('expired');   // Code schon benutzt/abgelaufen → klare Meldung statt Stillstand
+        if (!$('ac-load')) return;
+        $('ac-load').disabled = false; $('ac-load').textContent = tr('Nochmal versuchen'); toast(failMsg('offline'));
+      }
     };
     return;
   }
@@ -4282,7 +4313,7 @@ function acctAdopt(uid, secret, name) {
   Vault.q = []; Vault.rev = 0; vaultSave();
   persist();   // neu unterschrieben mit dem Geheimnis dieses Geräts für den geladenen Spielstand
   try { localStorage.setItem(SAVE + '.ok', localStorage.getItem(SAVE)); } catch {}
-  try { sessionStorage.setItem('skyrush.adopting', '1'); } catch {}
+  try { sessionStorage.setItem('skyrush.adopting', '1'); localStorage.setItem('skyrush.adopting', String(Date.now())); localStorage.removeItem(ACCT_LS); } catch {}
   openSheet('<div class="mono">Spielstand</div><h2>Wird geladen …</h2><p class="muted">Einen Moment – Sky Rush startet neu.</p>', false);
   setTimeout(() => location.reload(), 600);
 }
@@ -4341,7 +4372,7 @@ function openSettings() {
   const msg = t => $('s-msg') && ($('s-msg').textContent = t || '');
   $('s-name').onclick = async () => { await askName(); openSettings(); };
   $('s-tut').onclick = () => tutorial();
-  if ($('s-noads')) $('s-noads').onclick = async () => { const r = await Monetize.buyNoAds(); if (r.ok) openSettings(); msg(r.ok ? 'Danke! Werbepausen sind deaktiviert.' : r.msg); };
+  if ($('s-noads')) $('s-noads').onclick = async () => { const r = await Monetize.buyNoAds(); if (r.ok) { eco({ t: 'iapSync' }); openSettings(); } msg(r.ok ? 'Danke! Werbepausen sind deaktiviert.' : r.msg); };
   if ($('s-restore')) $('s-restore').onclick = async () => { const r = await Monetize.restore(); msg(r.ok ? 'Käufe wiederhergestellt.' : r.msg); if (r.ok) openSettings(); };
   if ($('s-coins')) $('s-coins').onclick = async () => { const r = await Monetize.buyCoins(); msg(r.ok ? 'Danke für deinen Kauf! 💛' : r.msg); };   // Gutschrift kommt über den Tresor (onGrant)
   if ($('s-restore')) $('s-restore').onclick = async () => { const r = await Monetize.restore(); msg(r.ok ? 'Käufe geprüft.' : r.msg); };
@@ -4764,13 +4795,18 @@ Monetize.init().then(() => { refreshHome(); Monetize.loadingDone(); });
 // Web-Portale: während der Werbung stumm
 addEventListener('skyrush:ad', e => { try { if (master) master.gain.value = e.detail ? 0 : .45; } catch {} });
 // Nach „Gespeicherten Spielstand laden“: bis der Server-Stand da ist, „Wird geladen“ zeigen statt kurz 0 Münzen
-const ADOPTING = (() => { try { return sessionStorage.getItem('skyrush.adopting') === '1'; } catch { return false; } })();
-if (ADOPTING) openSheet('<div class="mono">Spielstand</div><h2>Wird geladen …</h2><p class="muted">Einen Moment – Sky Rush startet neu.</p>', false);
-Net.ensure().then(() => { if (Net.uid()) Monetize.setUser(Net.uid()); vaultFlush().then(() => {
-  if (!ADOPTING) return;
-  try { sessionStorage.removeItem('skyrush.adopting'); } catch {}
-  closeSheet(); refreshHome(); toast(Vault.rev ? tr('Spielstand geladen') + ' ✓' : tr('Gerade offline – dein Spielstand kommt, sobald du online bist.'));
-}); acSeed(); if (Net.online()) refreshRemote(() => Net.config()).then(ok => { if (ok) { Monetize.refresh(); acctRow(); } }); }).catch(() => {});
+// Merker in localStorage (sessionStorage überlebt das Neuladen in manchen App-Ansichten nicht) + feste Zeitgrenze: das Fenster geht immer zu.
+const ADOPTING = (() => { try { const t = +localStorage.getItem('skyrush.adopting') || (sessionStorage.getItem('skyrush.adopting') === '1' ? Date.now() : 0); return t && Date.now() - t < 120e3; } catch { return false; } })();
+let adoptDone = !ADOPTING;
+function adoptFinish() {
+  if (adoptDone) return; adoptDone = true;
+  try { localStorage.removeItem('skyrush.adopting'); sessionStorage.removeItem('skyrush.adopting'); } catch {}
+  if (sheetOpen && $('sheet').querySelector('#ad-wait')) closeSheet();
+  refreshHome(); toast(Vault.rev ? tr('Spielstand geladen') + ' ✓' : tr('Gerade offline – dein Spielstand kommt, sobald du online bist.'));
+}
+if (ADOPTING) { openSheet('<div class="mono" id="ad-wait">Spielstand</div><h2>Wird geladen …</h2><p class="muted">Einen Moment – dein Spielstand kommt vom Server.</p>', false); setTimeout(adoptFinish, 15000); }
+else acctResume();
+Net.ensure().then(() => { if (Net.uid()) Monetize.setUser(Net.uid()); vaultFlush().catch(() => {}).finally(adoptFinish); acSeed(); if (Net.online()) refreshRemote(() => Net.config()).then(ok => { if (ok) { Monetize.refresh(); acctRow(); } }); }).catch(() => adoptFinish());
 // Direkt zum Duell (Link „#duel“ von der Info-Seite)
 if (location.hash === '#duel') { history.replaceState(null, '', location.pathname + location.search); setTimeout(() => { if (!G && !sheetOpen) openDuel(); }, 700); }
 document.addEventListener('visibilitychange', () => { if (!document.hidden && Vault.q.length) vaultFlush(); });

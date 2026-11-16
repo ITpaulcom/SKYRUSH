@@ -233,6 +233,8 @@ export function apply(s, a, env = {}) {
     // Turnierpreis / Tagesauswertung wurde angezeigt (nur ein Merker, keine Belohnung)
     case 'tourSeen': { const w = s.trophies.wins.find(x => x.p === a.p); if (!w) fail('none'); w.seen = true; return {}; }
     case 'dailySeen': { const w = s.dwins.find(x => x.d === a.d); if (!w) fail('none'); w.seen = true; return {}; }
+    // Käufe beim Server abgleichen lassen (z. B. nach „Werbefrei“): ändert hier nichts, der Server prüft bei RevenueCat
+    case 'iapSync': return {};
     // --- Echtgeld-Kauf (auf dem Server über RevenueCat geprüft, env.iap = bestätigte Pakete) ---
     case 'iap': {
       const pk = packOf(a.pack); if (!pk || !a.tx) fail('item');

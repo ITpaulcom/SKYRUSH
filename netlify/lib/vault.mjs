@@ -12,6 +12,7 @@ import { analyze, flag, isBanned } from './anticheat.mjs';
 import { verifyRun } from './runs.mjs';
 import { catchUpOps, indexPut, summary } from './admin.mjs';
 import { applyShopCfg } from './appcfg.mjs';
+import { recordSales } from './sales.mjs';
 
 export const vaultKey = uid => `vault/${uid}`;
 const rid = n => [...crypto.getRandomValues(new Uint8Array(n))].map(b => b.toString(16).padStart(2, '0')).join('');
@@ -97,6 +98,7 @@ async function processIap(uid, player, v, a) {
   const key = process.env.REVENUECAT_SECRET;
   if (!key) {
     // Noch nicht eingerichtet: Kauf vom Gerät übernehmen, aber vermerken (Zentrale) – mit Schlüssel prüft der Server selbst
+    if (a.t === 'iapSync') return { ok: true, res: {} };
     try { const res = E.apply(v.s, { t: 'iap', tx: a.tx, pack: a.pack }); await flag(uid, player.name, 'iap-unverified', { pack: a.pack }); return { ok: true, res }; }
     catch (e) { return { ok: false, err: e.code || 'iap' }; }
   }
@@ -106,15 +108,19 @@ async function processIap(uid, player, v, a) {
     if (!r.ok) return { ok: false, err: 'iap-check', retry: true };
     data = await r.json();
   } catch { return { ok: false, err: 'iap-check', retry: true }; }
-  const got = [];
+  const got = [], sales = [];
+  v.sold ??= [];
   for (const [pid, txs] of Object.entries(data?.subscriber?.non_subscriptions || {})) {
-    if (!E.packOf(pid)) continue;
     for (const tx of txs || []) {
       const id = tx.store_transaction_id || tx.id;
-      if (!id || v.s.iapTx.includes(id)) continue;
+      if (!id) continue;
+      // Für die Einnahmen-Übersicht: jeder Kauf genau einmal (auch „Werbefrei“, das keine Münzen bringt)
+      if (!v.sold.includes(id)) { v.sold.push(id); if (v.sold.length > 300) v.sold.shift(); sales.push({ tx: id, product: pid, store: tx.store, sandbox: !!tx.is_sandbox, date: tx.purchase_date, price: tx.price }); }
+      if (!E.packOf(pid) || v.s.iapTx.includes(id)) continue;
       try { got.push({ pack: pid, ...E.apply(v.s, { t: 'iap', tx: id, pack: pid }) }); } catch {}
     }
   }
+  if (sales.length) await recordSales(sales).catch(() => {});
   return { ok: true, res: { got } };
 }
 
@@ -281,7 +287,7 @@ export async function sync(uid, player, b, duel) {
       let r;
       if (a.t === 'run') r = await processRun(uid, player, v, a);
       else if (a.t === 'duel') r = await processDuel(uid, player, v, a, duel);
-      else if (a.t === 'iap') r = await processIap(uid, player, v, a);
+      else if (a.t === 'iap' || a.t === 'iapSync') r = await processIap(uid, player, v, a);
       else r = { ok: true, res: E.apply(v.s, a, RNG_ACTIONS.has(a.t) ? { rnd: prng(v.rs, v.rc++) } : {}) };
       results[a.id] = r;
     } catch (e) { results[a.id] = { ok: false, err: e.code || 'error' }; }

@@ -1,5 +1,5 @@
 // SKY RUSH Service Worker – offline spielbar (nur Web/PWA)
-const V = 'skyrush-v2.9.1';
+const V = 'skyrush-v2.9.2';
 const ASSETS = ['./', 'index.html', 'core.js', 'config.js', 'monetize.js', 'houseads.js', 'net.js', 'meta.js', 'bot.js', 'i18n.js', 'pad.js', 'remote.js', 'shopcfg.js', 'channel.js', 'portal.js', 'economy.js', 'catalog.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'fonts/space-grotesk-latin-500-normal.woff2',
   'fonts/space-grotesk-latin-700-normal.woff2', 'fonts/jetbrains-mono-latin-500-normal.woff2'];

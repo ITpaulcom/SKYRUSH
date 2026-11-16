@@ -2,6 +2,7 @@
 //   GET  ?view=dash            Werbung, Ranglisten (inkl. Vorwoche mit Preis-Status), Anti-Cheat, Sperren, Kennzahlen
 //   GET  ?view=players         alle Spieler (Verzeichnis)
 //   GET  ?view=player&uid=…    ein Spieler: Spielstand, Ränge, Aufträge, Auffälligkeiten, Protokoll
+//   GET  ?view=money           Einnahmen: geprüfte Käufe pro Tag (Werbung steht in dash)
 //   GET  ?view=log | security  Protokoll · Anmeldungen/Sperren
 //   POST { action: 'op', uid, op: { kind, … }, why }   Spielstand ändern (hoch- oder runterstufen)
 //   POST { action: 'ban' | 'unban' | 'unboard' | 'rename' | 'reindex' | 'logout' | 'logoutAll' | 'height' | 'levels' | 'unlinkGoogle', … }
@@ -17,6 +18,7 @@ import { readCfg, writeCfg, PLACEMENTS } from '../lib/appcfg.mjs';
 import { shopItems, applyShop } from '../../www/shopcfg.js';
 import { PACKS, STYLE } from '../../www/catalog.js';
 import { CONFIG as BASE } from '../../www/config.js';
+import { salesDays, LIST_EUR } from '../lib/sales.mjs';
 
 const UID = /^[a-f0-9-]{36}$/;
 const OPS = new Set(['coins', 'levels', 'mult', 'tokens', 'level', 'chestAdd', 'chestDel', 'charAdd', 'charDel', 'styleAdd', 'styleDel', 'height', 'prize', 'prizeDel', 'dprize', 'dprizeDel', 'reset']);
@@ -130,6 +132,7 @@ export default async req => {
     applyShop(c.shop);
     return json({ shop: c.shop || {}, items, cats, packs, updated: c.updated || 0 }, 200, noStore);
   }
+  if (view === 'money') return json({ sales: await salesDays(Math.min(400, Number(q.get('days') || 90))), list: LIST_EUR, rc: !!process.env.REVENUECAT_SECRET, now: Date.now() }, 200, noStore);
   if (view === 'security') return json(await securityInfo(), 200, noStore);
   if (view === 'player') {
     const uid = q.get('uid') || '';
