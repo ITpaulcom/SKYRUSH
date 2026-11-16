@@ -29,7 +29,7 @@ export const CONFIG = {
     // Die ID steht beim ersten App-Start im Log (Android Studio → Logcat, Suche „setTestDeviceIds“).
     testDeviceIds: [],
     // Web: Google H5 Games Ads (AdSense). Leer = keine Werbung im Web.
-    webPublisherId: '',     // optional, Werbung in der Web-Version: ca-pub-…
+    webPublisherId: 'ca-pub-1764627877115679',     // optional, Werbung in der Web-Version: ca-pub-…
 
     // Faire Taktung – innerhalb der Richtlinien von AdMob, Apple und Google Play.
     interstitial: {
