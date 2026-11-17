@@ -45,6 +45,14 @@ export function ensure(s) {
 // Tägliche Dinge (Tagesserie, Aufgaben, Glücksrad, Saison) auf den heutigen Tag stellen
 export function housekeeping(s) { M.streakCheck(s); M.tasksCheck(s); M.spinCheck(s); M.seasonEnsure(s); if (s.adc.day !== M.day()) s.adc = { day: M.day(), n: {} }; }
 const ad = (s, k) => { housekeeping(s); const n = s.adc.n[k] || 0; if (n >= AD_LIMITS[k]) fail('limit'); s.adc.n[k] = n + 1; };
+// Vorab prüfen (ohne etwas zu ändern), ob eine Video-Belohnung überhaupt noch gutgeschrieben würde – damit niemand umsonst ein Video schaut
+export function adOk(s, k) {
+  const used = s.adc && s.adc.day === M.day() ? (s.adc.n[k] || 0) : 0;
+  if (used >= AD_LIMITS[k]) return 'limit';
+  if (k === 'double') { const lr = s.lastRun; if (!lr || lr.doubled || !(lr.coins > 0)) return 'none'; }
+  if (k === 'chest') { const lc = s.lastChest; if (!lc || lc.doubled) return 'none'; }
+  return '';
+}
 
 // ---------- Missionen ----------
 export function newMissions(s) {

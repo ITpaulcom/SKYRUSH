@@ -33,6 +33,11 @@ function rollDay() {
 }
 
 const listeners = { revenue: [] };
+// Niemals Werbung mitten im Lauf: das Spiel meldet, ob gerade gespielt wird. Wird ein Lauf gestartet, während eine Anzeige
+// noch lädt, wird sie verworfen. Ausnahme ist nur „Zweite Chance“ – die läuft auf dem Ende-Bildschirm, nicht im Lauf.
+let runCheck = () => false;
+const inRun = () => { try { return !!runCheck(); } catch { return false; } };
+const blocked = placement => placement !== 'rescue' && inRun();
 // Werbe-Diagnose: warum kommt (keine) Anzeige? Wird einmal pro Start an den Server gemeldet → Zentrale „Werbung“
 const diag = { platform, consent: '', canRequest: null, init: '', loads: 0, fails: 0, err: '', shown: 0, house: 0, web: '' };
 const errText = e => { if (!e) return '?'; const c = e.code ?? e.errorCode; const m = e.message || e.errorMessage || e.error || ''; return String((c != null ? c + ' ' : '') + m).slice(0, 120) || 'unbekannt'; };
@@ -56,6 +61,7 @@ export const Monetize = {
   },
   hasPrivacyOptions: () => privacyRequired,
   refresh, diag,
+  setRunCheck(fn) { if (typeof fn === 'function') runCheck = fn; },
 };
 
 // ---------- Umsatz erfassen ----------
@@ -173,7 +179,7 @@ function initWeb() {
 // Liefert true, wenn die Belohnung vergeben werden soll.
 async function rewarded(placement) {
   rollDay(); placementNow = placement;
-  if (!Monetize.canShowRewarded(placement)) return false;
+  if (blocked(placement) || !Monetize.canShowRewarded(placement)) return false;
   const done = ok => { if (ok) { st.rewardedToday++; st.lastAdAt = Date.now(); save(); } return ok; };
 
   if (PORTAL) return done(await portalAd('rewarded'));
@@ -181,6 +187,7 @@ async function rewarded(placement) {
   // springt die Eigenwerbung ein – die Belohnung funktioniert also immer.
   if (isNative && AdMob && prov('admob') && adsAllowed) {
     if (!loaded.rewarded) { await preload('rewarded'); await waitFor(() => loaded.rewarded, 5000); }
+    if (blocked(placement)) return false;   // Lauf hat inzwischen begonnen → keine Anzeige
     if (loaded.rewarded) {
       let failed = false;
       const ok = await new Promise(res => { pendingReward = res; AdMob.showRewardVideoAd().catch(() => { failed = true; finishReward(false); }); setTimeout(() => { if (pendingReward === res) finishReward(rewardEarned); }, 120000); });
@@ -194,7 +201,7 @@ async function rewarded(placement) {
       const end = v => { if (!called) { called = true; res(v); } };
       adBreak({
         type: 'reward', name: placement,
-        beforeReward: show => { offered = true; show(); },
+        beforeReward: show => { if (blocked(placement)) return; offered = true; show(); },
         adViewed: () => { given = true; },
         adDismissed: () => {},
         adBreakDone: info => { diag.web = (info && info.breakStatus) || ''; if (given) recordRevenue('rewarded', estimate('rewarded'), 'USD', true); end(given); },
@@ -204,7 +211,7 @@ async function rewarded(placement) {
     if (offered) { if (ok) diag.shown++; return done(ok); }
   }
   // Ohne (aktiven) Werbe-Partner: Eigenwerbung (FAX Messenger, ITpaul) statt leerer Test-Anzeige – kein Umsatz, wird nicht gezählt
-  if (!prov('house')) return false;
+  if (!prov('house') || blocked(placement)) return false;
   const ok = await houseAd({ seconds: 5, reward: true, placement });
   if (ok) diag.house++;
   return done(ok);
@@ -216,7 +223,7 @@ function gameFinished() { gameplay(false); st.gamesFinished++; st.gamesSinceInte
 async function maybeInterstitial(placement) {
   rollDay(); placementNow = placement;
   const c = CONFIG.ads.interstitial;
-  if (st.noAds || !placementOn(placement)) return false;
+  if (st.noAds || !placementOn(placement) || inRun()) return false;
   if (st.gamesFinished < c.graceGames) return false;
   if (st.gamesSinceInter < c.everyGames) return false;
   if (Date.now() - st.lastAdAt < c.minSeconds * 1000) return false;
@@ -227,6 +234,7 @@ async function maybeInterstitial(placement) {
     shown = await portalAd('interstitial');
   } else if (isNative && AdMob && prov('admob')) {
     if (!adsAllowed || !loaded.interstitial) { preload('interstitial'); return false; }
+    if (inRun()) return false;
     // Sicherheitsnetz: kommt das Schließen-Ereignis nie an, hängt das Spiel nicht fest
     await new Promise(res => { pendingInter = res; AdMob.showInterstitial().catch(() => finishInter()); setTimeout(() => { if (pendingInter === res) finishInter(); }, 45000); });
     shown = true;
@@ -238,8 +246,8 @@ async function maybeInterstitial(placement) {
       setTimeout(() => res(viewed), 45000);
     });
     // AdSense liefert (noch) nichts → wie bisher Eigenwerbung, damit die Pause nicht ganz ausfällt
-    if (!shown && prov('house') && /notReady|noAdPreloaded|error|other|timeout/.test(diag.web || 'other')) shown = await houseAd({ seconds: 3, reward: false, placement });
-  } else if (prov('house') && !(isNative && prov('admob'))) {
+    if (!shown && prov('house') && !inRun() && /notReady|noAdPreloaded|error|other|timeout/.test(diag.web || 'other')) shown = await houseAd({ seconds: 3, reward: false, placement });
+  } else if (prov('house') && !(isNative && prov('admob')) && !inRun()) {
     shown = await houseAd({ seconds: 3, reward: false, placement });
   }
   if (shown) { st.gamesSinceInter = 0; st.interToday++; st.lastAdAt = Date.now(); save(); }

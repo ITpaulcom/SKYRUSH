@@ -3264,11 +3264,12 @@ function showResults({ score, record, h, ms, xp = 0, ups = [], lvlBefore = save.
   if (ups.length) { sfx.record(); }
   if ($('res-double')) $('res-double').onclick = async () => {
     if (doubled) return;
-    if (await Monetize.rewarded('double_coins')) { const r = eco({ t: 'adDouble' }); if (!r.ok) return toast('Heute schon genug verdoppelt'); doubled = true; sfx.cash(); $('res-coins').textContent = fmt(coins * 2); $('res-double').remove(); }
+    const why = E.adOk(save, 'double'); if (why) { $('res-double').remove(); return toast(why === 'limit' ? 'Heute schon genug verdoppelt' : 'Für diesen Lauf gibt es nichts zu verdoppeln'); }
+    if (await Monetize.rewarded('double_coins')) { const r = eco({ t: 'adDouble' }); if (!r.ok) return toast(r.err === 'limit' ? 'Heute schon genug verdoppelt' : 'Das ging gerade nicht.'); doubled = true; sfx.cash(); $('res-coins').textContent = fmt(coins * 2); $('res-double').remove(); }
   };
   if ($('res-tourad')) $('res-tourad').onclick = async () => { if (await Monetize.rewarded('tournament_attempt')) { save.tour.adUsed = true; save.tour.used = CONFIG.tournament.freeAttempts - 1; persist(); closeSheet(); startGame('tournament'); } };
   if ($('res-again')) $('res-again').onclick = async () => { closeSheet(); await Monetize.maybeInterstitial('between_games'); startGame(m); };
-  $('res-menu').onclick = async () => { closeSheet(); goHome(); Monetize.maybeInterstitial('between_games'); };
+  $('res-menu').onclick = async () => { closeSheet(); await Monetize.maybeInterstitial('between_games'); goHome(); };
 }
 function breakCheck() {
   if (!save.breakReminder || reminded || Date.now() - sessionStart < 45 * 60 * 1000) return;
@@ -3811,7 +3812,7 @@ function duelResults(list, provisional = false) {
     const k = kind; duelReset(); await Monetize.maybeInterstitial('between_games');
     if (k === 'live') { try { duelLobby((await duelCall('quick')).room, true); } catch (e) { goHome(); openDuel(duelErr(e)); } } else startTraining();
   };
-  $('du-menu').onclick = async () => { closeSheet(); duelReset(); goHome(); Monetize.maybeInterstitial('between_games'); };
+  $('du-menu').onclick = async () => { closeSheet(); duelReset(); await Monetize.maybeInterstitial('between_games'); goHome(); };
 }
 
 // ================= Sheets =================
@@ -4588,7 +4589,7 @@ async function openChests(want = null, synced = false) {
       $('ch-h').textContent = loot.style ? (loot.style.it.rar === 'l' ? '🌟 LEGENDÄR!' : '✨ Seltener Fund!') : 'Das war drin:'; if ($('ch-pity')) $('ch-pity').remove();
       await revealCards($('ch-loot'), rewardCards(loot));
       $('ch-act').innerHTML = `${Monetize.canShowRewarded('chest_double') ? '<button class="btn ad" id="ch-ad">Münzen &amp; Kopfstarts verdoppeln</button>' : ''}<button class="btn go" id="ch-next">${save.chests.length ? `Nächste Truhe (${save.chests.length})` : 'Super!'}</button>`;
-      if ($('ch-ad')) $('ch-ad').onclick = async () => { if (await Monetize.rewarded('chest_double')) { const r = eco({ t: 'adChest' }); if (!r.ok) return toast(failMsg(r.err)); refreshHome(); sfx.cash(); confetti(30); $('ch-ad').remove(); revealCards($('ch-loot'), rewardCards({ coins: loot.coins * 2, token: loot.token * 2, upgrade: loot.upgrade, style: loot.style })); } };
+      if ($('ch-ad')) $('ch-ad').onclick = async () => { const why = E.adOk(save, 'chest'); if (why) { $('ch-ad').remove(); return toast(failMsg(why)); } if (await Monetize.rewarded('chest_double')) { const r = eco({ t: 'adChest' }); if (!r.ok) return toast(failMsg(r.err)); refreshHome(); sfx.cash(); confetti(30); $('ch-ad').remove(); revealCards($('ch-loot'), rewardCards({ coins: loot.coins * 2, token: loot.token * 2, upgrade: loot.upgrade, style: loot.style })); } };
       $('ch-next').onclick = () => (save.chests.length ? openChests() : closeSheet());
     }, reduceMotion ? 50 : 1150);
   };
@@ -4683,8 +4684,8 @@ function boostUi() {
 $('h-boost').onclick = async e => {
   e.stopPropagation();
   if (save.tokens.headstart > 0) { save.armed = !save.armed; persist(); boostUi(); sfx.move(); return; }
-  if (!Monetize.canShowRewarded('headstart')) return openShop();   // kein Video möglich → Kopfstart gibt es im Shop
-  if (await Monetize.rewarded('headstart')) { const r = eco({ t: 'adHead' }); if (!r.ok) return toast(failMsg(r.err)); save.armed = true; persist(); boostUi(); sfx.cash(); } else toast('Video gerade nicht verfügbar');
+  if (!Monetize.canShowRewarded('headstart') || E.adOk(save, 'head')) return openShop();   // kein Video möglich / Tagesgrenze erreicht → Kopfstart gibt es im Shop
+  if (await Monetize.rewarded('headstart')) { const r = eco({ t: 'adHead' }); if (!r.ok) return toast(failMsg(r.err)); save.armed = true; persist(); boostUi(); sfx.cash(); } else if (!(G && !G.over)) toast('Video gerade nicht verfügbar');
 };
 $('h-level').onclick = openLevel;
 $('h-streak').onclick = () => openStreak(false);
@@ -4788,6 +4789,8 @@ function dailyBonus() {
 }
 
 Monetize.onRevenue(e => Net.logAd(e.format, e.valueMicros, e.currency, e.estimated, e.placement));
+// Läuft gerade ein Lauf (Spiel, Turnier, Duell)? Dann zeigt die Werbung nichts – auch keine verspätet geladene Anzeige.
+Monetize.setRunCheck(() => !!(G && !G.over));
 // Werbe-Diagnose an die Zentrale (nach 40 s und nach 6 min): zeigt dort, warum ggf. keine echten Anzeigen kommen
 for (const t of [40e3, 360e3]) setTimeout(() => Net.adDiag(Monetize.diag, { test: !!(CONFIG.ads && CONFIG.ads.testMode) }), t);
 dailyBonus(); startDemo(); refreshHome(); requestAnimationFrame(frame);
