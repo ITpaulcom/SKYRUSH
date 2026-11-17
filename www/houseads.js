@@ -180,6 +180,10 @@ function css() {
   const s = document.createElement('style'); s.id = 'hx-css'; s.textContent = CSS; document.head.appendChild(s);
 }
 
+// Läuft gerade eine Eigenwerbung? closeHouseAd() schließt sie sofort ohne Belohnung (z. B. wenn ein Duell startet)
+let current = null;
+export const houseAdOpen = () => !!current;
+export function closeHouseAd() { if (current) current(false); }
 // Zeigt eine Anzeige; löst true auf, wenn der Spieler sie schließt (nach Ablauf der Sekunden)
 export function showHouseAd({ seconds, reward, placement, st, save, site = location.origin, tr = s => s }) {
   css();
@@ -204,26 +208,33 @@ export function showHouseAd({ seconds, reward, placement, st, save, site = locat
       cta: () => { my.c++; save(); },
     };
     try { spot.mount(card, x); } catch {}
+    // Vollbild: Kennzeichnung oben und Knopf unten liegen direkt auf der Anzeige
+    if (card) { card.prepend(el.querySelector('.hx-label')); card.append(el.querySelector('.hx-go')); }
     const btn = el.querySelector('.hx-go');
     let s = seconds;
     const tick = () => { btn.textContent = reward ? (s > 0 ? `Belohnung in ${s} s` : 'Belohnung holen') : (s > 0 ? `Weiter in ${s} s` : 'Weiter'); btn.disabled = s > 0; btn.classList.toggle('go', s <= 0); s--; };
     tick(); const iv = setInterval(() => { tick(); if (s < 0) clearInterval(iv); }, 1000);
-    btn.onclick = () => { clearInterval(iv); x.clear(); el.classList.add('out'); setTimeout(() => el.remove(), 220); res(true); };
+    const close = ok => { if (current !== close) return; current = null; clearInterval(iv); x.clear(); el.classList.add('out'); setTimeout(() => el.remove(), 220); res(ok); };
+    current = close;
+    btn.onclick = () => close(true);
   });
 }
 
 const CSS = `
-.hx-wrap{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:18px;background:rgba(12,7,32,.8);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:hxIn .28s cubic-bezier(.2,1.3,.4,1) both;overflow:auto}
+.hx-wrap{position:fixed;inset:0;z-index:60;background:#0c0720;animation:hxIn .2s ease-out both}
 .hx-wrap.out{opacity:0;transition:opacity .2s}
-@keyframes hxIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
-.hx-box{width:min(370px,100%);display:flex;flex-direction:column;gap:12px}
-.hx-label{font:500 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#fff;opacity:.7;text-align:center}
-.hx-go{width:100%}
-.hx{position:relative;overflow:hidden;isolation:isolate;border:3px solid var(--ink);border-radius:24px;box-shadow:0 6px 0 var(--ink);padding:20px 18px 18px;display:flex;flex-direction:column;gap:10px;text-align:left}
+@keyframes hxIn{from{opacity:0}to{opacity:1}}
+/* Vollbild wie eine echte Anzeige: die Anzeige füllt den ganzen Bildschirm, Inhalt mittig, Knopf unten */
+.hx-box{position:absolute;inset:0;display:flex}
+.hx{flex:1;position:relative;overflow-x:hidden;overflow-y:auto;isolation:isolate;border:0;border-radius:0;box-shadow:none;display:flex;flex-direction:column;justify-content:center;gap:14px;text-align:left;
+  padding:calc(env(safe-area-inset-top,0px) + 54px) 22px calc(env(safe-area-inset-bottom,0px) + 96px)}
+.hx>:not(i):not(.hx-label):not(.hx-go){width:100%;max-width:480px;margin-inline:auto}
+.hx-label{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);left:50%;transform:translateX(-50%);white-space:nowrap;font:500 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.5);padding:6px 12px;border-radius:99px;z-index:2}
+.hx-go{position:absolute;left:22px;right:22px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);max-width:480px;margin-inline:auto;z-index:2}
 .hx button{font:inherit;cursor:pointer}
-.hx-h{font-size:21px;line-height:1.15;letter-spacing:-.02em;display:block}
+.hx-h{font-size:clamp(24px,6.5vw,34px);line-height:1.12;letter-spacing:-.02em;display:block}
 .hx-hint{font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;opacity:.65}
-.hx-small{font-size:13px;line-height:1.4;opacity:.85}
+.hx-small{font-size:15px;line-height:1.45;opacity:.88}
 .hx-cta{display:block;width:100%;text-align:center;text-decoration:none;font-weight:700;font-size:15px;border-radius:14px;padding:12px 10px;margin-top:4px;border:0}
 .hx-chips{display:flex;flex-wrap:wrap;gap:6px}
 .hx-chips button{border-radius:99px;padding:7px 11px;font-size:13px}

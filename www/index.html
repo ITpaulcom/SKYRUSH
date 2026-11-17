@@ -3091,6 +3091,7 @@ function openPadHelp() {
 
 // ================= Ablauf =================
 function startGame(m) {
+  if (Monetize.busy) return;   // Anzeige oder Lade-Animation noch offen → erst danach spielen (nie Werbung über einem Lauf)
   Monetize.gameStart();   // Web-Portale: Spielphase melden (keine Werbung mitten im Lauf)
   const period = m === 'daily' ? C.dayKey() : m === 'tournament' ? C.weekKey() : 'all';
   // Endlos: Die Welt vergibt der Server (kein Aussuchen leichter Welten). Ohne Verbindung läuft der Lauf mit eigener Welt – dann ohne Rangliste.
@@ -3437,6 +3438,7 @@ function makeOpp(p, i) {
   return o;
 }
 function beginRace(room, label) {
+  Monetize.abortAds();   // Duell-Start lässt sich nicht verschieben → offene Eigenwerbung schließen
   Monetize.gameStart();
   DUEL.room = room; DUEL.on = true; DUEL.sent = 0; DUEL.place = 0; DUEL.placeCand = 0; DUEL.lastSec = -1;
   DUEL.ropts = ruleOptsOf(room.rules); DUEL.rules = C.duelRules(DUEL.ropts); DUEL.hitQ = [];
