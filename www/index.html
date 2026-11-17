@@ -4788,6 +4788,8 @@ function dailyBonus() {
 }
 
 Monetize.onRevenue(e => Net.logAd(e.format, e.valueMicros, e.currency, e.estimated, e.placement));
+// Werbe-Diagnose an die Zentrale (nach 40 s und nach 6 min): zeigt dort, warum ggf. keine echten Anzeigen kommen
+for (const t of [40e3, 360e3]) setTimeout(() => Net.adDiag(Monetize.diag, { test: !!(CONFIG.ads && CONFIG.ads.testMode) }), t);
 dailyBonus(); startDemo(); refreshHome(); requestAnimationFrame(frame);
 window.__ready = 1; $('bootfail').hidden = true;
 // Einladungslink ?duell=CODE → Duell-Menü mit vorausgefülltem Code

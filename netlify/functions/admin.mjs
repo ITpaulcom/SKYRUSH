@@ -132,6 +132,11 @@ export default async req => {
     applyShop(c.shop);
     return json({ shop: c.shop || {}, items, cats, packs, updated: c.updated || 0 }, 200, noStore);
   }
+  if (view === 'addiag') {   // Werbe-Diagnose der letzten 3 Tage
+    const days = [0, 1, 2].map(i => new Date(Date.now() - i * 864e5).toISOString().slice(0, 10));
+    const rows = (await Promise.all(days.map(d => st.get(`addiag/${d}`, { type: 'json' })))).flatMap(x => (x && x.rows) || []).sort((a, b) => b.at - a.at).slice(0, 80);
+    return json({ rows }, 200, noStore);
+  }
   if (view === 'accounts') {   // Google-Login: letzte Anmeldeversuche und an welchem Schritt sie stehen
     const rec = ((await st.get('acct/recent', { type: 'json' })) || { list: [] }).list.slice(0, 40);
     const rows = await Promise.all(rec.map(async r => {

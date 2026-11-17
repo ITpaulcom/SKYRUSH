@@ -73,6 +73,10 @@ export const Net = {
   },
   // Einstellungen aus der Zentrale (Werbung, Anbieter, Google-Anmeldung)
   async config() { if (!BASE) return null; return call('/api/config', null, 6000); },
+  async adDiag(diag, extra = {}) {
+    if (!online()) return;
+    try { await call('/api/ad-event', { uid: dev.uid, secret: dev.secret, diag, ...extra }); } catch {}
+  },
   async logAd(format, valueMicros, currency, estimated, placement) {
     if (!online()) return;
     try { await call('/api/ad-event', { uid: dev.uid, secret: dev.secret, format, micros: valueMicros, currency, estimated, placement }); } catch {}

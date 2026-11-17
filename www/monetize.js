@@ -33,6 +33,9 @@ function rollDay() {
 }
 
 const listeners = { revenue: [] };
+// Werbe-Diagnose: warum kommt (keine) Anzeige? Wird einmal pro Start an den Server gemeldet → Zentrale „Werbung“
+const diag = { platform, consent: '', canRequest: null, init: '', loads: 0, fails: 0, err: '', shown: 0, house: 0, web: '' };
+const errText = e => { if (!e) return '?'; const c = e.code ?? e.errorCode; const m = e.message || e.errorMessage || e.error || ''; return String((c != null ? c + ' ' : '') + m).slice(0, 120) || 'unbekannt'; };
 // Anbieter und Platzierungen lassen sich in der Zentrale abschalten (remote.js); ohne Eintrag ist alles an
 const prov = k => (k === 'house' && PORTAL) ? false : ((CONFIG.ads && CONFIG.ads.providers) || {})[k] !== false;   // Portale: keine Eigenwerbung für andere Produkte
 const placementOn = p => !p || ((CONFIG.ads && CONFIG.ads.placements) || {})[p] !== false;
@@ -48,11 +51,11 @@ export const Monetize = {
     rollDay();
     if (!placementOn(placement) || st.rewardedToday >= CONFIG.ads.rewardedMaxPerDay) return false;
     if (PORTAL) return portalReady();
-    if (isNative) return prov('admob') ? true : prov('house');
+    if (isNative) return prov('admob') || prov('house');
     return (prov('web') && !!(adBreak || CONFIG.ads.webPublisherId)) || prov('house');
   },
   hasPrivacyOptions: () => privacyRequired,
-  refresh,
+  refresh, diag,
 };
 
 // ---------- Umsatz erfassen ----------
@@ -84,18 +87,20 @@ async function init() {
     try {
       const devs = CONFIG.ads.testDeviceIds || [];
       await AdMob.initialize({ initializeForTesting: CONFIG.ads.testMode || devs.length > 0, testingDevices: devs });
-      const info = await AdMob.requestConsentInfo();
+      let info = {};
+      try { info = await AdMob.requestConsentInfo(); } catch (e) { diag.consent = 'Fehler: ' + errText(e); }   // ohne Antwort trotzdem weiter (sonst nie Werbung)
       privacyRequired = info.privacyOptionsRequirementStatus === 'REQUIRED';
       let consent = info;
-      if (info.isConsentFormAvailable && info.status === 'REQUIRED') consent = await AdMob.showConsentForm();
+      if (info.isConsentFormAvailable && info.status === 'REQUIRED') { try { consent = await AdMob.showConsentForm(); } catch (e) { diag.consent = 'Formular: ' + errText(e); } }
       adsAllowed = consent.canRequestAds !== false;
+      diag.consent = diag.consent || String(consent.status || info.status || '?'); diag.canRequest = adsAllowed; diag.init = 'ok';
       if (platform === 'ios') {
         const t = await AdMob.trackingAuthorizationStatus();
         if (t.status === 'notDetermined') await AdMob.requestTrackingAuthorization();
       }
       bindNative();
       if (adsAllowed) { preload('rewarded'); if (!st.noAds) preload('interstitial'); }
-    } catch (e) { console.warn('AdMob init', e); }
+    } catch (e) { console.warn('AdMob init', e); diag.init = 'Fehler: ' + errText(e); }
   } else if (!isNative && CONFIG.ads.webPublisherId && prov('web')) {
     initWeb();
   }
@@ -115,15 +120,15 @@ const iosIdMissing = () => platform === 'ios' && String(CONFIG.ads.iosAppId).sta
 const testing = format => CONFIG.ads.testMode || iosIdMissing() || String(unitId(format)).startsWith('ca-app-pub-3940256099942544');
 
 function bindNative() {
-  AdMob.addListener('onRewardedVideoAdLoaded', () => { loaded.rewarded = true; });
-  AdMob.addListener('onRewardedVideoAdFailedToLoad', () => { loaded.rewarded = false; setTimeout(() => preload('rewarded'), 30000); });
+  AdMob.addListener('onRewardedVideoAdLoaded', () => { loaded.rewarded = true; diag.loads++; });
+  AdMob.addListener('onRewardedVideoAdFailedToLoad', e => { loaded.rewarded = false; diag.fails++; diag.err = 'Video: ' + errText(e); setTimeout(() => preload('rewarded'), 30000); });
   AdMob.addListener('onRewardedVideoAdReward', () => { rewardEarned = true; });
   AdMob.addListener('onRewardedVideoAdImpression', d => recordRevenue('rewarded', d?.valueMicros ?? estimate('rewarded'), d?.currencyCode, d?.valueMicros == null));
   AdMob.addListener('onRewardedVideoAdDismissed', () => { finishReward(rewardEarned); });
   AdMob.addListener('onRewardedVideoAdFailedToShow', () => { finishReward(false); });
 
-  AdMob.addListener('interstitialAdLoaded', () => { loaded.interstitial = true; });
-  AdMob.addListener('interstitialAdFailedToLoad', () => { loaded.interstitial = false; setTimeout(() => preload('interstitial'), 30000); });
+  AdMob.addListener('interstitialAdLoaded', () => { loaded.interstitial = true; diag.loads++; });
+  AdMob.addListener('interstitialAdFailedToLoad', e => { loaded.interstitial = false; diag.fails++; diag.err = 'Pause: ' + errText(e); setTimeout(() => preload('interstitial'), 30000); });
   AdMob.addListener('interstitialAdImpression', d => recordRevenue('interstitial', d?.valueMicros ?? estimate('interstitial'), d?.currencyCode, d?.valueMicros == null));
   AdMob.addListener('interstitialAdDismissed', () => finishInter());
   AdMob.addListener('interstitialAdFailedToShow', () => finishInter());
@@ -133,7 +138,7 @@ async function preload(format) {
   try {
     if (format === 'rewarded') await AdMob.prepareRewardVideoAd({ adId: unitId('rewarded'), isTesting: testing('rewarded') });
     else await AdMob.prepareInterstitial({ adId: unitId('interstitial'), isTesting: testing('interstitial') });
-  } catch { /* Listener plant erneuten Versuch */ }
+  } catch (e) { diag.fails++; diag.err = format + ': ' + errText(e); /* Listener plant erneuten Versuch */ }
 }
 function finishReward(ok) {
   loaded.rewarded = false;
@@ -172,31 +177,36 @@ async function rewarded(placement) {
   const done = ok => { if (ok) { st.rewardedToday++; st.lastAdAt = Date.now(); save(); } return ok; };
 
   if (PORTAL) return done(await portalAd('rewarded'));
-  if (isNative && AdMob && prov('admob')) {
-    if (!adsAllowed) return false;
-    if (!loaded.rewarded) { await preload('rewarded'); await waitFor(() => loaded.rewarded, 6000); }
-    if (!loaded.rewarded) return false;
-    const ok = await new Promise(res => { pendingReward = res; AdMob.showRewardVideoAd().catch(() => finishReward(false)); setTimeout(() => { if (pendingReward === res) finishReward(rewardEarned); }, 120000); });
-    return done(ok);
+  // Echte Anzeige (AdMob / AdSense). Gibt es gerade keine (neue App noch nicht freigeschaltet, keine Einwilligung, kein Füllstand),
+  // springt die Eigenwerbung ein – die Belohnung funktioniert also immer.
+  if (isNative && AdMob && prov('admob') && adsAllowed) {
+    if (!loaded.rewarded) { await preload('rewarded'); await waitFor(() => loaded.rewarded, 5000); }
+    if (loaded.rewarded) {
+      let failed = false;
+      const ok = await new Promise(res => { pendingReward = res; AdMob.showRewardVideoAd().catch(() => { failed = true; finishReward(false); }); setTimeout(() => { if (pendingReward === res) finishReward(rewardEarned); }, 120000); });
+      if (ok || !failed) { if (ok) diag.shown++; return done(ok); }
+    }
   }
-  if (adBreak && prov('web')) {
+  if (!isNative && adBreak && prov('web')) {
+    let offered = false;
     const ok = await new Promise(res => {
       let given = false, called = false;
       const end = v => { if (!called) { called = true; res(v); } };
       adBreak({
         type: 'reward', name: placement,
-        beforeReward: show => show(),
+        beforeReward: show => { offered = true; show(); },
         adViewed: () => { given = true; },
         adDismissed: () => {},
-        adBreakDone: info => { if (given) recordRevenue('rewarded', estimate('rewarded'), 'USD', true); end(given); },
+        adBreakDone: info => { diag.web = (info && info.breakStatus) || ''; if (given) recordRevenue('rewarded', estimate('rewarded'), 'USD', true); end(given); },
       });
-      setTimeout(() => end(given), 60000);
+      setTimeout(() => end(given), offered ? 60000 : 4000);
     });
-    return done(ok);
+    if (offered) { if (ok) diag.shown++; return done(ok); }
   }
   // Ohne (aktiven) Werbe-Partner: Eigenwerbung (FAX Messenger, ITpaul) statt leerer Test-Anzeige – kein Umsatz, wird nicht gezählt
   if (!prov('house')) return false;
   const ok = await houseAd({ seconds: 5, reward: true, placement });
+  if (ok) diag.house++;
   return done(ok);
 }
 
@@ -220,14 +230,16 @@ async function maybeInterstitial(placement) {
     // Sicherheitsnetz: kommt das Schließen-Ereignis nie an, hängt das Spiel nicht fest
     await new Promise(res => { pendingInter = res; AdMob.showInterstitial().catch(() => finishInter()); setTimeout(() => { if (pendingInter === res) finishInter(); }, 45000); });
     shown = true;
-  } else if (adBreak && prov('web')) {
+  } else if (!isNative && adBreak && prov('web')) {
     shown = await new Promise(res => {
       let viewed = false;
       adBreak({ type: 'next', name: placement, beforeAd: () => { viewed = true; },
-        adBreakDone: () => { if (viewed) recordRevenue('interstitial', estimate('interstitial'), 'USD', true); res(viewed); } });
+        adBreakDone: info => { diag.web = (info && info.breakStatus) || ''; if (viewed) recordRevenue('interstitial', estimate('interstitial'), 'USD', true); res(viewed); } });
       setTimeout(() => res(viewed), 45000);
     });
-  } else if (prov('house')) {
+    // AdSense liefert (noch) nichts → wie bisher Eigenwerbung, damit die Pause nicht ganz ausfällt
+    if (!shown && prov('house') && /notReady|noAdPreloaded|error|other|timeout/.test(diag.web || 'other')) shown = await houseAd({ seconds: 3, reward: false, placement });
+  } else if (prov('house') && !(isNative && prov('admob'))) {
     shown = await houseAd({ seconds: 3, reward: false, placement });
   }
   if (shown) { st.gamesSinceInter = 0; st.interToday++; st.lastAdAt = Date.now(); save(); }
