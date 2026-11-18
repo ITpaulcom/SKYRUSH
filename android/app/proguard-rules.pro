@@ -19,3 +19,27 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# ---- Sky Rush: R8 sicher fuer Capacitor ----
+# Annotationen/Signaturen behalten (Capacitor liest Plugin-Annotationen per Reflection)
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod,Exceptions,SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
+# Capacitor-Kern + Bridge (WebView <-> nativ)
+-keep class com.getcapacitor.** { *; }
+-keepclassmembers class * { @android.webkit.JavascriptInterface <methods>; }
+
+# Unsere App-Klassen (MainActivity)
+-keep class com.itpaul.skyrush.** { *; }
+
+# Plugins: Namen muessen exakt bleiben, die JS-Seite ruft sie per Name auf
+-keep class com.getcapacitor.community.admob.** { *; }
+-keep class com.capacitorjs.plugins.** { *; }
+-keep class com.revenuecat.purchases.capacitor.** { *; }
+-keep class com.revenuecat.purchases.hybridcommon.** { *; }
+
+# Kotlin-Metadaten (fuer Kotlin-Plugins)
+-keep class kotlin.Metadata { *; }
+-dontwarn org.apache.cordova.**
+-dontwarn com.google.errorprone.annotations.**
+-dontwarn javax.annotation.**

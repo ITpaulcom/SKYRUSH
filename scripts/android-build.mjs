@@ -152,5 +152,8 @@ if (!fs.existsSync(aab)) fail('Build lief durch, aber die .aab-Datei fehlt.');
 fs.mkdirSync(path.join(ROOT, 'builds'), { recursive: true });
 const outFile = path.join(ROOT, 'builds', `SkyRush-PlayStore-v${vc}.aab`);
 fs.copyFileSync(aab, outFile);
+// R8-Zuordnungsdatei sichern (steckt auch im .aab; Kopie nur als Backup fuer Absturzberichte)
+const map = path.join(ROOT, 'android', 'app', 'build', 'outputs', 'mapping', 'release', 'mapping.txt');
+if (fs.existsSync(map)) fs.copyFileSync(map, path.join(ROOT, 'builds', `SkyRush-PlayStore-v${vc}-mapping.txt`));
 fs.writeFileSync(VCF, String(vc));   // erst nach Erfolg hochzählen
 log(`\n✅ FERTIG: builds\\${path.basename(outFile)} (${(fs.statSync(outFile).size / 1048576).toFixed(1)} MB)\n   Diese Datei in der Google Play Console hochladen.\n   WICHTIG: skyrush-upload.jks + SCHLUESSEL-SICHERN.txt sicher aufbewahren!`);

@@ -34,8 +34,10 @@ android {
     buildTypes {
         release {
             if (ksPath) signingConfig signingConfigs.release
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // R8: Code verkleinern + verschleiern. Die Zuordnungsdatei (mapping) steckt automatisch im .aab,
+            // Google Play liest sie selbst aus – kein extra Hochladen nötig.
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }
