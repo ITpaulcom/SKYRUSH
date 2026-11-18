@@ -8,7 +8,11 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SITE = 'https://myskyrush.netlify.app';
-const SKIP = new Set(['admin.html', 'sw.js', 'konto.html', 'store-import', 'ads.txt', 'app-ads.txt', '.DS_Store']);
+const SKIP = new Set(['admin.html', 'sw.js', 'konto.html', 'store-import', 'ads.txt', 'app-ads.txt', '.DS_Store',
+  // alter Mehrspieler-Prototyp + Fremddateien: gehören nicht ins Spiel und nicht auf fremde Portale
+  'assets', 'js', 'css', 'multiplayer', 'game.html']);
+// Nur Spieldateien mit diesen Endungen kommen ins Paket (keine versehentlich abgelegten Dokumente)
+const ALLOW = /\.(html|js|json|webmanifest|png|jpg|jpeg|webp|svg|woff2|mp3|ogg|wav|txt)$/i;
 const arg = (process.argv[2] || 'alle').toLowerCase();
 const list = arg === 'alle' ? ['crazygames', 'poki'] : [arg];
 if (!list.every(p => ['crazygames', 'poki'].includes(p))) { console.log('Unbekanntes Portal. Erlaubt: crazygames, poki, alle'); process.exit(1); }
@@ -18,7 +22,7 @@ function files(dir, base = '') {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     if (SKIP.has(e.name) || e.name.startsWith('.')) continue;
     const rel = base ? base + '/' + e.name : e.name;
-    if (e.isDirectory()) out.push(...files(path.join(dir, e.name), rel)); else out.push(rel);
+    if (e.isDirectory()) out.push(...files(path.join(dir, e.name), rel)); else if (ALLOW.test(e.name)) out.push(rel);
   }
   return out;
 }
