@@ -1,0 +1,279 @@
+/**
+ * Lobby UI Styles - Sky Rush Multiplayer
+ */
+
+/* Layout */
+.lobby-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.section {
+    background: var(--color-surface, #ffffff);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Header */
+.lobby-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.lobby-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-text, #1B1240);
+}
+
+.back-btn {
+    background: var(--color-primary, #FF5A7A);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.back-btn:hover {
+    opacity: 0.9;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: var(--color-text, #1B1240);
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #E0D8D0;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--color-primary, #FF5A7A);
+}
+
+.form-group .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+/* Buttons */
+.btn-primary {
+    background: var(--color-primary, #FF5A7A);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 16px;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-primary:disabled {
+    background: #C0C0C0;
+    cursor: not-allowed;
+}
+
+/* Player Cards */
+.players-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.player-card {
+    background: #F5F0EB;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.player-avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--color-primary, #FF5A7A);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.player-name {
+    flex: 1;
+    font-weight: 600;
+}
+
+.badge {
+    background: #E0D8D0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge.host {
+    background: var(--color-primary, #FF5A7A);
+    color: white;
+}
+
+.badge.open {
+    background: #4CAF50;
+    color: white;
+}
+
+.badge.locked {
+    background: #FF9800;
+    color: white;
+}
+
+/* Room Cards */
+.rooms-container {
+    display: grid;
+    gap: 12px;
+}
+
+.room-card {
+    background: #F5F0EB;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.room-name {
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.room-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.room-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--color-primary, #FF5A7A);
+}
+
+/* Info Text */
+.password-status {
+    background: #FFF3CD;
+    border-left: 4px solid #FF9800;
+    padding: 12px;
+    margin-top: 8px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.game-mode-info {
+    background: #E3F2FD;
+    border-left: 4px solid #2196F3;
+    padding: 12px;
+    margin-top: 8px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Error Section */
+.error-section {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.error-message {
+    color: #D32F2F;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.retry-btn {
+    background: var(--color-primary, #FF5A7A);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Loading */
+.loading-section {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #E0D8D0;
+    border-top-color: var(--color-primary, #FF5A7A);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .lobby-container {
+        padding: 12px;
+    }
+    
+    .section {
+        padding: 16px;
+    }
+    
+    .room-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}

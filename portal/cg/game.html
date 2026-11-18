@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+    <title>Sky Rush – Multiplayer</title>
+    <link rel="stylesheet" href="../assets/css/design.css">
+    <style>
+        :root {
+            --color-primary: #7B4DFF;
+            --color-bg: #2A1B5C;
+            --color-surface: #FFF8EC;
+            --color-text: #1B1240;
+            --shadow-lg: 0 8px 0 #1B1240;
+            --shadow-md: 0 4px 0 #1B1240;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+            background: var(--color-bg);
+            color: var(--color-text);
+            font-family: var(--font-body, 'Space Grotesk', system-ui, sans-serif);
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #gameCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* HUD Overlay */
+        .hud {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: max(16px, env(safe-area-inset-top, 0px)) 
+                     max(16px, env(safe-area-inset-right, 0px)) 
+                     max(16px, env(safe-area-inset-bottom, 0px)) 
+                     max(16px, env(safe-area-inset-left, 0px));
+        }
+
+        .hud-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            pointer-events: auto;
+        }
+
+        .hud-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 12px;
+            pointer-events: auto;
+        }
+
+        .player-card {
+            background: var(--color-surface);
+            border: 3px solid var(--color-text);
+            border-radius: 16px;
+            padding: 10px 14px;
+            box-shadow: var(--shadow-md);
+            min-width: 140px;
+        }
+
+        .player-card h3 {
+            font-size: 14px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .player-card .score {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .player-card .height {
+            font-size: 12px;
+            opacity: 0.8;
+            font-family: var(--font-mono, 'JetBrains Mono', monospace);
+        }
+
+        .player-avatar {
+            display: inline-grid;
+            place-items: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* Spieler-Indikatoren */
+        .players-overlay {
+            position: fixed;
+            top: 80px;
+            right: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .player-indicator {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid var(--color-text);
+            border-radius: 12px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 2px 0 var(--color-text);
+            transition: transform 0.2s;
+        }
+
+        .player-indicator.self {
+            background: var(--color-primary);
+            color: #fff;
+            border-color: var(--color-text);
+        }
+
+        .player-indicator .name {
+            display: block;
+        }
+
+        .player-indicator .pos {
+            font-size: 10px;
+            opacity: 0.8;
+            font-family: var(--font-mono, monospace);
+        }
+
+        /* Pause Menu */
+        .pause-menu {
+            position: fixed;
+            inset: 0;
+            background: rgba(27, 18, 64, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            z-index: 1000;
+        }
+
+        .pause-menu.hidden {
+            display: none;
+        }
+
+        .pause-content {
+            background: var(--color-surface);
+            border: 4px solid var(--color-text);
+            border-radius: 24px;
+            padding: 32px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .pause-content h2 {
+            font-size: 32px;
+            margin-bottom: 24px;
+            color: var(--color-primary);
+        }
+
+        .pause-content .btn {
+            display: block;
+            width: 100%;
+            margin: 12px 0;
+            padding: 14px 20px;
+            font-size: 18px;
+            font-weight: 700;
+            background: var(--color-surface);
+            color: var(--color-text);
+            border: 3px solid var(--color-text);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            transition: transform 0.07s, box-shadow 0.07s;
+        }
+
+        .pause-content .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .pause-content .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--color-text);
+        }
+
+        .pause-content .btn.primary {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+        /* Verbindungsanzeige */
+        .connection-badge {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid var(--color-text);
+            border-radius: 99px;
+            padding: 6px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 0 var(--color-text);
+            z-index: 100;
+        }
+
+        .connection-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3BE8A4;
+            border: 2px solid var(--color-text);
+        }
+
+        .connection-badge .dot.error {
+            background: #FF5A7A;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Game Over Screen */
+        .game-over {
+            position: fixed;
+            inset: 0;
+            background: rgba(27, 18, 64, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            z-index: 1000;
+        }
+
+        .game-over.hidden {
+            display: none;
+        }
+
+        .game-over-content {
+            text-align: center;
+            color: #fff;
+        }
+
+        .game-over-content h1 {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--color-primary);
+            text-shadow: 0 4px 0 var(--color-text);
+        }
+
+        .game-over-content .final-score {
+            font-size: 72px;
+            font-weight: 700;
+            color: #FFC83D;
+            text-shadow: 0 4px 0 var(--color-text);
+            margin: 24px 0;
+        }
+
+        .game-over-content .leaderboard {
+            background: var(--color-surface);
+            border: 3px solid var(--color-text);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 24px 0;
+            min-width: 300px;
+        }
+
+        .game-over-content .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            margin: 4px 0;
+            background: #fff;
+            border: 2px solid var(--color-text);
+            border-radius: 8px;
+            font-weight: 700;
+        }
+
+        .game-over-content .leaderboard-item:first-child {
+            background: #FFD700;
+        }
+
+        .btn {
+            font: inherit;
+            font-weight: 700;
+            font-size: 18px;
+            background: var(--color-surface);
+            color: var(--color-text);
+            border: 3px solid var(--color-text);
+            border-radius: 16px;
+            padding: 14px 24px;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            transition: transform 0.07s, box-shadow 0.07s;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--color-text);
+        }
+
+        .btn.primary {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 24px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Spiel-Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- HUD -->
+    <div class="hud" id="hud" hidden>
+        <div class="hud-top">
+            <div class="player-card">
+                <h3>
+                    <span class="player-avatar" id="playerAvatar">P</span>
+                    <span id="playerName">Spieler</span>
+                </h3>
+                <div class="score" id="playerScore">0</div>
+                <div class="height" id="playerHeight">Höhe: 0m</div>
+            </div>
+        </div>
+
+        <div class="players-overlay" id="playersOverlay">
+            <!-- Andere Spieler werden hier angezeigt -->
+        </div>
+
+        <div class="hud-bottom">
+            <div class="connection-badge" id="connectionBadge">
+                <span class="dot" id="connectionDot"></span>
+                <span id="connectionText">Verbunden</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pause Menu -->
+    <div class="pause-menu hidden" id="pauseMenu">
+        <div class="pause-content">
+            <h2>⏸️ Pause</h2>
+            <button class="btn primary" onclick="resumeGame()">Weiter spielen</button>
+            <button class="btn" onclick="leaveGame()">Spiel verlassen</button>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div class="game-over hidden" id="gameOverScreen">
+        <div class="game-over-content">
+            <h1>🏁 Ziel erreicht!</h1>
+            <div class="final-score" id="finalScore">0</div>
+            
+            <div class="leaderboard" id="leaderboard">
+                <h3>🏆 Rangliste</h3>
+                <!-- Rangliste wird dynamisch gefüllt -->
+            </div>
+
+            <div class="btn-group">
+                <button class="btn primary" onclick="returnToLobby()">Zur Lobby</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { RaumClient } from '../assets/js/rooms-client.js';
+
+        // Globale Spielvariablen
+        let canvas, ctx;
+        let gameLoopId = null;
+        let isPaused = false;
+        let isGameOver = false;
+
+        // Spielzustand
+        const gameState = {
+            player: {
+                x: 0,
+                y: 0,
+                height: 0,
+                score: 0,
+                velocity: 0
+            },
+            otherPlayers: new Map(),
+            roomId: null,
+            playerId: null
+        };
+
+        // Raum-Client für Multiplayer
+        let raumClient = null;
+
+        // Initialisierung
+        window.addEventListener('DOMContentLoaded', () => {
+            initGame();
+            connectToRoom();
+        });
+
+        // Spiel initialisieren
+        function initGame() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Tastatursteuerung
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('keyup', handleKeyUp);
+
+            // Touch-Steuerung
+            canvas.addEventListener('touchstart', handleTouchStart);
+            canvas.addEventListener('touchmove', handleTouchMove);
+            canvas.addEventListener('touchend', handleTouchEnd);
+
+            // Pause-Taste
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' || e.key === 'p') {
+                    togglePause();
+                }
+            });
+
+            // Spiel-Loop starten
+            startGameLoop();
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        // Mit Raum verbinden
+        function connectToRoom() {
+            const params = new URLSearchParams(window.location.search);
+            const roomId = params.get('room');
+            const playerId = params.get('player');
+
+            if (!roomId || !playerId) {
+                showError('Ungültige Raum- oder Spieler-ID');
+                return;
+            }
+
+            gameState.roomId = roomId;
+            gameState.playerId = playerId;
+
+            // Raum-Client starten
+            raumClient = new RaumClient({
+                raumCode: roomId,
+                spielerId: playerId,
+                intervall: 500 // Häufigere Updates für besseres Gameplay
+            });
+
+            raumClient.onZustand = (zustand) => {
+                updateOtherPlayers(zustand.spieler);
+                updateConnectionStatus('verbunden');
+            };
+
+            raumClient.onStatus = (status) => {
+                if (status === 'getrennt') {
+                    updateConnectionStatus('getrennt');
+                } else if (status === 'aufgegeben') {
+                    updateConnectionStatus('fehler');
+                }
+            };
+
+            raumClient.onRaumWeg = (grund) => {
+                showError(grund || 'Verbindung zum Raum verloren');
+            };
+
+            raumClient.starten();
+
+            // HUD anzeigen
+            document.getElementById('hud').hidden = false;
+        }
+
+        // Andere Spieler aktualisieren
+        function updateOtherPlayers(spieler) {
+            gameState.otherPlayers.clear();
+            
+            const overlay = document.getElementById('playersOverlay');
+            overlay.innerHTML = '';
+
+            spieler.forEach((s, index) => {
+                if (s.id !== gameState.playerId) {
+                    gameState.otherPlayers.set(s.id, {
+                        name: s.name,
+                        height: s.hoehe || 0,
+                        score: s.punkte || 0,
+                        position: index
+                    });
+
+                    // Indikator erstellen
+                    const indicator = document.createElement('div');
+                    indicator.className = 'player-indicator';
+                    indicator.innerHTML = `
+                        <span class="name">${s.name}</span>
+                        <span class="pos">${s.hoehe || 0}m • ${s.punkte || 0} Pkt</span>
+                    `;
+                    overlay.appendChild(indicator);
+                } else {
+                    // Eigener Spieler
+                    document.getElementById('playerName').textContent = s.name;
+                    document.getElementById('playerAvatar').textContent = s.name[0].toUpperCase();
+                }
+            });
+        }
+
+        // Verbindungsstatus aktualisieren
+        function updateConnectionStatus(status) {
+            const dot = document.getElementById('connectionDot');
+            const text = document.getElementById('connectionText');
+
+            if (status === 'verbunden') {
+                dot.className = 'dot';
+                text.textContent = 'Verbunden';
+            } else if (status === 'getrennt') {
+                dot.className = 'dot error';
+                text.textContent = 'Verbindung wird wiederhergestellt...';
+            } else if (status === 'fehler') {
+                dot.className = 'dot error';
+                text.textContent = 'Verbindung fehlgeschlagen';
+            }
+        }
+
+        // Spiel-Loop
+        function startGameLoop() {
+            function loop() {
+                if (!isPaused && !isGameOver) {
+                    update();
+                    render();
+                    
+                    // Position an Server melden
+                    if (raumClient) {
+                        raumClient.standMelden(
+                            gameState.player.height,
+                            gameState.player.score
+                        );
+                    }
+                }
+                gameLoopId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        // Spiel-Logik aktualisieren
+        function update() {
+            // Hier kommt die eigentliche Spiel-Logik hin
+            // (aus dem Hauptspiel übernehmen)
+            
+            // Beispiel: Spieler steigt automatisch
+            gameState.player.velocity += 0.1;
+            gameState.player.height += gameState.player.velocity;
+            gameState.player.score = Math.floor(gameState.player.height / 10);
+
+            // UI aktualisieren
+            document.getElementById('playerScore').textContent = gameState.player.score;
+            document.getElementById('playerHeight').textContent = `Höhe: ${Math.floor(gameState.player.height)}m`;
+        }
+
+        // Rendern
+        function render() {
+            // Hintergrund
+            ctx.fillStyle = '#2A1B5C';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Einfache Darstellung (Platzhalter)
+            ctx.fillStyle = '#7B4DFF';
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height - 100, 30, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#1B1240';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Höhe anzeigen
+            ctx.fillStyle = '#fff';
+            ctx.font = '24px Space Grotesk';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${Math.floor(gameState.player.height)}m`, canvas.width / 2, canvas.height / 2);
+        }
+
+        // Steuerung
+        let keys = {};
+        let touchStartY = 0;
+
+        function handleKeyDown(e) {
+            keys[e.key] = true;
+            
+            if (e.key === ' ' || e.key === 'ArrowUp') {
+                gameState.player.velocity += 0.5;
+            }
+        }
+
+        function handleKeyUp(e) {
+            keys[e.key] = false;
+        }
+
+        function handleTouchStart(e) {
+            touchStartY = e.touches[0].clientY;
+            e.preventDefault();
+        }
+
+        function handleTouchMove(e) {
+            const deltaY = touchStartY - e.touches[0].clientY;
+            if (deltaY > 10) {
+                gameState.player.velocity += 0.3;
+            }
+            touchStartY = e.touches[0].clientY;
+            e.preventDefault();
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+        }
+
+        // Pause umschalten
+        function togglePause() {
+            isPaused = !isPaused;
+            document.getElementById('pauseMenu').classList.toggle('hidden', !isPaused);
+        }
+
+        // Spiel fortsetzen
+        window.resumeGame = function() {
+            isPaused = false;
+            document.getElementById('pauseMenu').classList.add('hidden');
+        };
+
+        // Spiel verlassen
+        window.leaveGame = function() {
+            if (raumClient) {
+                raumClient.verlassen();
+                raumClient.stoppen();
+            }
+            window.location.href = 'lobby.html';
+        };
+
+        // Zur Lobby zurückkehren
+        window.returnToLobby = function() {
+            leaveGame();
+        };
+
+        // Fehler anzeigen
+        function showError(message) {
+            alert(message);
+            setTimeout(() => {
+                window.location.href = 'lobby.html';
+            }, 2000);
+        }
+
+        // Cleanup beim Verlassen
+        window.addEventListener('beforeunload', () => {
+            if (raumClient) {
+                raumClient.verlassen();
+                raumClient.stoppen();
+            }
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+            }
+        });
+    </script>
+</body>
+</html>

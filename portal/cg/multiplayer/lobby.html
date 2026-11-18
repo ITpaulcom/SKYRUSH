@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sky Rush – Multiplayer-Lobby</title>
+    <link rel="stylesheet" href="lobby.css">
+</head>
+<body>
+    <div class="lobby-container">
+        <header class="lobby-header">
+            <h1 id="lobbyTitle">Sky Rush Multiplayer</h1>
+            <button id="backBtn" class="btn-secondary hidden">Zurück</button>
+        </header>
+
+        <!-- Hauptmenü -->
+        <section id="mainMenu" class="section">
+            <div class="menu-buttons">
+                <button onclick="showSection('createRoomSection')" class="btn-primary">
+                    <span class="icon">➕</span>
+                    Raum erstellen
+                </button>
+                <button onclick="showSection('joinSection')" class="btn-secondary">
+                    <span class="icon">🚪</span>
+                    Raum beitreten
+                </button>
+                <button onclick="showSection('roomsListSection')" class="btn-secondary">
+                    <span class="icon">📋</span>
+                    Spielräume anzeigen
+                </button>
+            </div>
+        </section>
+
+        <!-- Raum erstellen -->
+        <section id="createRoomSection" class="section hidden">
+            <div class="form-group">
+                <label for="roomName">Raumname</label>
+                <input type="text" id="roomName" placeholder="Mein Sky Rush Raum" maxlength="30">
+            </div>
+            
+            <div class="form-group">
+                <label for="roomPassword">Passwort (optional)</label>
+                <input type="password" id="roomPassword" placeholder="Leer für öffentlichen Raum" maxlength="20">
+                <small id="passwordStatus" class="hidden">Passwort ist erforderlich für diesen Raum.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="gameMode">Spielmodus</label>
+                <select id="gameMode">
+                    <option value="hotseat">Hot-Seat (gleiches Gerät)</option>
+                    <option value="shared">Shared-Screen (unterschiedliche Geräte)</option>
+                </select>
+                <p id="gameModeInfo" class="info-text">Hot-Seat: Spieler sitzen am gleichen Gerät und spielen gemeinsam.</p>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="spectators" checked>
+                    Zuschauer erlauben
+                </label>
+            </div>
+
+            <div class="button-row">
+                <button onclick="createRoom()" class="btn-primary">Raum erstellen</button>
+                <button onclick="showSection('mainMenu')" class="btn-secondary">Abbrechen</button>
+            </div>
+        </section>
+
+        <!-- Raum beitreten -->
+        <section id="joinSection" class="section hidden">
+            <div class="form-group">
+                <label for="joinRoomCode">Raumcode</label>
+                <input type="text" id="joinRoomCode" placeholder="6-stelliger Code" maxlength="6" style="text-transform: uppercase; letter-spacing: 0.5em;">
+            </div>
+
+            <div class="form-group">
+                <label for="joinPlayerName">Spielername</label>
+                <input type="text" id="joinPlayerName" placeholder="Dein Name" maxlength="20">
+            </div>
+
+            <div class="button-row">
+                <button onclick="joinRoomByCode()" class="btn-primary">Beitreten</button>
+                <button onclick="showSection('mainMenu')" class="btn-secondary">Abbrechen</button>
+            </div>
+        </section>
+
+        <!-- Spielräume anzeigen -->
+        <section id="roomsListSection" class="section hidden">
+            <div id="roomsContainer" class="rooms-list">
+                <p>Lade Spielräume...</p>
+            </div>
+            <div class="button-row">
+                <button onclick="showSection('mainMenu')" class="btn-secondary">Zurück</button>
+            </div>
+        </section>
+
+        <!-- Im Raum -->
+        <section id="inRoomSection" class="section hidden">
+            <div class="room-info">
+                <h2 id="roomInfoName">Raumname</h2>
+                <p id="roomCode" class="room-code">Code: ABC123</p>
+                <p id="playerCount">Spieler: 1/4</p>
+            </div>
+
+            <div id="playersContainer" class="players-list">
+                <!-- Spieler werden dynamisch eingefügt -->
+            </div>
+
+            <div class="button-row">
+                <button id="startGameBtn" onclick="startGame()" class="btn-primary" style="display: none;">Spiel starten</button>
+                <button onclick="leaveRoom()" class="btn-secondary">Raum verlassen</button>
+            </div>
+
+            <div id="connectionStatus" class="status-indicator">
+                <span class="dot"></span>
+                <span class="text">Verbunden</span>
+            </div>
+        </section>
+
+        <!-- Fehler -->
+        <section id="errorSection" class="section hidden">
+            <div class="error-message">
+                <h2>⚠️ Fehler</h2>
+                <p id="errorMessage">Ein Fehler ist aufgetreten.</p>
+            </div>
+            <div class="button-row">
+                <button onclick="showSection('mainMenu')" class="btn-primary">Zum Hauptmenü</button>
+            </div>
+        </section>
+
+        <!-- Ladebildschirm -->
+        <section id="loadingSection" class="section hidden">
+            <div class="loader">
+                <div class="spinner"></div>
+                <p>Verbinde mit Server...</p>
+            </div>
+        </section>
+    </div>
+
+    <script type="module">
+        import { raumErstellen, raumBeitreten, raumListe, RaumClient } from '../assets/js/rooms-client.js';
+
+        // Globale Variablen
+        let currentRoom = null;
+        let raumClient = null;
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT_ATTEMPTS = 5;
+
+        // Exportiere Funktionen für globale Verwendung
+        window.showSection = showSection;
+        window.createRoom = createRoom;
+        window.joinRoomByCode = joinRoomByCode;
+        window.leaveRoom = leaveRoom;
+        window.startGame = startGame;
+        window.loadRooms = loadRooms;
+
+        // Initialisierung
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab-Wechsel
+            document.getElementById('roomPassword').addEventListener('input', function() {
+                setPasswordStatus(this.value.length > 0);
+            });
+
+            // Spielmodus-Auswahl
+            document.getElementById('gameMode').addEventListener('change', function() {
+                updateGameModeSelection(this.value);
+            });
+
+            // Back-Button
+            document.getElementById('backBtn').addEventListener('click', function() {
+                showSection('mainMenu');
+            });
+        });
+
+        // Section anzeigen
+        function showSection(sectionId) {
+            // Alle Sektionen verstecken
+            ['mainMenu', 'createRoomSection', 'joinSection', 'roomsListSection', 'inRoomSection', 'errorSection', 'loadingSection'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+
+            // Gewählte Sektion zeigen
+            const section = document.getElementById(sectionId);
+            section.classList.remove('hidden');
+
+            // Back-Button zeigen/verstecken
+            const backBtn = document.getElementById('backBtn');
+            const lobbyTitle = document.getElementById('lobbyTitle');
+
+            if (sectionId === 'mainMenu' || sectionId === 'createRoomSection' || sectionId === 'joinSection') {
+                backBtn.classList.add('hidden');
+                lobbyTitle.textContent = sectionId === 'createRoomSection' ? 'Spielraum erstellen' : 
+                                        sectionId === 'joinSection' ? 'Spielraum beitreten' : 'Sky Rush Multiplayer';
+            } else if (sectionId === 'roomsListSection') {
+                backBtn.classList.add('hidden');
+                lobbyTitle.textContent = 'Aktive Spielräume';
+                loadRooms();
+            } else if (sectionId === 'inRoomSection') {
+                backBtn.classList.remove('hidden');
+                lobbyTitle.textContent = 'In Spielraum';
+            } else {
+                backBtn.classList.add('hidden');
+                lobbyTitle.textContent = 'Fehler';
+            }
+        }
+
+        // Passwort-Status anzeigen
+        function setPasswordStatus(hasPassword) {
+            const status = document.getElementById('passwordStatus');
+            if (hasPassword) {
+                status.textContent = 'Passwort ist erforderlich für diesen Raum.';
+                status.classList.remove('hidden');
+            } else {
+                status.classList.add('hidden');
+            }
+        }
+
+        // Spielmodus-Auswahl aktualisieren
+        function updateGameModeSelection(gameMode) {
+            const gameModeInfo = document.getElementById('gameModeInfo');
+            if (gameMode === 'hotseat') {
+                gameModeInfo.textContent = 'Hot-Seat: Spieler sitzen am gleichen Gerät und spielen gemeinsam.';
+            } else if (gameMode === 'shared') {
+                gameModeInfo.textContent = 'Shared-Screen: Spieler sitzen an unterschiedlichen Geräten, die mit dem Hauptgerät verbunden sind.';
+            }
+        }
+
+        // Raum erstellen
+        async function createRoom() {
+            const name = document.getElementById('roomName').value.trim();
+            const password = document.getElementById('roomPassword').value.trim();
+            const allowSpectators = document.getElementById('spectators').checked;
+            const gameMode = document.getElementById('gameMode').value;
+
+            if (!name) {
+                showError('Bitte gib einen Raumnamen ein.');
+                return;
+            }
+
+            showSection('loadingSection');
+            
+            try {
+                const ergebnis = await raumErstellen(name);
+                
+                if (!ergebnis.ok) {
+                    throw new Error(ergebnis.fehler || 'Fehler beim Erstellen des Raumes');
+                }
+
+                currentRoom = {
+                    id: ergebnis.raum.raumCode,
+                    name: name,
+                    spielerId: ergebnis.spielerId,
+                    istHost: true,
+                    spieler: ergebnis.raum.spieler
+                };
+
+                // RaumClient starten
+                startRaumClient(ergebnis.raum.raumCode, ergebnis.spielerId);
+                
+                showSection('inRoomSection');
+                updateRoomUI();
+
+            } catch (error) {
+                console.error('Fehler beim Erstellen:', error);
+                showError(error.message || 'Fehler beim Erstellen des Raums');
+            }
+        }
+
+        // Raum beitreten (über Code)
+        async function joinRoomByCode() {
+            const code = document.getElementById('joinRoomCode').value.trim().toUpperCase();
+            const name = document.getElementById('joinPlayerName').value.trim();
+
+            if (!code || code.length !== 6) {
+                showError('Bitte gib einen gültigen 6-stelligen Raumcode ein.');
+                return;
+            }
+
+            if (!name) {
+                showError('Bitte gib einen Spielernamen ein.');
+                return;
+            }
+
+            showSection('loadingSection');
+            
+            try {
+                const ergebnis = await raumBeitreten(code, name);
+                
+                if (!ergebnis.ok) {
+                    throw new Error(ergebnis.fehler || 'Fehler beim Beitreten');
+                }
+
+                currentRoom = {
+                    id: code,
+                    name: ergebnis.raum.raumCode,
+                    spielerId: ergebnis.spielerId,
+                    istHost: false,
+                    spieler: ergebnis.raum.spieler
+                };
+
+                // RaumClient starten
+                startRaumClient(code, ergebnis.spielerId);
+                
+                showSection('inRoomSection');
+                updateRoomUI();
+
+            } catch (error) {
+                console.error('Fehler beim Beitreten:', error);
+                showError(error.message || 'Fehler beim Beitreten');
+            }
+        }
+
+        // RaumClient starten
+        function startRaumClient(raumCode, spielerId) {
+            if (raumClient) {
+                raumClient.stoppen();
+            }
+
+            raumClient = new RaumClient({
+                raumCode: raumCode,
+                spielerId: spielerId,
+                intervall: 800
+            });
+
+            raumClient.onZustand = (zustand) => {
+                currentRoom.spieler = zustand.spieler;
+                updateRoomUI();
+                updateConnectionStatus('verbunden');
+            };
+
+            raumClient.onStatus = (status) => {
+                if (status === 'getrennt') {
+                    updateConnectionStatus('getrennt');
+                } else if (status === 'verbunden') {
+                    updateConnectionStatus('verbunden');
+                } else if (status === 'aufgegeben') {
+                    updateConnectionStatus('aufgegeben');
+                }
+            };
+
+            raumClient.onRaumWeg = (grund) => {
+                showError(grund || 'Der Raum wurde geschlossen.');
+            };
+
+            raumClient.starten();
+        }
+
+        // UI aktualisieren
+        function updateRoomUI() {
+            if (!currentRoom) return;
+
+            const playersContainer = document.getElementById('playersContainer');
+            const playerCount = document.getElementById('playerCount');
+            const roomInfo = document.getElementById('roomInfoName');
+            const roomCode = document.getElementById('roomCode');
+
+            roomInfo.textContent = currentRoom.name || `Raum ${currentRoom.id}`;
+            playerCount.textContent = `Spieler: ${currentRoom.spieler.length}/4`;
+            roomCode.textContent = `Code: ${currentRoom.id}`;
+
+            playersContainer.innerHTML = '';
+            
+            currentRoom.spieler.forEach((spieler, index) => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'player-card';
+                playerDiv.innerHTML = `
+                    <span class="player-avatar">${spieler.name[0].toUpperCase()}</span>
+                    <span class="player-name">${spieler.name}</span>
+                    ${spieler.istHost ? '<span class="badge host">Host</span>' : ''}
+                    <span class="player-score">${spieler.punkte || 0} Pkt</span>
+                `;
+                playersContainer.appendChild(playerDiv);
+            });
+
+            // Start-Button nur für den Host anzeigen wenn mindestens 2 Spieler
+            const startBtn = document.getElementById('startGameBtn');
+            if (currentRoom.istHost && currentRoom.spieler.length >= 2) {
+                startBtn.style.display = 'inline-block';
+                startBtn.textContent = `Spiel starten (${currentRoom.spieler.length} Spieler)`;
+            } else if (currentRoom.istHost) {
+                startBtn.style.display = 'none';
+            } else {
+                startBtn.style.display = 'none';
+            }
+        }
+
+        // Verbindungsstatus aktualisieren
+        function updateConnectionStatus(status) {
+            const container = document.getElementById('connectionStatus');
+            const dot = container.querySelector('.dot');
+            const text = container.querySelector('.text');
+
+            if (status === 'verbunden') {
+                dot.className = 'dot connected';
+                text.textContent = 'Verbunden';
+            } else if (status === 'getrennt') {
+                dot.className = 'dot disconnected';
+                text.textContent = 'Verbindung wird wiederhergestellt...';
+            } else if (status === 'aufgegeben') {
+                dot.className = 'dot error';
+                text.textContent = 'Verbindung fehlgeschlagen';
+            }
+        }
+
+        // Raum verlassen
+        function leaveRoom() {
+            if (raumClient) {
+                raumClient.verlassen();
+                raumClient.stoppen();
+                raumClient = null;
+            }
+            
+            currentRoom = null;
+            reconnectAttempts = 0;
+
+            showSection('mainMenu');
+        }
+
+        // Spiel starten
+        async function startGame() {
+            if (currentRoom && currentRoom.istHost && raumClient) {
+                try {
+                    const ergebnis = await raumClient.starten_runde();
+                    
+                    if (ergebnis.ok) {
+                        // Zum Spiel weiterleiten
+                        window.location.href = `../game.html?room=${currentRoom.id}&player=${currentRoom.spielerId}`;
+                    } else {
+                        showError(ergebnis.fehler || 'Fehler beim Starten des Spiels');
+                    }
+                } catch (error) {
+                    console.error('Fehler beim Starten:', error);
+                    showError('Verbindung zum Server verloren. Bitte versuche es erneut.');
+                }
+            }
+        }
+
+        // Fehler anzeigen
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            showSection('errorSection');
+        }
+
+        // Spielräume laden
+        async function loadRooms() {
+            const container = document.getElementById('roomsContainer');
+            container.innerHTML = '<p>Lade Spielräume...</p>';
+
+            try {
+                const ergebnis = await raumListe();
+                
+                if (!ergebnis.ok || !ergebnis.raeume || ergebnis.raeume.length === 0) {
+                    container.innerHTML = '<p>Keine aktiven Spielräume verfügbar.</p>';
+                    return;
+                }
+
+                container.innerHTML = ergebnis.raeume.map(raum => `
+                    <div class="room-card" onclick="window.joinRoomByCode('${raum.raumCode}')">
+                        <div class="room-name">${raum.hostName}'s Raum</div>
+                        <div class="room-meta">
+                            <span class="player-count">${raum.spielerAnzahl}/${raum.maxSpieler} Spieler</span>
+                            <span class="room-code-display">${raum.raumCode}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Fehler beim Laden der Spielräume:', error);
+                container.innerHTML = '<p>Fehler beim Laden der Spielräume.</p>';
+            }
+        }
+    </script>
+</body>
+</html>
