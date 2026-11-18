@@ -61,6 +61,18 @@ if not defined ZIP (
   goto menu
 )
 for %%N in ("%ZIP%") do set "NAME=%%~nN"
+set "NEWER="
+for /f "usebackq delims=" %%V in (`powershell -NoProfile -Command "$n=[version]([regex]::Match('%NAME%','\d+(\.\d+)+').Value); $m=Get-ChildItem -Path '%~dp0updates' -Filter 'SkyRush-Update-*.zip' -File -ErrorAction SilentlyContinue | ForEach-Object { [version]([regex]::Match($_.BaseName,'\d+(\.\d+)+').Value) } | Sort-Object -Descending | Select-Object -First 1; if ($m -and $n -lt $m) { $m.ToString() }"`) do set "NEWER=%%V"
+if not defined NEWER goto upok
+echo.
+echo   ACHTUNG: %NAME% ist AELTER als das schon eingespielte Update %NEWER%.
+echo   Es wird NICHT eingespielt ^(sonst waere das Spiel wieder auf altem Stand^).
+echo   Die alte Datei wird nach updates\alt verschoben.
+if not exist "%~dp0updates\alt" mkdir "%~dp0updates\alt"
+move /y "%ZIP%" "%~dp0updates\alt\" >nul
+pause
+goto menu
+:upok
 set "DEST=%~dp0updates\%NAME%"
 echo.
 echo   Gefunden: %ZIP%
