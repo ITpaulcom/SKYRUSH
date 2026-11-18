@@ -3410,8 +3410,9 @@ function duelLobby(room, quick, rematch = false) {
     if ($('du-rules')) $('du-rules').onclick = e => { e.preventDefault(); stopPoll = true; duelSetup(rm.rules, async rules => { stopPoll = false; try { DUEL.room = (await duelCall('rules', { code: rm.code, rules })).room; } catch (er) { toast(duelErr(er)); } render(); }, () => { stopPoll = false; render(); }); };
     if ($('du-startfill')) $('du-startfill').onclick = () => go(true);
     if ($('du-share')) $('du-share').onclick = () => {
-      const url = `${CONFIG.apiBase || location.origin}/?duell=${rm.code}`, text = `Rennen in Sky Rush! Code ${rm.code} – ${url}`;
-      if (navigator.share) navigator.share({ title: 'Sky Rush Duell', text, url }).catch(() => {});
+      // Auf Portalen (CrazyGames, Poki) nur den Raum-Code teilen – keine Links, die Spieler vom Portal wegführen
+      const url = Monetize.portal ? '' : `${CONFIG.apiBase || location.origin}/?duell=${rm.code}`, text = url ? `Rennen in Sky Rush! Code ${rm.code} – ${url}` : `Sky Rush · Duell-Code ${rm.code}`;
+      if (navigator.share) navigator.share(url ? { title: 'Sky Rush Duell', text, url } : { title: 'Sky Rush Duell', text }).catch(() => {});
       else navigator.clipboard?.writeText(text).then(() => toast('Einladung kopiert!'), () => toast(`Code: ${rm.code}`));
     };
     if ($('du-cancel')) $('du-cancel').onclick = () => { duelStop(); duelCall('leave', { code: rm.code }).catch(() => {}); DUEL.room = null; openDuel(); };
