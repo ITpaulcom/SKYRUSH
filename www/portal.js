@@ -17,11 +17,43 @@ export async function initPortal() {
   if (!PORTAL) return false;
   if (!(await load(SRC[PORTAL]))) return false;
   try {
-    if (PORTAL === 'crazygames') { await window.CrazyGames.SDK.init(); sdk = window.CrazyGames.SDK; try { sdk.game.loadingStart(); } catch {} }
+    if (PORTAL === 'crazygames') { await window.CrazyGames.SDK.init(); sdk = window.CrazyGames.SDK; try { sdk.game.loadingStart(); } catch {} cgSync(); }
     else { await window.PokiSDK.init(); sdk = window.PokiSDK; }
   } catch { sdk = null; }
   return !!sdk;
 }
+// CrazyGames-Spielstand über das Data-Modul des SDK: Bei angemeldeten CrazyGames-Spielern wandert der Spielstand
+// mit auf jedes Gerät. Gespeichert wird ein Paket aller skyrush*-Einträge aus localStorage (wie beim Domain-Umzug).
+const CG_KEY = 'sr_bundle', CG_FLAG = 'sr_cg_restored';
+const srKeys = () => { const o = {}; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (/^skyrush/.test(k)) o[k] = localStorage.getItem(k); } } catch {} return o; };
+const games = j => { try { const s = JSON.parse(j || 'null'); return s ? (s.games || 0) * 1 + (s.bestH || s.best || 0) / 1e6 : -1; } catch { return -1; } };
+function cgSync() {
+  const d = sdk && sdk.data; if (!d) return;
+  // 1) Stand aus der CrazyGames-Cloud übernehmen, wenn er weiter ist als der auf diesem Gerät (einmal pro Sitzung neu laden)
+  try {
+    const raw = d.getItem(CG_KEY), cg = raw ? JSON.parse(raw) : null;
+    if (cg && typeof cg === 'object' && !sessionStorage.getItem(CG_FLAG) &&
+        games(cg['skyrush.save.v1']) > games(localStorage.getItem('skyrush.save.v1'))) {
+      Object.keys(srKeys()).forEach(k => localStorage.removeItem(k));
+      Object.keys(cg).forEach(k => { if (/^skyrush/.test(k) && typeof cg[k] === 'string') localStorage.setItem(k, cg[k]); });
+      sessionStorage.setItem(CG_FLAG, '1');
+      location.reload(); return;
+    }
+  } catch {}
+  // 2) Jede Änderung am Spielstand gebündelt (spätestens nach 1,5 s) ins Data-Modul schreiben
+  let t = 0;
+  const flush = () => { clearTimeout(t); t = 0; try { d.setItem(CG_KEY, JSON.stringify(srKeys())); } catch {} };
+  const soon = k => { if (/^skyrush/.test(String(k)) && !t) t = setTimeout(flush, 1500); };
+  try {
+    const P = Storage.prototype, set = P.setItem, rem = P.removeItem;
+    P.setItem = function (k, v) { set.call(this, k, v); if (this === localStorage) soon(k); };
+    P.removeItem = function (k) { rem.call(this, k); if (this === localStorage) soon(k); };
+  } catch {}
+  addEventListener('pagehide', flush);
+  addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
+  flush();
+}
+
 export function loadingDone() {
   if (!sdk) return;
   try { PORTAL === 'crazygames' ? sdk.game.loadingStop() : sdk.gameLoadingFinished(); } catch {}
