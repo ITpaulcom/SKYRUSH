@@ -4835,7 +4835,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && Va
 // alte, nie bestätigte Duell-Gutschriften nicht ewig mitschleppen
 Vault.q = Vault.q.filter(a => !a._at || Date.now() - a._at < 6 * 3600e3);
 if (AC.restored) setTimeout(() => toast('Spielstand wurde wiederhergestellt'), 1500);
-if (location.search.includes('debug')) setTimeout(openRevenue, 300);
+if (new URLSearchParams(location.search).has('debug') && !Monetize.portal) setTimeout(openRevenue, 300);   // nur ?debug, nie auf Portalen (dort hängt z. B. sdk_debug an der Adresse)
 if (native) cap.Plugins?.SplashScreen?.hide?.();
 if ('serviceWorker' in navigator && !native && !Monetize.portal && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 if (DEV_HOST) window.__sky = { get G() { return G; }, Monetize, previewChar, openTourLobby, showTourPrize, showDailyPrize, openLeaderboard, openShop, showResults, showRestore, wallBench: n => { const t0 = performance.now(); for (let i = 0; i < n; i++) drawWalls(i / 60, 1 / 60, G, G.p.x, G.p.y); return (performance.now() - t0) / n; }, train: r => startTraining(r), restore: r => { save.restoreMsg = r; showRestore(); }, duelSetup: (r) => duelSetup(r || {}, () => {}, () => {}), duelLobby: (r, q) => duelLobby(r, q), edge: (k, f = 2.5) => { edgeK = k; edgeFx = f; }, Vault, vaultFlush, eco, act, startGame, C, save, DUEL, openDuel, openShop, openSeason, closeSheet: () => closeSheet(), openChests: () => openChests(), refresh: () => refreshHome(), openAchievements, openLeaderboard, openLevel, openMissions, openSets, openSettings, openStreak, openTasks, openWheel, offerRescue: (...a) => offerRescue(...a), tutorial: () => tutorial() };
