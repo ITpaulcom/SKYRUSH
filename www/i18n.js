@@ -66,6 +66,13 @@ function one(t, depth) {
   return t;
 }
 
+// Zusätzliche Übersetzungen zur Laufzeit (z. B. Namen eigener Artikel aus der Zentrale: Deutsch → Englisch für alle anderen Sprachen)
+export function addWords(pairs) {
+  if (lang === 'de' || !Array.isArray(pairs)) return;
+  for (const [k, v] of pairs) if (typeof k === 'string' && typeof v === 'string' && k && v && !exact.has(k)) exact.set(k, v);
+  cache.clear();
+}
+
 // ---------- DOM ----------
 const ATTRS = ['title', 'placeholder', 'aria-label'];
 function walk(node) {

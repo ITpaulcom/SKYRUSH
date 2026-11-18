@@ -7,6 +7,7 @@ import * as M from './meta.js';
 import * as C from './core.js';
 import { CHARS, STYLE, SETS, UPGRADE_COST, MISSIONS, PACKS } from './catalog.js';
 import { CONFIG } from './config.js';
+const CUSTOM_ID = /^x[a-z0-9]{4,15}$/, CUSTOM_KEY = /^(jet|trail|shoe|hat|land|face):x[a-z0-9]{4,15}$/;   // wie in shopcfg.js
 
 // Diese Felder gehören zum Tresor (Server ist maßgeblich). Alles andere (Name, Ton, Steuerung, gewählte Figur …) bleibt auf dem Gerät.
 export const ECON_KEYS = ['coins', 'owned', 'ownedStyle', 'levels', 'mult', 'missions', 'chests', 'tokens', 'xp', 'level', 'streak', 'spin', 'tasks', 'ach', 'tot',
@@ -25,12 +26,13 @@ export const styleItem = key => { const [cat, k] = String(key).split(':'); retur
 // ---------- Grundzustand / Bereinigung ----------
 export function ensure(s) {
   s.coins = int(s.coins, 0, 1e9);
-  s.owned = [...new Set(['hops', ...(Array.isArray(s.owned) ? s.owned : [])])].filter(k => CHARS[k]);
+  // eigene Artikel aus der Zentrale (ID „x…“) bleiben im Besitz, auch wenn der Katalog sie gerade (noch) nicht kennt
+  s.owned = [...new Set(['hops', ...(Array.isArray(s.owned) ? s.owned : [])])].filter(k => CHARS[k] || CUSTOM_ID.test(k));
   const lv = s.levels && typeof s.levels === 'object' ? s.levels : {}; s.levels = {}; for (const k of POWERS) s.levels[k] = int(lv[k], 0, C.MAX_LEVEL);
   s.mult = int(s.mult, 1, 30) || 1;
   for (const k of ['bestH', 'best', 'lastH', 'games', 'milestone']) s[k] = int(s[k], 0, 1e9);
   M.ensure(s);
-  s.ownedStyle = [...new Set([...DEFAULT_STYLE, ...s.ownedStyle.filter(x => styleItem(x))])];
+  s.ownedStyle = [...new Set([...DEFAULT_STYLE, ...s.ownedStyle.filter(x => styleItem(x) || CUSTOM_KEY.test(x))])];
   s.chests = s.chests.filter(c => M.CHEST[c]);
   s.tokens.headstart = int(s.tokens.headstart, 0, 1e6);
   if (!Array.isArray(s.missions) || s.missions.length !== 3) s.missions = newMissions(s);
@@ -294,7 +296,7 @@ export function migrate(src, { proven = 0, fresh = false } = {}) {
   const h = trustedHeight(s.bestH, proven);
   if (h < s.bestH) notes.push('h:' + s.bestH);
   s.bestH = h; s.milestone = Math.min(s.milestone, Math.floor(proven / 10000));
-  s.owned = s.owned.filter(k => !CHARS[k].unlock || h >= CHARS[k].unlock);
+  s.owned = s.owned.filter(k => !CHARS[k]?.unlock || h >= CHARS[k].unlock);
   const B = trustBudget(proven, fresh);
   if (s.coins > B) { notes.push('coins:' + s.coins); s.coins = B; }
   // Sammlung: was in den Rahmen passt, bleibt (in der Reihenfolge, in der es dazukam)

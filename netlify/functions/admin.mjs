@@ -15,7 +15,7 @@ import { setBan, unboard, flag } from '../lib/anticheat.mjs';
 import { setHeight, setLevels } from '../lib/vault.mjs';
 import { login, session, logout, securityInfo, log, readLog, readIndex, indexPut, summary, reindex, runOp, opQueueKey } from '../lib/admin.mjs';
 import { readCfg, writeCfg, PLACEMENTS } from '../lib/appcfg.mjs';
-import { shopItems, applyShop } from '../../www/shopcfg.js';
+import { shopItems, applyShop, CUSTOM_OPTS, CUSTOM_MAX } from '../../www/shopcfg.js';
 import { PACKS, STYLE } from '../../www/catalog.js';
 import { CONFIG as BASE } from '../../www/config.js';
 import { salesDays, LIST_EUR } from '../lib/sales.mjs';
@@ -47,11 +47,21 @@ export default async req => {
       return json({ ok: true, cfg: r.cfg });
     }
     if (b.action === 'shop') {
-      const before = await readCfg(true), r = await writeCfg({ ads: before.ads, google: before.google, shop: b.shop || {} }, 'Zentrale');
+      // eigene Artikel bleiben erhalten – die verwaltet die Ansicht „Neue Artikel“
+      const before = await readCfg(true), r = await writeCfg({ ads: before.ads, google: before.google, shop: { ...(b.shop || {}), custom: (before.shop || {}).custom } }, 'Zentrale');
       if (r.errors) return json({ error: 'invalid', fields: r.errors }, 400);
       const n = Object.keys((r.cfg.shop || {}).items || {}).length, sl = (r.cfg.shop || {}).sale;
       await log(req, 'shop', null, `${n} Artikel angepasst${sl ? ` · Rabatt ${sl.pct} %` : ''}`);
       return json({ ok: true, shop: r.cfg.shop || {} });
+    }
+    if (b.action === 'custom') {   // eigene Artikel anlegen / ändern / löschen (immer die ganze Liste)
+      const before = await readCfg(true), prev = ((before.shop || {}).custom || []).map(x => x.id);
+      const list = (Array.isArray(b.custom) ? b.custom : []).map(x => ({ ...x, at: x.at || Date.now() }));
+      const r = await writeCfg({ ads: before.ads, google: before.google, shop: { ...(before.shop || {}), custom: list } }, 'Zentrale');
+      if (r.errors) return json({ error: 'invalid', fields: r.errors }, 400);
+      const now = ((r.cfg.shop || {}).custom || []), add = now.filter(x => !prev.includes(x.id)).map(x => x.name), del = prev.filter(id => !now.some(x => x.id === id)).length;
+      await log(req, 'custom', null, `${now.length} eigene Artikel${add.length ? ' · neu: ' + add.join(', ') : ''}${del ? ` · ${del} gelöscht` : ''}`.slice(0, 400));
+      return json({ ok: true, custom: now });
     }
     if (!UID.test(b.uid || '')) return json({ error: 'uid' }, 400);
     const p = await st.get(`players/${b.uid}`, { type: 'json' });
@@ -125,12 +135,16 @@ export default async req => {
       base: { testMode: !!a.testMode, androidAppId: a.androidAppId || '', iosAppId: a.iosAppId || '', android: a.android || {}, ios: a.ios || {}, webPublisherId: a.webPublisherId || '', testDeviceIds: a.testDeviceIds || [], interstitial: a.interstitial || {}, rewardedMaxPerDay: a.rewardedMaxPerDay, estimatedEcpm: a.estimatedEcpm || {} } }, 200, noStore);
   }
   if (view === 'shop') {
-    const c = await readCfg(true); applyShop({});   // Grundpreise zeigen
+    const c = await readCfg(true); applyShop({ custom: (c.shop || {}).custom });   // Grundpreise zeigen (eigene Artikel mit)
     const items = shopItems().map(x => ({ id: x.id, cat: x.cat, name: x.name, base: x.base, rar: x.rar || '' }));
     const cats = Object.fromEntries(Object.entries(STYLE).map(([k, v]) => [k, v.title])); cats.char = 'Figuren';
     const packs = PACKS.filter(p => !p.baseHidden).map(p => ({ id: p.id, coins: p.coins, tag: p.baseTag || '', once: !!p.once }));
     applyShop(c.shop);
     return json({ shop: c.shop || {}, items, cats, packs, updated: c.updated || 0 }, 200, noStore);
+  }
+  if (view === 'custom') {
+    const c = await readCfg(true), sh = c.shop || {};
+    return json({ custom: sh.custom || [], items: sh.items || {}, opts: CUSTOM_OPTS, max: CUSTOM_MAX, updated: c.updated || 0 }, 200, noStore);
   }
   if (view === 'addiag') {   // Werbe-Diagnose der letzten 3 Tage
     const days = [0, 1, 2].map(i => new Date(Date.now() - i * 864e5).toISOString().slice(0, 10));

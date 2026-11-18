@@ -44,6 +44,11 @@
   main{max-width:1200px;margin:0 auto;padding:18px 16px 70px}
   h2{margin:4px 0 12px;font-size:22px} h3{margin:0 0 10px;font-size:16px}
   .card{background:var(--card);border:2px solid var(--ink);border-radius:16px;padding:14px 16px;margin-bottom:14px}
+  .cgrid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+  .citem{display:flex;gap:10px;align-items:center;border:2px solid var(--ink);border-radius:12px;padding:8px;background:#fff}
+  .citem canvas,.cprev canvas{border-radius:10px;border:2px solid var(--ink);flex:none;width:96px;height:96px}
+  .cform{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}.cprev{display:flex;flex-direction:column;align-items:center;gap:4px}.cprev canvas{width:150px;height:150px}
+  .cpick{display:inline-flex;align-items:center;gap:3px;margin-right:6px} input[type=color]{width:42px;height:32px;padding:0;border:2px solid var(--ink);border-radius:8px;background:#fff;cursor:pointer}
   .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
   .kpi{background:#fff;border:2px solid var(--ink);border-radius:14px;padding:10px 12px}
@@ -179,14 +184,14 @@ $('lf').onsubmit = async e => {
 $('out').onclick = async () => { try { await api('', { action: 'logout' }); } catch {} showLogin('Abgemeldet.'); };
 
 // ---------- Navigation ----------
-const VIEWS = { dash: 'Übersicht', money: 'Einnahmen', players: 'Spieler', boards: 'Ranglisten', ac: 'Anti-Cheat', ads: 'Werbung', shop: 'Shop', acct: 'Google-Login', cfg: 'Einstellungen', log: 'Protokoll', sec: 'Sicherheit' };
+const VIEWS = { dash: 'Übersicht', money: 'Einnahmen', players: 'Spieler', boards: 'Ranglisten', ac: 'Anti-Cheat', ads: 'Werbung', shop: 'Shop', items: 'Neue Artikel', acct: 'Google-Login', cfg: 'Einstellungen', log: 'Protokoll', sec: 'Sicherheit' };
 let VIEW = 'dash', DASH = null, PLAYERS = null;
 function navRender(counts = {}) { $('nav').innerHTML = Object.entries(VIEWS).map(([k, v]) => `<button data-v="${k}" class="${k === VIEW ? 'on' : ''}">${v}${counts[k] ? `<span class="cnt">${counts[k]}</span>` : ''}</button>`).join(''); }
 $('nav').onclick = e => { const b = e.target.closest('[data-v]'); if (b) go(b.dataset.v); };
 async function go(v) {
   if (!VIEWS[v]) v = 'dash'; VIEW = v; history.replaceState(null, '', '#' + v); navRender(go.counts);
   $('main').innerHTML = '<p class="muted">Lädt …</p>';
-  try { await ({ dash: vDash, money: vMoney, players: vPlayers, boards: vBoards, ac: vAc, ads: vAds, shop: vShop, acct: vAcct, cfg: vCfg, log: vLog, sec: vSec })[v](); }
+  try { await ({ dash: vDash, money: vMoney, players: vPlayers, boards: vBoards, ac: vAc, ads: vAds, shop: vShop, items: vItems, acct: vAcct, cfg: vCfg, log: vLog, sec: vSec })[v](); }
   catch (e) { if (e.message !== 'auth') $('main').innerHTML = `<p class="card" style="color:var(--bad)">Fehler: ${esc(e.message)}</p>`; }
 }
 const loadDash = async (force = false) => (DASH && !force ? DASH : (DASH = await api('?view=dash&days=30')));
@@ -589,10 +594,184 @@ async function vShop() {
   };
 }
 
+// ---------- Neue Artikel: eigene Figuren, Streams und Sneaker ohne App-Update ----------
+// Vorschau mit denselben Zeichen-Funktionen wie im Spiel (Sneaker, Stream-Formen, Figuren-Zubehör)
+const PV = (() => {
+  const STYLE = { shoe: { items: { basic: {} } } };
+  function rr(x, y, w, h, r, g) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+  function drawShoes(g, key, r, look0, boots, t, vy) {
+  const sh = STYLE.shoe.items[key] || STYLE.shoe.items.basic;
+  g.lineWidth = 3; g.strokeStyle = '#1B1240'; g.lineJoin = 'round';
+  for (const s of [-1, 1]) {
+    const fx = s * r * .42, fy = r * .98;
+    if (boots) {   // Sprungschuhe aktiv: Feder unter der Sohle
+      g.strokeStyle = '#FF5A7A'; g.lineWidth = 2.5; g.beginPath();
+      for (let i = 0; i <= 4; i++) g.lineTo(fx + (i % 2 ? r * .14 : -r * .14), fy + r * .14 + i * r * .07);
+      g.stroke(); g.strokeStyle = '#1B1240'; g.lineWidth = 3;
+    }
+    if (key === 'basic' || !sh.up) {
+      g.fillStyle = boots ? '#FF5A7A' : look0.body[1]; g.beginPath(); g.ellipse(fx, fy, r * .26, r * .14, 0, 0, 7); g.fill(); g.stroke(); continue;
+    }
+    const L = r * .33, H = r * (sh.high ? .3 : .2), toe = fx + s * L, heel = fx - s * L;
+    if (sh.glow) { g.save(); g.shadowColor = sh.acc; g.shadowBlur = 14; }
+    if (sh.flame && vy > 2) { g.fillStyle = `hsl(${30 + Math.sin(t * 40) * 15},100%,60%)`; g.beginPath(); g.moveTo(heel, fy + r * .05); g.lineTo(heel - s * r * .12, fy + r * .32 + Math.sin(t * 50) * r * .05); g.lineTo(heel + s * r * .1, fy + r * .12); g.closePath(); g.fill(); }
+    // Obermaterial
+    let up = sh.up;
+    if (sh.shine) { up = g.createLinearGradient(fx - L, fy - H, fx + L, fy + H * .4); up.addColorStop(0, '#FFF6C2'); up.addColorStop(.5, '#FFC83D'); up.addColorStop(1, '#C98A00'); }
+    if (sh.stars) { up = g.createLinearGradient(fx - L, fy - H, fx + L, fy); up.addColorStop(0, '#5B2BD1'); up.addColorStop(1, '#1A0A4A'); }
+    g.fillStyle = up;
+    g.beginPath(); g.moveTo(heel, fy + H * .3); g.lineTo(heel + s * r * .02, fy - H); g.quadraticCurveTo(fx, fy - H * 1.05, fx + s * L * .25, fy - H * .35);
+    g.quadraticCurveTo(toe + s * r * .04, fy - H * .3, toe, fy + H * .3); g.closePath(); g.fill(); g.stroke();
+    if (sh.glow) g.restore();
+    // Sohle
+    if (sh.cloud) { g.fillStyle = sh.sole; g.beginPath(); for (let i = 0; i < 3; i++) g.arc(fx - L * .66 + i * L * .66, fy + H * .38, r * .09, 0, 7); g.fill(); g.stroke(); }
+    else { g.fillStyle = sh.sole; rr(fx - L - r * .02, fy + H * .2, L * 2 + r * .04, r * .1, r * .05, g); g.fill(); g.stroke(); }
+    // Details: Streifen, Schnürung, Sterne
+    g.strokeStyle = sh.acc; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(heel + s * L * .3, fy + H * .05); g.quadraticCurveTo(fx, fy - H * .45, fx + s * L * .45, fy - H * .05); g.stroke();
+    if (sh.high) { g.fillStyle = sh.acc; g.beginPath(); g.arc(heel + s * L * .35, fy - H * .45, r * .045, 0, 7); g.fill(); }
+    if (sh.stars) { g.fillStyle = '#FFFFFF'; for (let i = 0; i < 3; i++) { g.beginPath(); g.arc(fx + s * (i - 1) * L * .45, fy - H * (.15 + (i % 2) * .3), r * .025, 0, 7); g.fill(); } }
+    g.strokeStyle = '#1B1240'; g.lineWidth = 3;
+  }
+}
+  function shapeAt(g, sh, x, y, r, col, t = 0) {
+  if (sh === 'mix') sh = (Math.floor(x + y) & 1) ? 'star' : 'circle';
+  g.fillStyle = col; g.strokeStyle = col;
+  if (sh === 'sq') { g.fillRect(x - r, y - r, r * 2, r * 2); return; }
+  if (sh === 'note') { g.font = `700 ${r * 3}px "Space Grotesk",sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText((Math.floor(x) & 1) ? '♪' : '♫', x, y); return; }
+  if (sh === 'coin') { g.beginPath(); g.ellipse(x, y, r * Math.abs(Math.cos(t * 9)) + .5, r, 0, 0, 7); g.fill(); g.strokeStyle = '#B07A00'; g.lineWidth = 1.5; g.stroke(); return; }
+  if (sh === 'ring') { g.lineWidth = Math.max(1.5, r * .25); g.beginPath(); g.arc(x, y, r * 1.2, 0, 7); g.stroke(); g.fillStyle = 'rgba(255,255,255,.7)'; g.beginPath(); g.arc(x - r * .4, y - r * .4, r * .25, 0, 7); g.fill(); return; }
+  if (sh === 'heart') { g.beginPath(); g.moveTo(x, y + r); g.bezierCurveTo(x - r * 1.6, y - r * .2, x - r * .6, y - r * 1.4, x, y - r * .45); g.bezierCurveTo(x + r * .6, y - r * 1.4, x + r * 1.6, y - r * .2, x, y + r); g.fill(); return; }
+  if (sh === 'star') { g.save(); g.translate(x, y); g.rotate(t * 4); starPath(g, r * 1.3, .45); g.fill(); g.restore(); return; }
+  g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+}
+  function starPath(g, r, inner = .5) {
+  g.beginPath();
+  for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr2 = i % 2 ? r * inner : r; g.lineTo(Math.cos(a) * rr2, Math.sin(a) * rr2); }
+  g.closePath();
+}
+  function char(ctx, look0, t) {
+    const r = 34, hatOn = false, mt = null, drawMetalShine = () => {}; ctx.save(); ctx.translate(60, 66);
+    ctx.lineWidth = 3.5; ctx.strokeStyle = '#1B1240'; ctx.lineJoin = 'round';
+      if (look0.acc === 'ears') { ctx.fillStyle = look0.body[1]; for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(s * r * .3, -r * .8); ctx.lineTo(s * r * .85, -r * 1.35); ctx.lineTo(s * r * .9, -r * .45); ctx.closePath(); ctx.fill(); ctx.stroke(); } }
+      if (look0.acc === 'antenna' && !hatOn) { ctx.beginPath(); ctx.moveTo(0, -r); ctx.lineTo(0, -r * 1.5); ctx.stroke(); ctx.fillStyle = '#FF5A7A'; ctx.beginPath(); ctx.arc(0, -r * 1.55, r * .16, 0, 7); ctx.fill(); ctx.stroke(); }
+      if (look0.acc === 'panda') { ctx.fillStyle = '#1B1240'; for (const s of [-1, 1]) { ctx.beginPath(); ctx.arc(s * r * .68, -r * .7, r * .3, 0, 7); ctx.fill(); } }
+      if (look0.acc === 'alien' && !hatOn) for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(s * r * .3, -r * .85); ctx.quadraticCurveTo(s * r * .55, -r * 1.35, s * r * .7, -r * 1.5); ctx.stroke(); ctx.fillStyle = '#FF6BD6'; ctx.beginPath(); ctx.arc(s * r * .72, -r * 1.55, r * .15, 0, 7); ctx.fill(); ctx.stroke(); }
+      if (look0.acc === 'flame' && !hatOn) { const fl = Math.sin(t * 14) * r * .08; ctx.fillStyle = '#FF8A2B'; ctx.beginPath(); ctx.moveTo(-r * .45, -r * .75); ctx.quadraticCurveTo(-r * .5, -r * 1.3, -r * .15, -r * 1.25 + fl); ctx.quadraticCurveTo(-r * .05, -r * 1.75, r * .2, -r * 1.45 - fl); ctx.quadraticCurveTo(r * .55, -r * 1.35, r * .45, -r * .75); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#FFE066'; ctx.beginPath(); ctx.moveTo(-r * .2, -r * .85); ctx.quadraticCurveTo(-r * .1, -r * 1.25 - fl, r * .1, -r * 1.2); ctx.quadraticCurveTo(r * .25, -r * 1.05, r * .2, -r * .85); ctx.closePath(); ctx.fill(); }
+      if (look0.acc === 'unicorn') { ['#FF8FB1', '#FFC83D', '#3BE8A4', '#38C6FF', '#B25CFF'].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(-r * (.55 + i * .1), -r * (.55 - i * .2), r * .22, r * .14, -.8, 0, 7); ctx.fill(); }); }
+      if (look0.acc === 'leaf' && !hatOn) { ctx.fillStyle = '#2FCB77'; ctx.beginPath(); ctx.ellipse(r * .25, -r * 1.15, r * .35, r * .16, -.6, 0, 7); ctx.fill(); ctx.stroke(); }
+      const bg = ctx.createRadialGradient(-r * .35, -r * .4, r * .1, 0, 0, r * 1.05);
+      if (mt) mt.stops.forEach((c, i) => bg.addColorStop([0, .22, .6, 1][i], c)); else { bg.addColorStop(0, '#FFFFFF'); bg.addColorStop(.25, look0.body[0]); bg.addColorStop(1, look0.body[1]); }
+      ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(0, 0, r, 0, 7); ctx.fill(); ctx.stroke();
+      if (mt) drawMetalShine(look0.metal, r, t);
+      if (look0.acc === 'crown' && !hatOn) { ctx.fillStyle = '#FFC83D'; ctx.beginPath(); ctx.moveTo(-r * .45, -r * .8); ctx.lineTo(-r * .45, -r * 1.3); ctx.lineTo(-r * .2, -r * 1.05); ctx.lineTo(0, -r * 1.4); ctx.lineTo(r * .2, -r * 1.05); ctx.lineTo(r * .45, -r * 1.3); ctx.lineTo(r * .45, -r * .8); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+      if (look0.acc === 'penguin') { ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.ellipse(0, r * .18, r * .72, r * .7, 0, 0, 7); ctx.fill(); ctx.fillStyle = '#FFA733'; ctx.beginPath(); ctx.moveTo(-r * .14, r * .1); ctx.lineTo(r * .14, r * .1); ctx.lineTo(0, r * .3); ctx.closePath(); ctx.fill(); ctx.lineWidth = 2; ctx.stroke(); ctx.lineWidth = 3.5; }
+      if (look0.acc === 'panda') { ctx.fillStyle = '#1B1240'; for (const s of [-1, 1]) { ctx.beginPath(); ctx.ellipse(s * r * .34, -r * .1, r * .3, r * .36, s * .5, 0, 7); ctx.fill(); } }
+      if (look0.acc === 'ninja' && !hatOn) { ctx.fillStyle = '#FF3D5A'; ctx.fillRect(-r * .98, -r * .62, r * 1.96, r * .24); ctx.lineWidth = 2.5; ctx.strokeRect(-r * .98, -r * .62, r * 1.96, r * .24); const w0 = Math.sin(t * 10) * r * .08; ctx.beginPath(); ctx.moveTo(r * .9, -r * .5); ctx.quadraticCurveTo(r * 1.3, -r * .6 + w0, r * 1.55, -r * .35 - w0); ctx.lineTo(r * 1.45, -r * .2); ctx.quadraticCurveTo(r * 1.2, -r * .4, r * .9, -r * .4); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+      if (look0.acc === 'unicorn' && !hatOn) { const hg = ctx.createLinearGradient(0, -r * 1.6, 0, -r * .8); hg.addColorStop(0, '#FFF6C2'); hg.addColorStop(1, '#FFC83D'); ctx.fillStyle = hg; ctx.beginPath(); ctx.moveTo(-r * .18, -r * .86); ctx.lineTo(r * .05, -r * 1.65); ctx.lineTo(r * .22, -r * .84); ctx.closePath(); ctx.fill(); ctx.lineWidth = 2.5; ctx.stroke(); ctx.lineWidth = 3.5; }
+    
+    ctx.lineWidth = 3; ctx.strokeStyle = '#1B1240';
+    for (const sx of [-1, 1]) { ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.ellipse(sx * r * .32, -r * .12, r * .2, r * .25, 0, 0, 7); ctx.fill(); ctx.lineWidth = 2.5; ctx.stroke(); ctx.fillStyle = '#1B1240'; ctx.beginPath(); ctx.arc(sx * r * .3, -r * .1, r * .1, 0, 7); ctx.fill(); }
+    ctx.beginPath(); ctx.arc(0, r * .22, r * .22, .25, Math.PI - .25); ctx.lineWidth = 3; ctx.stroke();
+    drawShoes(ctx, 'basic', r, look0, false, t, 0);
+    ctx.restore();
+  }
+  function draw(cv, it, t = 0) {
+    const ctx = cv.getContext('2d'); ctx.clearRect(0, 0, cv.width, cv.height);
+    const bg = ctx.createLinearGradient(0, 0, 0, cv.height); bg.addColorStop(0, '#FFE7F1'); bg.addColorStop(1, '#E6F4FF'); ctx.fillStyle = bg; ctx.fillRect(0, 0, cv.width, cv.height);
+    if (it.cat === 'char') { if (it.body && it.body.length === 2) { const bd = it.body; const look0 = { body: bd, acc: it.acc || 'none' };
+        // Körper erst nach dem Zubehör hinter dem Kopf zeichnen (wie im Spiel): Ohren/Antenne… liegen hinter dem Körper
+        char(ctx, look0, t); } }
+    else if (it.cat === 'trail') {
+      const cols = it.cols && it.cols.length ? it.cols : ['#FFFFFF'];
+      ctx.fillStyle = 'rgba(27,18,64,.85)'; ctx.fillRect(0, 0, cv.width, cv.height);
+      for (let i = 0; i < 26; i++) { const k = i / 26, x = 18 + k * 84 + Math.sin(t * 3 + i) * 3, y = 100 - k * 70 + Math.cos(t * 2 + i * .7) * 4, r = (it.sh && it.sh !== 'circle' ? 9 : 11) * (1 - k * .55);
+        const col = it.sh === 'rainbow' ? `hsl(${(t * 140 + i * 28) % 360},100%,62%)` : cols[i % cols.length];
+        ctx.globalAlpha = 1 - k * .6; shapeAt(ctx, it.sh === 'rainbow' || it.sh === 'circle' ? 'circle' : it.sh, x, y, r * .55, col, i * .2 + t); }
+      ctx.globalAlpha = 1;
+    } else if (it.cat === 'shoe') {
+      const sh = { up: it.up, sole: it.sole, acc: it.acc }; for (const f of it.fx || []) sh[f] = true; STYLE.shoe.items.prev = sh;
+      ctx.save(); ctx.translate(60, 30); ctx.scale(2.3, 2.3); drawShoes(ctx, 'prev', 26, { body: ['#FFE066', '#FFB020'] }, false, t, 4); ctx.restore();
+    }
+  }
+  return { draw };
+})();
+async function vItems() {
+  const d = await api('?view=custom'), O = d.opts;
+  let list = (d.custom || []).map(x => ({ ...x })), edit = null;
+  const newId = () => 'x' + [...crypto.getRandomValues(new Uint8Array(8))].map(b => 'abcdefghijklmnopqrstuvwxyz0123456789'[b % 36]).join('');
+  const blank = cat => cat === 'char' ? { cat, name: '', nameEn: '', price: 8000, body: ['#FFD6A5', '#FF8A3D'], acc: 'none' }
+    : cat === 'trail' ? { cat, name: '', nameEn: '', price: 3000, rar: 'r', sh: 'star', cols: ['#FFFFFF', '#FFC83D', '#FF6BD6'] }
+    : { cat, name: '', nameEn: '', price: 4000, rar: 'r', up: '#FF4D6D', sole: '#FFFFFF', acc: '#FFC83D', fx: [] };
+  const sel = (id, opts, v) => `<select id="${id}">${Object.entries(opts).map(([k, n]) => `<option value="${k}" ${k === v ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select>`;
+  const col = (id, v) => `<input type="color" id="${id}" value="${v || '#FFFFFF'}">`;
+  const card = (x, i) => `<div class="citem" data-i="${i}"><canvas width="120" height="120" data-pv="${i}"></canvas><div><b>${esc(x.name)}</b>${x.nameEn ? ` <small class="muted">${esc(x.nameEn)}</small>` : ''}<br><small class="muted">${O.cats[x.cat]}${x.rar ? ' · ' + O.rar[x.rar] : ''} · ${fmt(x.price)} Münzen${(d.items[(x.cat === 'char' ? 'char' : x.cat) + ':' + x.id] || {}).hidden ? ' · <b style="color:var(--bad)">ausgeblendet</b>' : ''}</small><div class="row" style="margin-top:6px"><button class="btn s w" data-ed="${i}">Bearbeiten</button><button class="btn s r" data-del="${i}">Löschen</button></div></div></div>`;
+  const render = () => {
+    $('main').innerHTML = `<h2>Neue Artikel</h2>
+      <p class="muted">Eigene Figuren, Streams und Sneaker – erscheinen ohne App-Update bei allen Spielern im Shop (nach dem nächsten Spielstart). Sie werden aus Bausteinen gebaut, die das Spiel schon kann: Farben, Zubehör, Formen und Effekte. Preis-Änderungen, Rabatte, „Neu“-Abzeichen und Ausblenden machst du danach wie gewohnt im Tab <b>Shop</b>.</p>
+      <div class="card"><h3>➕ Neuen Artikel anlegen</h3><div class="row">${Object.entries(O.cats).map(([k, n]) => `<button class="btn w" data-new="${k}">${k === 'char' ? '🙂' : k === 'trail' ? '💨' : '👟'} ${n}</button>`).join('')}</div>
+        <p class="small muted" style="margin:8px 0 0">Neue Hüte, Jetpacks, Gesichter oder Lande-Effekte brauchen eigene Zeichnungen im Spiel – die kommen mit einem Update.</p></div>
+      <div id="ced"></div>
+      <div class="card"><h3>Deine Artikel <small class="muted">${list.length} / ${d.max}</small></h3>${list.length ? `<div class="cgrid">${list.map(card).join('')}</div>` : '<div class="empty">Noch keine eigenen Artikel.</div>'}</div>`;
+    $('main').querySelectorAll('canvas[data-pv]').forEach(cv => PV.draw(cv, list[+cv.dataset.pv], 1));
+    $('main').querySelectorAll('[data-new]').forEach(b => b.onclick = () => { edit = { i: -1, it: blank(b.dataset.new) }; form(); });
+    $('main').querySelectorAll('[data-ed]').forEach(b => b.onclick = () => { const i = +b.dataset.ed; edit = { i, it: JSON.parse(JSON.stringify(list[i])) }; form(); });
+    $('main').querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+      const x = list[+b.dataset.del];
+      if (!confirm(`„${x.name}“ endgültig löschen?\n\nWer ihn schon gekauft hat, sieht ihn danach nicht mehr (bekommt aber nichts zurück). Meist besser: im Tab „Shop“ bei „Aus“ ausblenden – dann behalten Käufer ihn.`)) return;
+      const next = list.filter((_, j) => j !== +b.dataset.del);
+      try { const r = await api('', { action: 'custom', custom: next }); list = r.custom; toast('✓ Gelöscht'); render(); } catch (e) { toast('Ging nicht: ' + e.message, true); }
+    });
+  };
+  let raf = 0;
+  const form = () => {
+    const it = edit.it, c = it.cat;
+    $('ced').innerHTML = `<div class="card"><h3>${edit.i < 0 ? 'Neu' : 'Bearbeiten'}: ${O.cats[c]}</h3><div class="cform"><div class="form grow">
+      <div class="fl"><span><b>Name</b><small>so heißt der Artikel im Shop (Deutsch)</small></span><span><input id="cf-name" maxlength="28" value="${esc(it.name)}" placeholder="z. B. ${c === 'char' ? 'Blubbo' : c === 'trail' ? 'Glitzerstaub' : 'Turbo-Treter'}"></span></div>
+      <div class="fl"><span><b>Name englisch</b><small>für alle anderen Sprachen · leer = deutscher Name</small></span><span><input id="cf-en" maxlength="28" value="${esc(it.nameEn || '')}"></span></div>
+      <div class="fl"><span><b>Preis</b><small>Münzen · wird auf 10 gerundet</small></span><span><input type="number" id="cf-price" min="10" max="1000000" step="10" value="${it.price}"></span></div>
+      ${c !== 'char' ? `<div class="fl"><span><b>Seltenheit</b><small>Farbe des Rahmens im Shop</small></span><span>${sel('cf-rar', O.rar, it.rar)}</span></div>` : ''}
+      ${c === 'char' ? `<div class="fl"><span><b>Farben</b><small>hell (Licht) · dunkel (Schatten, Füße)</small></span><span>${col('cf-b0', it.body[0])} ${col('cf-b1', it.body[1])}</span></div>
+        <div class="fl"><span><b>Zubehör</b><small>wird nur gezeigt, wenn kein Hut getragen wird (Ohren, Pinguin, Panda, Einhorn-Mähne immer)</small></span><span>${sel('cf-acc', O.acc, it.acc)}</span></div>` : ''}
+      ${c === 'trail' ? `<div class="fl"><span><b>Form</b></span><span>${sel('cf-sh', O.sh, it.sh)}</span></div>
+        <div class="fl"><span><b>Farben</b><small>1–4 · Haken = verwenden</small></span><span>${[0, 1, 2, 3].map(k => `<label class="cpick"><input type="checkbox" id="cf-ck${k}" ${it.cols[k] ? 'checked' : ''}>${col('cf-c' + k, it.cols[k] || ['#FFFFFF', '#FFC83D', '#FF6BD6', '#38C6FF'][k])}</label>`).join('')}</span></div>` : ''}
+      ${c === 'shoe' ? `<div class="fl"><span><b>Farben</b><small>Oberteil · Sohle · Akzent (Schnürung/Leuchten)</small></span><span>${col('cf-up', it.up)} ${col('cf-sole', it.sole)} ${col('cf-acc2', it.acc)}</span></div>
+        <div class="fl"><span><b>Effekte</b><small>Gold-Glanz und Galaxie ersetzen die Oberteil-Farbe</small></span><span class="chips">${Object.entries(O.shoe).map(([k, n]) => `<label class="chip"><input type="checkbox" class="cf-fx" value="${k}" ${it.fx.includes(k) ? 'checked' : ''}> ${esc(n)}</label>`).join('')}</span></div>` : ''}
+      </div><div class="cprev"><canvas id="cf-pv" width="120" height="120"></canvas><small class="muted">Vorschau</small></div></div>
+      <div class="row" style="margin-top:10px;justify-content:flex-end"><button class="btn w" id="cf-cancel">Abbrechen</button><button class="btn" id="cf-save">${edit.i < 0 ? 'Anlegen' : 'Speichern'}</button></div></div>`;
+    const read = () => {
+      const o = { ...it, name: $('cf-name').value.trim(), nameEn: $('cf-en').value.trim(), price: +$('cf-price').value };
+      if (c !== 'char') o.rar = $('cf-rar').value;
+      if (c === 'char') { o.body = [$('cf-b0').value.toUpperCase(), $('cf-b1').value.toUpperCase()]; o.acc = $('cf-acc').value; }
+      if (c === 'trail') { o.sh = $('cf-sh').value; o.cols = [0, 1, 2, 3].filter(k => $('cf-ck' + k).checked).map(k => $('cf-c' + k).value.toUpperCase()); }
+      if (c === 'shoe') { o.up = $('cf-up').value.toUpperCase(); o.sole = $('cf-sole').value.toUpperCase(); o.acc = $('cf-acc2').value.toUpperCase(); o.fx = [...$('ced').querySelectorAll('.cf-fx:checked')].map(x => x.value); }
+      if (!o.nameEn) delete o.nameEn;
+      return o;
+    };
+    cancelAnimationFrame(raf);
+    const loop = () => { if (!$('cf-pv')) return; PV.draw($('cf-pv'), read(), performance.now() / 1000); raf = requestAnimationFrame(loop); }; loop();
+    $('cf-cancel').onclick = () => { cancelAnimationFrame(raf); edit = null; $('ced').innerHTML = ''; };
+    $('cf-save').onclick = async () => {
+      const o = read();
+      if (o.name.length < 2) return toast('Bitte einen Namen eingeben (mind. 2 Zeichen).', true);
+      if (!(o.price >= 10 && o.price <= 1000000)) return toast('Preis zwischen 10 und 1.000.000 Münzen.', true);
+      if (c === 'trail' && o.sh !== 'rainbow' && !o.cols.length) return toast('Mindestens eine Farbe anhaken.', true);
+      if (list.some((x, j) => j !== edit.i && x.name.toLowerCase() === o.name.toLowerCase())) return toast('Diesen Namen gibt es schon.', true);
+      if (edit.i < 0) { o.id = newId(); o.at = Date.now(); }
+      const next = list.slice(); if (edit.i < 0) next.unshift(o); else next[edit.i] = o;
+      $('cf-save').disabled = true;
+      try { const r = await api('', { action: 'custom', custom: next }); list = r.custom; cancelAnimationFrame(raf); edit = null; toast('✓ Gespeichert – im Shop ab dem nächsten Spielstart'); render(); }
+      catch (e) { toast('Ging nicht: ' + ((e.j && e.j.fields) || [e.message]).join(', '), true); $('cf-save').disabled = false; }
+    };
+    $('ced').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  render();
+}
+
 // ---------- Protokoll ----------
 async function vLog() {
   const { log } = await api('?view=log');
-  const A = { login: '🔓 Anmeldung', 'login-fail': '⛔ Fehlversuch', 'logout-all': 'Alle abgemeldet', ban: '🚫 Gesperrt', unban: 'Entsperrt', unboard: 'Aus Rangliste', rename: 'Umbenannt', height: 'Rekord', levels: 'Stufen', config: '⚙️ Einstellungen', 'unlink-google': '🔐 Google getrennt' };
+  const A = { login: '🔓 Anmeldung', 'login-fail': '⛔ Fehlversuch', 'logout-all': 'Alle abgemeldet', ban: '🚫 Gesperrt', unban: 'Entsperrt', unboard: 'Aus Rangliste', rename: 'Umbenannt', height: 'Rekord', levels: 'Stufen', config: '⚙️ Einstellungen', custom: '🧩 Neue Artikel', shop: '🏷️ Shop', 'unlink-google': '🔐 Google getrennt' };
   $('main').innerHTML = `<h2>Protokoll</h2><p class="muted">Alles, was in der Zentrale passiert ist – mit Grund. Anschluss nur als Kürzel.</p>
     <div class="card"><div class="wrap">${log.length ? `<table><tr><th>Wann</th><th>Was</th><th>Spieler</th><th>Details</th><th class="hide-s">Anschluss</th></tr>${log.map(l => `<tr><td class="small muted">${dt(l.at)}</td><td>${A[l.a] || (l.a.startsWith('op:') ? '✏️ ' + esc(l.a.slice(3)) : esc(l.a))}</td><td>${l.u ? nameCell(l.n, null, l.u) : ''}</td><td class="small">${esc(l.d)}</td><td class="hide-s small muted">${esc(l.ip)}</td></tr>`).join('')}</table>` : '<p class="empty">Noch leer.</p>'}</div></div>`;
 }

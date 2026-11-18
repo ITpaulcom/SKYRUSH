@@ -61,24 +61,54 @@ export function powerDur(kind, lv) {
   const P = POWER[kind], a = Math.min(lv, CHEAP_LEVEL), b = Math.max(0, lv - CHEAP_LEVEL);
   return P.base + P.per * a + Math.floor(P.per * b / 2);
 }
-// Welten (nur Darstellung, beeinflusst die Simulation nicht). Nach der letzten festen Welt geht es endlos weiter:
-// Welten 4–7 wiederholen sich alle 900 m in neuen Farbvarianten (Farbton gedreht, römische Ziffer im Namen).
+// Welten (nur Darstellung, beeinflusst die Simulation nicht).
+// Bis 10.000 m: 13 feste Welten. Danach je 10.000-m-Abschnitt (nach dem Himmelstor) 9 Welten à ~1.000 m.
+// Die Reihenfolge kommt aus einem Pool von 14 Welten, jede Runde neu gemischt – erst wenn alle 14 dran waren,
+// kommt eine Welt wieder (dann in neuer Farbe, mit römischer Ziffer). Nie zweimal dieselbe Welt hintereinander.
+// base = Nummer der Hintergrund-Grafik (8 = Himmelstor).
 export const BIOMES = [
   { at: 0, name: 'Stadt' }, { at: 2500, name: 'Wolken' }, { at: 6000, name: 'Polarlicht' }, { at: 11000, name: 'Weltall' },
   { at: 17000, name: 'Sternennebel' }, { at: 24000, name: 'Kristallgalaxie' }, { at: 32000, name: 'Sonnenkorona' }, { at: 41000, name: 'Hyperraum' },
+  { at: 51000, name: 'Ringplanet', base: 9 }, { at: 61000, name: 'Kometensturm', base: 11 }, { at: 71000, name: 'Quallenmeer', base: 12 },
+  { at: 80000, name: 'Neonstadt', base: 14 }, { at: 90000, name: 'Schwarzes Loch', base: 10 },
 ];
-export const LOOP_AT = 51000, LOOP_LEN = 9000, LOOP_FROM = 4;
+// Hintergrund-Nummer → Grundname (für die endlosen Abschnitte)
+export const WORLD_NAMES = { 4: 'Sternennebel', 5: 'Kristallgalaxie', 6: 'Sonnenkorona', 7: 'Hyperraum', 9: 'Ringplanet', 10: 'Schwarzes Loch',
+  11: 'Kometensturm', 12: 'Quallenmeer', 13: 'Bonbonwolken', 14: 'Neonstadt', 15: 'Lavaplanet', 16: 'Prismenwelt', 17: 'Uhrwerk-Kosmos', 18: 'Himmelsinseln' };
+const POOL = [18, 13, 15, 16, 17, 9, 4, 11, 5, 12, 6, 14, 7, 10];   // Runde 0 beginnt mit den fünf neuen Welten
+const PER_BLOCK = 9, BLOCK_OFF = 9000, BLOCK_LEN = 100000, SLOT = Math.floor((BLOCK_LEN - BLOCK_OFF) / PER_BLOCK);
+export const LOOP_AT = BLOCK_LEN + BLOCK_OFF;   // ab 10.900 m (nach dem ersten Himmelstor)
 const ROMAN = ['', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+const SEEN0 = new Set(BIOMES.map((b, i) => b.base ?? i));
+// Runde c des Pools, deterministisch gemischt. Die letzten 5 Welten einer Runde kommen in den ersten 5 der nächsten nicht vor
+// → dieselbe Welt frühestens nach 5 anderen wieder
+const rounds = [];
+function poolRound(c) {
+  if (rounds[c]) return rounds[c];
+  if (c === 0) return (rounds[0] = POOL.slice());
+  const prev = poolRound(c - 1), tail = new Set(prev.slice(-5));
+  let a = null;
+  for (let tries = 0; tries < 60 && !a; tries++) {
+    const b = POOL.slice(); let h = (Math.imul(c + 1, 2654435761) ^ Math.imul(tries + 7, 40503)) >>> 0;
+    for (let i = b.length - 1; i > 0; i--) { h = (Math.imul(h ^ (h >>> 15), 2246822519) + 3266489917) >>> 0; const j = h % (i + 1); const t = b[i]; b[i] = b[j]; b[j] = t; }
+    if (!b.slice(0, 5).some(x => tail.has(x))) a = b;
+  }
+  if (!a) a = prev.slice(5).concat(prev.slice(0, 5));   // Rückfall: um 5 weiterdrehen
+  return (rounds[c] = a);
+}
 // Fortlaufende Welt-Nummer (0, 1, 2, … ohne Ende)
 export function worldIndexAt(y) {
-  if (y >= LOOP_AT) return BIOMES.length + Math.floor((y - LOOP_AT) / LOOP_LEN);
-  let b = 0; for (let i = 0; i < BIOMES.length; i++) if (y >= BIOMES[i].at) b = i; return b;
+  if (y < BLOCK_LEN) { let b = 0; for (let i = 0; i < BIOMES.length; i++) if (y >= BIOMES[i].at) b = i; return b; }
+  const blk = Math.floor(y / BLOCK_LEN), off = y - blk * BLOCK_LEN - BLOCK_OFF;
+  if (off < 0) return blk === 1 ? BIOMES.length - 1 : BIOMES.length + (blk - 1) * PER_BLOCK - 1;   // im Himmelstor: Welt davor
+  return BIOMES.length + (blk - 1) * PER_BLOCK + Math.min(PER_BLOCK - 1, Math.floor(off / SLOT));
 }
 export function worldInfo(i) {
-  const n = BIOMES.length, loops = BIOMES.length - LOOP_FROM;
-  if (i < n) return { i, base: i, at: BIOMES[i].at, hue: 0, name: BIOMES[i].name };
-  const k = i - n, base = LOOP_FROM + (k % loops), cycle = Math.floor(k / loops) + 1;
-  return { i, base, at: LOOP_AT + k * LOOP_LEN, hue: (cycle * 67) % 360, name: `${BIOMES[base].name} ${ROMAN[cycle] || cycle + 1}` };
+  const n = BIOMES.length;
+  if (i < n) { const b = BIOMES[i].base ?? i; return { i, base: b, at: BIOMES[i].at, hue: 0, name: BIOMES[i].name }; }
+  const s = i - n, blk = Math.floor(s / PER_BLOCK) + 1, j = s % PER_BLOCK, c = Math.floor(s / POOL.length);
+  const base = poolRound(c)[s % POOL.length], seen = (SEEN0.has(base) ? 1 : 0) + c;
+  return { i, base, at: blk * BLOCK_LEN + BLOCK_OFF + j * SLOT, hue: seen ? (seen * 67 + base * 23) % 360 : 0, name: seen ? `${WORLD_NAMES[base]} ${ROMAN[seen] || seen + 1}` : WORLD_NAMES[base] };
 }
 // Alle 10.000 m (100.000 Einheiten) beginnt für 900 m das Himmelstor – eine besondere Meilenstein-Welt
 export const MILESTONE = 100000, SPECIAL_LEN = 9000;
@@ -86,10 +116,7 @@ const GATE_NAMES = ['Goldenes Himmelstor', 'Platin-Himmelstor', 'Kristall-Himmel
 export function worldAt(y) {
   const k = Math.floor(y / MILESTONE);
   if (k >= 1 && y - k * MILESTONE < SPECIAL_LEN) return { i: 10000 + k, base: 8, at: k * MILESTONE, hue: 0, name: k <= GATE_NAMES.length ? GATE_NAMES[k - 1] : `Sternentor ${ROMAN[k - GATE_NAMES.length] || k - GATE_NAMES.length + 1}`, special: k };
-  const w = worldInfo(worldIndexAt(y));
-  // direkt nach einem Himmelstor beginnt die nächste Welt erst am Ende des Tors (für weiche Übergänge)
-  if (k >= 1 && w.at < k * MILESTONE + SPECIAL_LEN) w.at = k * MILESTONE + SPECIAL_LEN;
-  return w;
+  return worldInfo(worldIndexAt(y));
 }
 export function biomeAt(y) { return worldAt(y).base; }
 

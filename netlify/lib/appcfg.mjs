@@ -2,7 +2,7 @@
 // Liegen auf dem Server (Blob „cfg/app“) und überschreiben beim Spielstart die Werte aus config.js – ohne neues App-Update.
 // Alles wird streng geprüft: falsche oder gefährliche Werte (z. B. Werbung öfter als die Richtlinien erlauben) kommen gar nicht erst an.
 import { store } from './db.mjs';
-import { shopItems, applyShop, MAX_PRICE, MAX_SALE } from '../../www/shopcfg.js';
+import { shopItems, applyShop, applyCustom, cleanCustom, CUSTOM_MAX, MAX_PRICE, MAX_SALE } from '../../www/shopcfg.js';
 import { PACKS } from '../../www/catalog.js';
 
 export const CFG_KEY = 'cfg/app';
@@ -41,6 +41,10 @@ export function sanitize(c = {}) {
 // Shop: nur bekannte Artikel, Preise 10 … 1.000.000 Münzen, Rabatt 1–90 %, Zeitraum als Zeitstempel
 const TS = v => { const n = Number(v); return Number.isFinite(n) && n > 1.6e12 && n < 4.1e12 ? Math.floor(n) : undefined; };
 function sanitizeShop(sh, errors) {
+  // eigene Artikel zuerst prüfen und einsetzen – dann kennen Preise/Rabatte/Ausblenden auch sie
+  const custom = [], ids = new Set();
+  for (const raw of Array.isArray(sh.custom) ? sh.custom : []) { const c = cleanCustom(raw); if (!c) { errors.push('Artikel ' + String((raw && raw.name) || '?').slice(0, 20)); continue; } if (!ids.has(c.id) && custom.length < CUSTOM_MAX) { ids.add(c.id); custom.push(c); } }
+  applyCustom(custom);
   const known = new Map(shopItems().map(x => [x.id, x])), items = {};
   for (const [id, o] of Object.entries(sh.items || {})) {
     if (!known.has(id) || !o || typeof o !== 'object') continue;
@@ -65,7 +69,7 @@ function sanitizeShop(sh, errors) {
     if (typeof o.tag === 'string' && o.tag.trim()) e.tag = o.tag.trim().replace(/[<>]/g, '').slice(0, 24);
     if (Object.keys(e).length) packs[p.id] = e;
   }
-  return { items: Object.keys(items).length ? items : undefined, sale, packs: Object.keys(packs).length ? packs : undefined };
+  return { items: Object.keys(items).length ? items : undefined, sale, packs: Object.keys(packs).length ? packs : undefined, custom: custom.length ? custom : undefined };
 }
 // Shop-Einstellungen auf den Katalog des Servers anwenden (vor jeder Abrechnung von Käufen)
 export async function applyShopCfg() { const c = await readCfg(); applyShop(c.shop); return c.shop || {}; }
