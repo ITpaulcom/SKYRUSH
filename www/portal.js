@@ -62,7 +62,10 @@ export function gameplay(on) {
   if (!sdk || on === playing) return; playing = on;
   try { PORTAL === 'crazygames' ? (on ? sdk.game.gameplayStart() : sdk.game.gameplayStop()) : (on ? sdk.gameplayStart() : sdk.gameplayStop()); } catch {}
 }
-export const portalReady = () => !!sdk;
+// Kommt kein Video (z. B. CrazyGames „Basic Launch“: dort liefert das Portal noch keine Werbung aus),
+// werden Video-Knöpfe 3 Minuten lang ausgeblendet statt ins Leere zu führen
+let noAdUntil = 0;
+export const portalReady = () => !!sdk && Date.now() >= noAdUntil;
 
 // type: 'rewarded' | 'interstitial' → true, wenn die Anzeige gezeigt (bzw. das Video bis zum Ende geschaut) wurde
 export async function portalAd(type) {
@@ -72,11 +75,11 @@ export async function portalAd(type) {
   try {
     if (PORTAL === 'crazygames') {
       ok = await new Promise(res => {
-        let started = false; const t = setTimeout(() => res(false), 90000);
+        let started = false; const t = setTimeout(() => { if (!started) noAdUntil = Date.now() + 180000; res(false); }, 90000);
         sdk.ad.requestAd(type === 'rewarded' ? 'rewarded' : 'midgame', {
           adStarted: () => { started = true; adState(true); },
           adFinished: () => { clearTimeout(t); res(true); },
-          adError: () => { clearTimeout(t); res(type === 'rewarded' ? false : started); },
+          adError: () => { clearTimeout(t); if (type === 'rewarded' && !started) noAdUntil = Date.now() + 180000; res(type === 'rewarded' ? false : started); },
         });
       });
     } else {
