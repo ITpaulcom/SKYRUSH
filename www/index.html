@@ -222,6 +222,9 @@ button.pill{cursor:pointer;font:inherit;font-weight:700;color:var(--ink)}
 
 /* ---------- Kompaktes Layout (alle Größen, nichts abgeschnitten) ---------- */
 #home .wrap{overflow-y:auto;overflow-x:hidden;touch-action:pan-y;scrollbar-width:none;padding-bottom:4px}
+/* Passt der Startbildschirm nicht ganz aufs Handy (kleine iPhones, lange Texte, große Systemschrift), wird er minimal verkleinert,
+   damit immer alles sichtbar ist – nichts wird unten abgeschnitten. --hz setzt fitHome(). */
+#home .wrap>*{zoom:var(--hz,1)}
 #home .wrap::-webkit-scrollbar{display:none}
 .sheet{touch-action:pan-y;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;max-height:min(92%,calc(100% - 24px));padding-top:18px}
 .title{margin-top:6px}
@@ -4720,6 +4723,16 @@ function fitBoost() {
   if (sub.scrollWidth > sub.clientWidth + 1 || t.querySelector('h3').scrollWidth > t.querySelector('h3').clientWidth + 1) t.classList.add('tight');
 }
 addEventListener('resize', () => requestAnimationFrame(fitBoost));
+function fitHome() {
+  const h = $('home'), w = h && h.querySelector('.wrap'); if (!w || h.hidden || !w.clientHeight) return;
+  h.style.setProperty('--hz', '1');
+  const need = w.scrollHeight, have = w.clientHeight;
+  if (need > have + 1) h.style.setProperty('--hz', String(Math.max(0.72, Math.floor((have - 2) / need * 1000) / 1000)));
+}
+var fitT = 0;
+function fitSoon() { cancelAnimationFrame(fitT); fitT = requestAnimationFrame(() => { fitBoost(); fitHome(); }); }
+addEventListener('resize', fitSoon); addEventListener('orientationchange', () => setTimeout(fitSoon, 300));
+try { document.fonts && document.fonts.ready.then(fitSoon); } catch {}
 function refreshHome() {
   acSeed();
   $('m-duel-sub').textContent = save.duel.wins ? `${save.duel.wins} ${save.duel.wins === 1 ? 'Sieg' : 'Siege'}` : 'Zu viert';
@@ -4753,6 +4766,7 @@ function refreshHome() {
   setTimeout(showRestore, 600);
   setTimeout(showTourPrize, 900);
   setTimeout(showDailyPrize, 1100);
+  fitSoon();
 }
 const card = (id, fn) => { $(id).onclick = fn; $(id).onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fn(); } }; };
 card('m-endless', () => { audio(); startGame('endless'); });
