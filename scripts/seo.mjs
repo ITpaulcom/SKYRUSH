@@ -15,9 +15,9 @@ import { pathToFileURL } from 'node:url';
 const ROOT = process.cwd(), SITE = path.join(ROOT, 'site');
 export const LANGS = ['de', 'en', 'es', 'fr', 'it', 'pt', 'tr', 'pl', 'id', 'ja', 'ko'];
 // Welten des Spiels (Farben wie im Spiel, Höhe in Metern) – Namen kommen aus den Spiel-Übersetzungen
-const WORLDS = [['Stadt', 0, '#FF7EB3', '#FFA37A', '#FFD36E'], ['Wolken', 250, '#3DA9FF', '#7FD3FF', '#D6F4FF'], ['Polarlicht', 600, '#071A3A', '#0E3B5C', '#1F6D7A'],
-  ['Weltall', 1100, '#06021A', '#1B0B4A', '#3A1470'], ['Sternennebel', 1700, '#14012E', '#43105F', '#9A2A72'], ['Kristallgalaxie', 2400, '#020B26', '#0B2E5C', '#17708E'],
-  ['Sonnenkorona', 3200, '#2A0614', '#7A1A22', '#E2622C'], ['Hyperraum', 4100, '#05010F', '#1A0640', '#0B4A66'], ['Goldenes Himmelstor', -10000, '#3A1C6E', '#F29A6B', '#FFE7A3']];
+const WORLDS = [['Stadt', 0, '#FF7EB3', '#FFA37A', '#FFD36E'], ['Wolken', 250, '#3DA9FF', '#7FD3FF', '#D6F4FF'], ['Gewitterfront', 550, '#141A30', '#36405E', '#66769A'],
+  ['Polarlicht', 850, '#071A3A', '#0E3B5C', '#1F6D7A'], ['Weltall', 1200, '#06021A', '#1B0B4A', '#3A1470'], ['Mondbasis', 1650, '#03040F', '#11163A', '#2A3260'],
+  ['Sternennebel', 2150, '#14012E', '#43105F', '#9A2A72'], ['Kristallgalaxie', 2700, '#020B26', '#0B2E5C', '#17708E'], ['Goldenes Himmelstor', -10000, '#3A1C6E', '#F29A6B', '#FFE7A3']];   // muss zu BIOMES in www/core.js passen
 const HREF = { pt: 'pt-BR' };                       // hreflang-Code (Inhalte sind brasilianisches Portugiesisch)
 const DIR_NAMES = { de: 'Deutsch', en: 'English', es: 'Español', fr: 'Français', it: 'Italiano', pt: 'Português', tr: 'Türkçe', pl: 'Polski', id: 'Bahasa Indonesia', ja: '日本語', ko: '한국어' };
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

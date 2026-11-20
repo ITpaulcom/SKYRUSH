@@ -171,6 +171,25 @@ ok(C.weekKey(new Date('2026-10-21T12:00:00Z')) === '2026-W43', 'Wochen-Schlüsse
   const n = jump(0, 0), m = jump(200, 0), u = jump(200, 300), ratio = (m * m) / (n * n);
   ok(n === C.SPRING_V && m > n && u > m && ratio > 1.2 && ratio < 1.5, `Mega-Sprung: ${((ratio - 1) * 100).toFixed(0)} % höher als Feder, mit Rush + Schuhen ${((u * u / (n * n) - 1) * 100).toFixed(0)} %`);
 }
+// Welten: feste Reise bis 10.000 m, danach Wanderung über passende Nachbarwelten (keine Wiederholung direkt hintereinander)
+{
+  const N = C.BIOMES.length + 9 * 60, bases = new Set();
+  let rep = 0, unlinked = 0, near = 0;
+  for (let i = 0; i < N; i++) {
+    const w = C.worldInfo(i); bases.add(w.base);
+    if (i && C.worldInfo(i - 1).base === w.base) rep++;
+    if (i > C.BIOMES.length && !C.NEXT[C.worldInfo(i - 1).base].includes(w.base)) unlinked++;
+    for (let k = 2; k <= 3; k++) if (i >= k && C.worldInfo(i - k).base === w.base) near++;
+    if (!C.WORLD_NAMES[w.base] && i >= C.BIOMES.length) { ok(false, 'Weltname fehlt: ' + w.base); break; }
+  }
+  ok(rep === 0 && near === 0, `Welten: nie dieselbe Welt innerhalb von 3 Schritten (${N} Welten geprüft)`);
+  ok(unlinked === 0, 'Welten: jeder Wechsel nach 10.000 m führt in eine passende Nachbarwelt');
+  ok(bases.size === 26, `Welten: alle 26 Hintergründe kommen vor (${bases.size})`);
+  const seen = new Set(); for (let i = 0; i < C.BIOMES.length + 9; i++) seen.add(C.worldInfo(i).base);
+  ok(seen.size === 26, 'Welten: bis 20.000 m hat man jede Welt einmal gesehen');
+  ok(C.worldAt(100000).special === 1 && C.worldAt(109000).i === C.BIOMES.length, 'Himmelstor bei 10.000 m, danach erste endlose Welt');
+  ok(C.worldInfo(C.BIOMES.length + 3).at > C.worldInfo(C.BIOMES.length + 2).at, 'Welt-Höhen steigen');
+}
 console.log(`     Laufzeit ${Date.now() - t0} ms`);
 if (fails) { console.error(`${fails} Test(s) fehlgeschlagen`); process.exit(1); }
 console.log('Alle Tests bestanden.');

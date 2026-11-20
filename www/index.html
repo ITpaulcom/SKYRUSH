@@ -43,6 +43,22 @@
 <meta name="google-adsense-account" content="ca-pub-1764627877115679">
 <link rel="preload" href="fonts/space-grotesk-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/space-grotesk-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<!-- Spiel-Module gleich mitladen (sonst erst nach der ganzen Seite) → schnellerer Start -->
+<link rel="modulepreload" href="core.js">
+<link rel="modulepreload" href="config.js">
+<link rel="modulepreload" href="catalog.js">
+<link rel="modulepreload" href="economy.js">
+<link rel="modulepreload" href="meta.js">
+<link rel="modulepreload" href="monetize.js">
+<link rel="modulepreload" href="portal.js">
+<link rel="modulepreload" href="channel.js">
+<link rel="modulepreload" href="houseads.js">
+<link rel="modulepreload" href="net.js">
+<link rel="modulepreload" href="bot.js">
+<link rel="modulepreload" href="i18n.js">
+<link rel="modulepreload" href="shopcfg.js">
+<link rel="modulepreload" href="pad.js">
+<link rel="modulepreload" href="remote.js">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -1128,7 +1144,7 @@ function drawShoes(g, key, r, look0, boots, t, vy) {
       g.fillStyle = boots ? '#FF5A7A' : look0.body[1]; g.beginPath(); g.ellipse(fx, fy, r * .26, r * .14, 0, 0, 7); g.fill(); g.stroke(); continue;
     }
     const L = r * .33, H = r * (sh.high ? .3 : .2), toe = fx + s * L, heel = fx - s * L;
-    if (sh.glow) { g.save(); g.shadowColor = sh.acc; g.shadowBlur = 14; }
+    if (sh.glow) { const gr = r * .62; g.drawImage(glowSprite(sh.acc.length === 7 ? rgbaHex(sh.acc, .75) : sh.acc, Math.max(8, Math.round(gr))), fx - gr, fy - gr * .8, gr * 2, gr * 2); }   // Leuchten als fertiges Bild statt shadowBlur
     if (sh.flame && vy > 2) { g.fillStyle = `hsl(${30 + Math.sin(t * 40) * 15},100%,60%)`; g.beginPath(); g.moveTo(heel, fy + r * .05); g.lineTo(heel - s * r * .12, fy + r * .32 + Math.sin(t * 50) * r * .05); g.lineTo(heel + s * r * .1, fy + r * .12); g.closePath(); g.fill(); }
     // Obermaterial
     let up = sh.up;
@@ -1137,7 +1153,7 @@ function drawShoes(g, key, r, look0, boots, t, vy) {
     g.fillStyle = up;
     g.beginPath(); g.moveTo(heel, fy + H * .3); g.lineTo(heel + s * r * .02, fy - H); g.quadraticCurveTo(fx, fy - H * 1.05, fx + s * L * .25, fy - H * .35);
     g.quadraticCurveTo(toe + s * r * .04, fy - H * .3, toe, fy + H * .3); g.closePath(); g.fill(); g.stroke();
-    if (sh.glow) g.restore();
+
     // Sohle
     if (sh.cloud) { g.fillStyle = sh.sole; g.beginPath(); for (let i = 0; i < 3; i++) g.arc(fx - L * .66 + i * L * .66, fy + H * .38, r * .09, 0, 7); g.fill(); g.stroke(); }
     else { g.fillStyle = sh.sole; rr(fx - L - r * .02, fy + H * .2, L * 2 + r * .04, r * .1, r * .05, g); g.fill(); g.stroke(); }
@@ -1194,7 +1210,11 @@ let ctx = cv.getContext('2d');
 let colX = 0, colW = 0;   // sichtbare Spielspalte (genau ~3 Bahnen), auf breiten Bildschirmen zentriert
 let cw = 0, ch = 0, dpr = 1, S = 1, offX = 0, cam = 0, camX = C.START_LANE * C.LANE_W + C.LANE_W / 2, alpha = 1;
 // Qualität: startet hoch, wird automatisch reduziert, wenn das Gerät nicht flüssig hinterherkommt
-let quality = 2, lowFx = false, sab = 0;
+// Grafikstufe 0–3 (0 = volle Effekte, scharf · 1 = weniger Effekte · 2/3 = zusätzlich geringere Auflösung).
+// Wird pro Gerät gemerkt (nicht in der Cloud), damit langsame Geräte nicht bei jedem Start erst ruckeln.
+const GFX = [[2, false], [2, true], [1.5, true], [1, true]];
+let gfxLv = 0; try { gfxLv = Math.max(0, Math.min(3, +localStorage.getItem('sr_gfx') || 0)); } catch {}
+let quality = GFX[gfxLv][0], lowFx = GFX[gfxLv][1], sab = 0, frameNo = 0;
 const WSPR = new Map();   // vorgezeichnete Wolkenwand-Kacheln (siehe drawWalls)
 const MIN_VIEW = 330;   // Handy hochkant: ~2,75 Bahnen sichtbar → große, gut erkennbare Figuren
 function layout() {
@@ -1241,7 +1261,26 @@ const BIO = [
   { top: '#0E1036', mid: '#36246F', bot: '#4FB8D0' },  // 16 Prismenwelt
   { top: '#140E05', mid: '#3E2C10', bot: '#9C7128' },  // 17 Uhrwerk-Kosmos
   { top: '#6FBFFF', mid: '#B4E3FF', bot: '#FFE6C2' },  // 18 Himmelsinseln
+  { top: '#141A30', mid: '#36405E', bot: '#66769A' },  // 19 Gewitterfront
+  { top: '#03040F', mid: '#11163A', bot: '#2A3260' },  // 20 Mondbasis
+  { top: '#03102A', mid: '#0B2E55', bot: '#3F8FB8' },  // 21 Eismond
+  { top: '#0A0720', mid: '#1E1142', bot: '#24524A' },  // 22 Pilzwald
+  { top: '#2A1840', mid: '#A44E52', bot: '#F0AE68' },  // 23 Wüstenplanet
+  { top: '#08345E', mid: '#1477A3', bot: '#4FCFC8' },  // 24 Korallenriff
+  { top: '#02030C', mid: '#0B1434', bot: '#1D3570' },  // 25 Raumstation
+  { top: '#120A2C', mid: '#46215A', bot: '#D9774F' },  // 26 Laternenhimmel
 ];
+// Was jede Welt außer ihrer eigenen Grafik zeigt: st = Sterne, cl = Wolken, du = Tiefen-Staub, amb = Deko (0 nichts, 1 Ballons/Vögel, 2 Sternschnuppen, 3 + UFO)
+const WP = [
+  { st: 0, cl: .65, du: 0, amb: 1 }, { st: 0, cl: 1, du: 0, amb: 1 }, { st: 1, cl: .3, du: 0, amb: 2 }, { st: 1, cl: 0, du: 1, amb: 3 }, { st: 1, cl: 0, du: 1, amb: 2 },
+  { st: 1, cl: 0, du: 1, amb: 3 }, { st: 1, cl: 0, du: 1, amb: 3 }, { st: 1, cl: 0, du: 1, amb: 3 }, { st: 1, cl: 0, du: 1, amb: 2 }, { st: 1, cl: 0, du: 1, amb: 3 },
+  { st: 1, cl: 0, du: 1, amb: 3 }, { st: 1, cl: 0, du: 1, amb: 3 }, { st: 1, cl: 0, du: 1, amb: 3 }, { st: 0, cl: .9, du: 0, amb: 1 }, { st: 1, cl: 0, du: 1, amb: 3 },
+  { st: 1, cl: 0, du: 1, amb: 3 }, { st: 1, cl: 0, du: 1, amb: 3 }, { st: 1, cl: 0, du: 1, amb: 3 }, { st: 0, cl: .9, du: 0, amb: 1 },
+  { st: 0, cl: 0, du: 0, amb: 0 }, { st: 1, cl: 0, du: 1, amb: 3 }, { st: 1, cl: 0, du: 1, amb: 2 }, { st: .7, cl: 0, du: .4, amb: 0 },
+  { st: .35, cl: 0, du: 0, amb: 0 }, { st: 0, cl: 0, du: 0, amb: 0 }, { st: 1, cl: 0, du: 1, amb: 3 }, { st: .5, cl: 0, du: 0, amb: 0 },
+];
+const wpOf = W => WP[W.base] || WP[3];
+const wpMix = (A, B, k, key) => wpOf(A)[key] * (1 - k) + wpOf(B)[key] * k;
 const rgbaHex = (h, a) => { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
 const hexRgb = h => { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
 const mixc = (a, b, t) => { const A = hexRgb(a), B = hexRgb(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(',')})`; };
@@ -1268,7 +1307,15 @@ function biomeBlend(y) {
   return [A, B, t * t * (3 - 2 * t)];
 }
 let skyCache = {};
-function skyCacheClear() { skyCache = {}; for (const k in layerCache) delete layerCache[k]; }
+function skyCacheClear() { skyCache = {}; for (const k in layerCache) delete layerCache[k]; layerPx = 0; warmI = -1; }
+// Nächste Welt im Leerlauf vorzeichnen: Ihre Bilder (Planeten, Horizonte, Sprites) entstehen dann nicht erst im Übergang → kein Ruckler
+let warmI = -1, warmG = null;
+function warmWorld(W) {
+  if (!W || W.base < 1) return;
+  warmG ||= Object.assign(document.createElement('canvas'), { width: 1, height: 1 }).getContext('2d');
+  const main = ctx; ctx = warmG;
+  try { drawWorldFx(W, 1, 1, W.at + 50); } catch {} finally { ctx = main; }
+}
 function skyline(layer) {
   const key = layer + ':' + cw;
   if (skyCache[key]) return skyCache[key];
@@ -1339,11 +1386,14 @@ function cloud(x, y, s, a, v = 0, bi = 1) {
 // Deko-Objekte, die in der Welt schweben (Parallax 0,4)
 function drawAmbient(t, viewY) {
   const band = 520, par = .4, wy0 = cam * par, first = Math.floor(wy0 / band) - 1;
-  for (let bi = first; bi < first + Math.ceil(ch / S / par / band) + 3; bi++) {
+  for (let bi = first; bi < first + Math.ceil(ch / S / band) + 3; bi++) {
     if (bi < 1) continue;
-    const r = hash(bi * 97 + 3), wy = bi * band + r * 200, y = ch - (wy - wy0) * S, b = C.biomeAt(wy / par);
+    const r = hash(bi * 97 + 3), wy = bi * band + r * 200, y = ch - (wy - wy0) * S;
+    if (y < -120 || y > ch + 120) continue;
+    const b = C.biomeAt(wy / par), am = (WP[b] || WP[3]).amb;
+    if (!am) continue;
     let x = ((hash(bi * 53) * (cw + 160)) + t * (20 + r * 30) * (r > .5 ? 1 : -1) - bgShift * 1.3) % (cw + 160); if (x < 0) x += cw + 160; x -= 80;
-    const day = b <= 1 || DAYB.has(b);
+    const day = am === 1;
     if (day && r < .55) { // Heißluftballon / Luftballon
       const col = ['#FF5A7A', '#FFC83D', '#38C6FF', '#7B4DFF', '#3BE8A4'][bi % 5], s0 = (b === 0 ? .7 : 1) * (.8 + r * .5);
       const yy = y + Math.sin(t + bi) * 6;
@@ -1356,7 +1406,7 @@ function drawAmbient(t, viewY) {
     } else if (day) { // Vogelschwarm
       ctx.strokeStyle = 'rgba(27,18,64,.55)'; ctx.lineWidth = 2.5;
       for (let k = 0; k < 4; k++) { const bx = x + k * 18, by = y + (k % 2) * 10, f = Math.sin(t * 10 + k) * 5; ctx.beginPath(); ctx.moveTo(bx - 8, by - f); ctx.quadraticCurveTo(bx - 3, by - 4, bx, by); ctx.quadraticCurveTo(bx + 3, by - 4, bx + 8, by - f); ctx.stroke(); }
-    } else if ((b === 3 || b >= 5) && b !== 8 && r > .82) { // kleines UFO zieht vorbei
+    } else if (am === 3 && r > .82) { // kleines UFO zieht vorbei
       const yy = y + Math.sin(t * 2 + bi) * 8, s0 = .8 + r * .3;
       ctx.save(); ctx.translate(x, yy); ctx.scale(s0, s0);
       ctx.fillStyle = 'rgba(127,232,255,.35)'; ctx.beginPath(); ctx.moveTo(-10, 8); ctx.lineTo(10, 8); ctx.lineTo(22, 46); ctx.lineTo(-22, 46); ctx.closePath(); ctx.fill();
@@ -1373,10 +1423,38 @@ function drawAmbient(t, viewY) {
 }
 // Zusatz-Ebenen: Wolkenbank (Wolken), Berge (Polarlicht), Monde & Galaxie (Weltall), Himmelstor (alle 10.000 m)
 const layerCache = {};
+// Vorgezeichnete Ebenen. Speicher begrenzt: Farbvarianten (II, III, …) erzeugen neue Bilder → die am längsten
+// ungenutzten fliegen raus, sobald zusammen mehr als ~10 Mio. Bildpunkte (≈ 40 MB) belegt sind.
+let layerPx = 0;
+const LAYER_BUDGET = 10e6;
 function layerCanvas(key, w, h, draw) {
-  const k = key + w + 'x' + h; if (layerCache[k]) return layerCache[k];
-  const c = document.createElement('canvas'); c.width = Math.ceil(w * dpr); c.height = Math.ceil(h * dpr);
-  const g = c.getContext('2d'); g.scale(dpr, dpr); draw(g, w, h); return (layerCache[k] = c);
+  const k = key + w + 'x' + h; let c = layerCache[k];
+  if (c) { if (c._t !== frameNo) c._t = frameNo; return c; }
+  c = document.createElement('canvas'); c.width = Math.ceil(w * dpr); c.height = Math.ceil(h * dpr);
+  const g = c.getContext('2d'); g.scale(dpr, dpr); draw(g, w, h);
+  c._t = frameNo; layerPx += c.width * c.height; layerCache[k] = c;
+  if (layerPx > LAYER_BUDGET) {
+    const old = Object.entries(layerCache).filter(([kk, v]) => v._t < frameNo - 30).sort((x, y) => x[1]._t - y[1]._t);
+    for (const [kk, v] of old) { if (layerPx <= LAYER_BUDGET * .7) break; layerPx -= v.width * v.height; v.width = v.height = 0; delete layerCache[kk]; }
+  }
+  return c;
+}
+// Weiche, großflächige Lichteffekte (Verläufe übereinander) werden in einem kleinen Puffer (¼ Auflösung) gezeichnet
+// und mit EINEM Bild hochskaliert eingeblendet → statt 10–20 bildschirmgroßer Füllungen nur noch eine.
+const lowBufs = {};
+function lowBuf(key, sc = .25) {
+  const w = Math.max(8, Math.round(cw * sc)), h = Math.max(8, Math.round(ch * sc));
+  let o = lowBufs[key];
+  if (!o || o.w !== w || o.h !== h) { const c = document.createElement('canvas'); c.width = w; c.height = h; o = lowBufs[key] = { c, g: c.getContext('2d'), w, h }; }
+  o.g.setTransform(1, 0, 0, 1, 0, 0); o.g.globalCompositeOperation = 'source-over'; o.g.globalAlpha = 1; o.g.clearRect(0, 0, w, h);
+  o.g.setTransform(w / cw, 0, 0, h / ch, 0, 0);
+  return o;
+}
+// zeichnet fn in den Puffer (ctx zeigt währenddessen auf den Puffer) und blendet ihn ein
+function soft(key, op, fn) {
+  const L = lowBuf(key), main = ctx; ctx = L.g;
+  try { fn(); } finally { ctx = main; }
+  const o = ctx.globalCompositeOperation; ctx.globalCompositeOperation = op; ctx.drawImage(L.c, 0, 0, cw, ch); ctx.globalCompositeOperation = o;
 }
 function drawWorldFx2(W, a, t, viewY) {
   const into = Math.max(0, viewY - W.at), H = W.hue;
@@ -1400,7 +1478,17 @@ function drawWorldFx2(W, a, t, viewY) {
     });
     const y = ch - 230 + Math.min(260, into * S * .015);
     ctx.globalAlpha = a; ctx.drawImage(img, -(img.width / dpr - cw) / 2 - bgShift * .5, y, img.width / dpr, 260); ctx.globalAlpha = 1;
-  } else if (W.base === 2) { // verschneite Bergkette vor den Polarlichtern
+  } else if (W.base === 2) { // Polarlicht-Bänder + verschneite Bergkette
+    if (!lowFx) {
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineJoin = 'round';
+      const ay = Math.min(ch * .3, into * S * .004);   // Bänder sinken beim Aufstieg ganz leicht
+      for (let band = 0; band < 3; band++) {
+        ctx.beginPath();
+        for (let x = 0; x <= cw + 12; x += 12) { const y = ch * (.18 + band * .12) + ay + Math.sin(x / 90 + t * .6 + band * 2 + H / 40) * 30 + Math.sin(x / 37 + t * 1.1) * 10; x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
+        ctx.strokeStyle = band === 1 ? rgbaHex(hueRot('#C38BFF', H), .25 * a) : rgbaHex(hueRot('#3BE8A4', H), .3 * a); ctx.lineWidth = 40 + band * 10; ctx.stroke();
+      }
+      ctx.restore();
+    }
     for (const [layer, col, hgt, par] of [[0, '#3C6FA8', 210, .012], [1, '#244C7E', 160, .02]]) {
       const img = layerCanvas('mount' + layer, cw * 1.6, hgt + 20, (g, w, h) => {
         g.fillStyle = col; g.beginPath(); g.moveTo(0, h);
@@ -1423,6 +1511,13 @@ function drawWorldFx2(W, a, t, viewY) {
     const gx = cw * .7, gy = loopY(ch * .75, cam * S * .03, 110);
     for (let j = 0; j < 60; j++) { const d = j / 60, ang = d * 8 + t * .05, rad = d * 70; ctx.fillStyle = `hsla(${(260 + d * 80) % 360},90%,75%,${1 - d})`; ctx.beginPath(); ctx.arc(gx + Math.cos(ang) * rad, gy + Math.sin(ang) * rad * .4, 1.5, 0, 7); ctx.fill(); }
     ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    // ferner Planet mit Ring
+    const py = loopY(ch * .3, cam * S * .08, 120), pimg = layerCanvas('spaceplanet' + H, 240, 160, (g, w, h) => {
+      const pg = g.createRadialGradient(w / 2 - 20, h / 2 - 20, 10, w / 2, h / 2, 70); pg.addColorStop(0, hueRot('#FFB3C7', H)); pg.addColorStop(1, hueRot('#7B4DFF', H));
+      g.fillStyle = pg; g.beginPath(); g.arc(w / 2, h / 2, 70, 0, 7); g.fill();
+      g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = 5; g.beginPath(); g.ellipse(w / 2, h / 2, 110, 22, -.3, 0, 7); g.stroke();
+    });
+    ctx.globalAlpha = a; ctx.drawImage(pimg, cw * .75 - 120, py - 80, 240, 160); ctx.globalAlpha = 1;
   } else if (W.base === 8) drawHeavenRealm(W, a, t, viewY);
 }
 
@@ -1451,22 +1546,24 @@ function drawHeavenGlow(t, viewY) {
   // Nachglanz: nach dem ersten Tor bleibt ein Schimmer – je mehr Tore, desto stärker (bleibt aber „mäßig“)
   const after = past >= 1 ? Math.min(.55, .22 + past * .08) * (1 - pre * .6) : 0;
   if (pre <= 0 && after <= 0) return;
-  ctx.save(); ctx.globalCompositeOperation = 'lighter';
   const k = pre > 0 ? next : past, I = Math.max(pre * pre, after * .9);
-  // Licht von oben
-  const g = ctx.createLinearGradient(0, 0, 0, ch * (.35 + pre * .45));
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  // Licht von oben (nur so hoch füllen, wie es reicht)
+  const lh = ch * (.35 + pre * .45), g = ctx.createLinearGradient(0, 0, 0, lh);
   g.addColorStop(0, gateLight(k, .55 * I)); g.addColorStop(1, gateLight(k, 0));
-  ctx.fillStyle = g; ctx.fillRect(0, 0, cw, ch);
-  // Strahlen fächern von einem Punkt über dem Bildschirm herab
-  if (!lowFx) {
-    const cx = cw / 2, cy = -ch * (.55 - pre * .3), n = 9;
+  ctx.fillStyle = g; ctx.fillRect(0, 0, cw, lh);
+  if (!lowFx) {   // Strahlen fächern von einem Punkt über dem Bildschirm herab (im Nachglanz nur 5 statt 9 – spart viel Füllarbeit)
+    const cx = cw / 2, cy = -ch * (.55 - pre * .3), n = pre > 0 ? 9 : 5, sp = pre > 0 ? .17 : .26;
     for (let j = 0; j < n; j++) {
-      const ang = Math.PI / 2 + (j - (n - 1) / 2) * .17 + Math.sin(t * .3 + j) * .03, len = ch * 1.7, w = .05 + hash(j + k) * .05;
+      const ang = Math.PI / 2 + (j - (n - 1) / 2) * sp + Math.sin(t * .3 + j) * .03, len = ch * 1.7, w = .05 + hash(j + k) * .05;
       const rg = ctx.createLinearGradient(cx, cy, cx + Math.cos(ang) * len, cy + Math.sin(ang) * len);
       rg.addColorStop(0, gateLight(k, .32 * I * (.6 + .4 * Math.sin(t * 1.3 + j * 1.7)), 10)); rg.addColorStop(1, gateLight(k, 0));
       ctx.fillStyle = rg; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(ang - w) * len, cy + Math.sin(ang - w) * len); ctx.lineTo(cx + Math.cos(ang + w) * len, cy + Math.sin(ang + w) * len); ctx.closePath(); ctx.fill();
     }
   }
+  ctx.restore();
+
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
   // aufsteigender Glitzerstaub
   const n2 = Math.round((lowFx ? 14 : 34) * Math.max(pre, Math.min(1, after * 2)));
   for (let j = 0; j < n2; j++) {
@@ -1474,32 +1571,38 @@ function drawHeavenGlow(t, viewY) {
     const tw = .5 + .5 * Math.sin(t * 5 + j * 1.3), col = gateOf(k).rainbow ? `hsla(${(j * 40 + t * 60) % 360},100%,80%,${tw * .9})` : gateLight(k, tw * .9, 15);
     ctx.fillStyle = col; ctx.save(); ctx.translate(x, y); ctx.rotate(t + j); starPath(ctx, 2 + tw * 3.5, .35); ctx.fill(); ctx.restore();
   }
+  ctx.restore();
   // Höhen-Glanz: ab dem ersten Tor ein ruhiger, leuchtender Rahmen – weich in den Ecken, ohne harte Kante, atmet langsam
   if (after > 0) {
     const pa = after * (.8 + .2 * Math.sin(t * 1.2)), R = Math.hypot(cw, ch) / 2;
-    ctx.save(); ctx.globalCompositeOperation = 'source-over';
-    const vg = ctx.createRadialGradient(cw / 2, ch / 2, R * .6, cw / 2, ch / 2, R);
-    vg.addColorStop(0, edgeCol(past, 0, -24, t)); vg.addColorStop(.7, edgeCol(past, .08 * pa, -24, t)); vg.addColorStop(1, edgeCol(past, .26 * pa, -30, t));
-    ctx.fillStyle = vg; ctx.fillRect(0, 0, cw, ch);
+    const vgrad = (g, p) => { const vg = g.createRadialGradient(cw / 2, ch / 2, R * .6, cw / 2, ch / 2, R); vg.addColorStop(0, edgeCol(past, 0, -24, t)); vg.addColorStop(.7, edgeCol(past, .08 * p, -24, t)); vg.addColorStop(1, edgeCol(past, .26 * p, -30, t)); return vg; };
+    // nur dort füllen, wo der Rahmen sichtbar ist (innerhalb von 60 % des Radius ist er ganz durchsichtig) → etwa halbe Fläche
+    const r0 = R * .6, hx = cw / 2, hy = ch / 2, iy = Math.sqrt(Math.max(0, r0 * r0 - hx * hx)), ix = Math.sqrt(Math.max(0, r0 * r0 - hy * hy));
+    ctx.fillStyle = vgrad(ctx, pa);
+    if (iy > 0 && !gateOf(past).rainbow) {   // feste Torfarbe: oberes Band einmal vorzeichnen, unten gespiegelt – atmet nur noch über die Deckkraft
+      const bh = Math.ceil(hy - iy), img = layerCanvas('vig' + past, cw, bh, g => { g.fillStyle = vgrad(g, 1); g.fillRect(0, 0, cw, bh); });
+      ctx.save(); ctx.globalAlpha = pa; ctx.drawImage(img, 0, 0, cw, bh); ctx.translate(0, ch); ctx.scale(1, -1); ctx.drawImage(img, 0, 0, cw, bh); ctx.restore();
+    } else if (iy > 0) { ctx.fillRect(0, 0, cw, hy - iy); ctx.fillRect(0, hy + iy, cw, hy - iy); }
+    else if (ix > 0) { ctx.fillRect(0, 0, hx - ix, ch); ctx.fillRect(hx + ix, 0, hx - ix, ch); }
+    else ctx.fillRect(0, 0, cw, ch);
     edgeWaves(past, pa * .4, t, Math.min(110, cw * .2), lowFx ? 2 : 3, .07, -26);
-    ctx.globalCompositeOperation = 'lighter'; edgeRail(past, .35 * pa, t, t * .06, 7);
-    ctx.restore();
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; edgeRail(past, .35 * pa, t, t * .06, 7); ctx.restore();
   }
-  ctx.restore();
 }
 // Die Torwelt selbst (900 m ab dem Tor): Sonne hinter dem Tor, schwebende Tempel-Inseln, fallende Federn/Blüten
 function drawHeavenRealm(W, a, t, viewY) {
   const k = W.special, gt = gateOf(k), into = Math.max(0, viewY - W.at), I = Math.min(1.6, .75 + k * .2);
-  ctx.save(); ctx.globalCompositeOperation = 'lighter';
   const cx = cw / 2, cy = ch * .3 + Math.min(ch * .35, into * S * .03), R = Math.min(cw, ch) * .42;
-  ctx.translate(cx, cy); ctx.rotate(t * .04);
-  const rays = lowFx ? 10 : 18;
-  for (let j = 0; j < rays; j++) { ctx.rotate(Math.PI * 2 / rays); const g = ctx.createLinearGradient(0, 0, R * 3, 0); g.addColorStop(0, gateLight(k, .3 * a * I, 10)); g.addColorStop(1, gateLight(k, 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(R * 3, -R * .14); ctx.lineTo(R * 3, R * .14); ctx.closePath(); ctx.fill(); }
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const sun = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.4); sun.addColorStop(0, gateLight(k, .95 * a, 20)); sun.addColorStop(.25, gateLight(k, .55 * a, 8)); sun.addColorStop(1, gateLight(k, 0));
-  ctx.fillStyle = sun; ctx.fillRect(cx - R * 1.5, cy - R * 1.5, R * 3, R * 3);
-  if (gt.rainbow) for (let i = 0; i < 6; i++) { ctx.strokeStyle = `hsla(${i * 60 + t * 20},100%,70%,${.18 * a})`; ctx.lineWidth = R * .07; ctx.beginPath(); ctx.arc(cx, cy, R * (.9 + i * .09), Math.PI, 0); ctx.stroke(); }
-  ctx.restore();
+  soft('hr', 'lighter', () => {   // Sonne + Strahlenkranz: weich und bildschirmgroß → im ¼-Puffer
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(t * .04);
+    const rays = lowFx ? 10 : 18;
+    for (let j = 0; j < rays; j++) { ctx.rotate(Math.PI * 2 / rays); const g = ctx.createLinearGradient(0, 0, R * 3, 0); g.addColorStop(0, gateLight(k, .3 * a * I, 10)); g.addColorStop(1, gateLight(k, 0)); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(R * 3, -R * .14); ctx.lineTo(R * 3, R * .14); ctx.closePath(); ctx.fill(); }
+    ctx.restore();
+    const sun = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 1.4); sun.addColorStop(0, gateLight(k, .95 * a, 20)); sun.addColorStop(.25, gateLight(k, .55 * a, 8)); sun.addColorStop(1, gateLight(k, 0));
+    ctx.fillStyle = sun; ctx.fillRect(cx - R * 1.5, cy - R * 1.5, R * 3, R * 3);
+  });
+  if (gt.rainbow) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; for (let i = 0; i < 6; i++) { ctx.strokeStyle = `hsla(${i * 60 + t * 20},100%,70%,${.18 * a})`; ctx.lineWidth = R * .07; ctx.beginPath(); ctx.arc(cx, cy, R * (.9 + i * .09), Math.PI, 0); ctx.stroke(); } ctx.restore(); }
   // schwebende Tempel-Inseln (zwischengespeichert, 2 Tiefenebenen)
   for (const [layer, par, sc] of [[0, .05, .7], [1, .09, 1]]) {
     const img = layerCanvas('isle' + Math.min(k, GATE.length) + layer, 220, 170, (g, w, h) => drawIsle(g, w, h, Math.min(k, GATE.length), layer));
@@ -1758,17 +1861,21 @@ function drawWorldFx(W, a, t, viewY = 0) {
   const H = W.hue, seed = W.i * 101, par = cam * S;
   ctx.save();
   if (W.base <= 3 || W.base === 8) drawWorldFx2(W, a, t, viewY);
+  else if (W.base >= 19) drawWorldFx4(W, a, t, viewY);
   else if (W.base >= 9) drawWorldFx3(W, a, t, viewY);
   else if (W.base === 4) {            // Sternennebel: große leuchtende Gaswolken
+    soft('neb', 'lighter', () => {   // große Gaswolken: weich → im ¼-Puffer
+      ctx.globalCompositeOperation = 'lighter';
+      const n = lowFx ? 3 : 6, R = Math.max(cw, ch);
+      for (let j = 0; j < n; j++) {
+        const r = R * (.28 + hash(seed + j * 7) * .3), hue = (300 + j * 47 + H) % 360;
+        const x = hash(seed + j) * cw + Math.sin(t * .1 + j) * 30, y = loopY(hash(seed + j + 50) * ch * 1.8, par * (.06 + j * .02), r);
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, `hsla(${hue},95%,65%,${.26 * a})`); g.addColorStop(.5, `hsla(${(hue + 40) % 360},90%,55%,${.1 * a})`); g.addColorStop(1, 'hsla(0,0%,0%,0)');
+        ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+      }
+    });
     ctx.globalCompositeOperation = 'lighter';
-    const n = lowFx ? 3 : 6, R = Math.max(cw, ch);
-    for (let j = 0; j < n; j++) {
-      const r = R * (.28 + hash(seed + j * 7) * .3), hue = (300 + j * 47 + H) % 360;
-      const x = hash(seed + j) * cw + Math.sin(t * .1 + j) * 30, y = loopY(hash(seed + j + 50) * ch * 1.8, par * (.06 + j * .02), r);
-      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, `hsla(${hue},95%,65%,${.26 * a})`); g.addColorStop(.5, `hsla(${(hue + 40) % 360},90%,55%,${.1 * a})`); g.addColorStop(1, 'hsla(0,0%,0%,0)');
-      ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
-    }
     for (let j = 0; j < 40; j++) {   // junge, helle Sterne in den Wolken
       const x = hash(seed + j * 3) * cw, y = ((hash(seed + j * 5) * ch * 1.3 + par * .07) % (ch * 1.3)) - ch * .15, tw = .5 + .5 * Math.sin(t * 3 + j);
       ctx.fillStyle = `hsla(${(200 + H) % 360},100%,90%,${a * tw})`; ctx.beginPath(); ctx.arc(x, y, 1.5 + tw * 1.5, 0, 7); ctx.fill();
@@ -1838,7 +1945,6 @@ function drawWorldFx(W, a, t, viewY = 0) {
 // ---------- Welten ab 5.100 m (Hintergründe 9–18) ----------
 // 9 Ringplanet · 10 Schwarzes Loch · 11 Kometensturm · 12 Quallenmeer · 13 Bonbonwolken · 14 Neonstadt
 // 15 Lavaplanet · 16 Prismenwelt · 17 Uhrwerk-Kosmos · 18 Himmelsinseln. Statisches wird einmal vorgezeichnet (layerCanvas).
-const DAYB = new Set([13, 18]);   // helle Tag-Welten: Wolken statt Sterne
 function gearArt(g, w, teeth, c1, c2) {
   const c = w / 2, ro = w * .46, ri = ro * .84, n = teeth * 2;
   g.beginPath();
@@ -2018,14 +2124,18 @@ function drawWorldFx3(W, a, t, viewY) {
     for (let j = 0; j < (lowFx ? 3 : 6); j++) {
       const s0 = (16 + hash(seed + j * 3) * 16) * sc, x = hash(seed + j * 41) * (cw + 80) - 40 - bgShift * (.5 + hash(j) * .4), y = loopY(hash(seed + j * 19) * ch * 1.3, par * (.24 + hash(j + 8) * .2), s0 * 2);
       const nc = hc(j % 2 ? 320 : 185, 100, 66, (.55 + .35 * Math.sin(t * 3 + j * 2)) * a);
-      ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(t * .5 + j) * .12); ctx.strokeStyle = nc; ctx.lineWidth = 3; ctx.shadowColor = nc; ctx.shadowBlur = lowFx ? 0 : 10;
-      rr(-s0, -s0 * .7, s0 * 2, s0 * 1.4, s0 * .3); ctx.stroke();
-      ctx.beginPath(); const k = j % 4;
-      if (k === 0) { ctx.moveTo(0, s0 * .4); ctx.bezierCurveTo(-s0 * .9, -s0 * .1, -s0 * .35, -s0 * .65, 0, -s0 * .2); ctx.bezierCurveTo(s0 * .35, -s0 * .65, s0 * .9, -s0 * .1, 0, s0 * .4); }
-      else if (k === 1) { ctx.save(); starPath(ctx, s0 * .5, .45); ctx.restore(); }
-      else if (k === 2) { ctx.moveTo(0, -s0 * .45); ctx.lineTo(s0 * .4, 0); ctx.lineTo(s0 * .15, 0); ctx.lineTo(s0 * .15, s0 * .4); ctx.lineTo(-s0 * .15, s0 * .4); ctx.lineTo(-s0 * .15, 0); ctx.lineTo(-s0 * .4, 0); ctx.closePath(); }
-      else ctx.arc(0, 0, s0 * .38, 0, 7);
-      ctx.stroke(); ctx.restore();
+      ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(t * .5 + j) * .12); ctx.strokeStyle = nc; ctx.lineJoin = 'round';
+      const k = j % 4, sign = () => {
+        rr(-s0, -s0 * .7, s0 * 2, s0 * 1.4, s0 * .3); ctx.stroke();
+        ctx.beginPath();
+        if (k === 0) { ctx.moveTo(0, s0 * .4); ctx.bezierCurveTo(-s0 * .9, -s0 * .1, -s0 * .35, -s0 * .65, 0, -s0 * .2); ctx.bezierCurveTo(s0 * .35, -s0 * .65, s0 * .9, -s0 * .1, 0, s0 * .4); }
+        else if (k === 1) starPath(ctx, s0 * .5, .45);
+        else if (k === 2) { ctx.moveTo(0, -s0 * .45); ctx.lineTo(s0 * .4, 0); ctx.lineTo(s0 * .15, 0); ctx.lineTo(s0 * .15, s0 * .4); ctx.lineTo(-s0 * .15, s0 * .4); ctx.lineTo(-s0 * .15, 0); ctx.lineTo(-s0 * .4, 0); ctx.closePath(); }
+        else ctx.arc(0, 0, s0 * .38, 0, 7);
+        ctx.stroke();
+      };
+      if (!lowFx) { ctx.globalAlpha = .28; ctx.lineWidth = 9; sign(); ctx.globalAlpha = 1; }   // Leuchthof ohne shadowBlur (der kostete ~50 ms pro Bild)
+      ctx.lineWidth = 3; sign(); ctx.restore();
     }
     ctx.globalCompositeOperation = 'source-over';
   } else if (b === 15) {    // Lavaplanet: Vulkane am Horizont, Lavaströme, aufsteigende Glut
@@ -2088,8 +2198,9 @@ function drawWorldFx3(W, a, t, viewY) {
     for (const [layer, band, f, s1, al] of [[0, 380, .25, .75, .72], [1, 560, .5, 1.25, .97]]) {
       if (lowFx && layer === 0) continue;
       const wy0 = cam * f, first = Math.floor(wy0 / band) - 1;
-      for (let bi = first; bi < first + Math.ceil(ch / S / f / band) + 3; bi++) {
+      for (let bi = first; bi < first + Math.ceil(ch / S / band) + 3; bi++) {
         const r = hash(bi * 61 + layer * 500 + 9), wy = bi * band + r * 180, y = ch - (wy - wy0) * S;
+        if (y < -200 || y > ch + 200) continue;
         const span = cw + 300, x = wrap(hash(bi * 29 + layer * 71) * span - bgShift * (.5 + layer * .7), span) - 150;
         const v = Math.floor(r * 40) % 4, w = 230 * s1 * Math.min(1.3, S * 1.2 + .1), h = w * .62;
         const img = layerCanvas('isle' + v, 230, 143, (g, ww, hh) => islandArt(g, ww, hh, v));
@@ -2105,10 +2216,420 @@ function drawWorldFx3(W, a, t, viewY) {
     ctx.globalAlpha = 1;
   }
 }
+// ---------- Welten der Reise-Erweiterung (Hintergründe 19–26) ----------
+// 19 Gewitterfront · 20 Mondbasis · 21 Eismond · 22 Pilzwald · 23 Wüstenplanet · 24 Korallenriff · 25 Raumstation · 26 Laternenhimmel
+// Alles Feste wird einmal vorgezeichnet (layerCanvas); pro Bild nur kopieren, drehen, verschieben – kein shadowBlur, wenige Verläufe.
+function stormCloudArt(g, w, h, v) {
+  const { out, y0 } = cloudPuffs(w, h, v), L = out[0][0] - out[0][2] * .9, R = out[out.length - 1][0] + out[out.length - 1][2] * .9, bh = h * .2, by = y0 - bh * .55;
+  const body = () => { g.beginPath(); for (const [x, y, r] of out) { g.moveTo(x + r, y); g.arc(x, y, r, 0, 7); } g.moveTo(L + bh / 2, by); g.arcTo(R, by, R, by + bh, bh / 2); g.arcTo(R, by + bh, L, by + bh, bh / 2); g.arcTo(L, by + bh, L, by, bh / 2); g.arcTo(L, by, R, by, bh / 2); g.closePath(); };
+  body(); g.strokeStyle = 'rgba(14,16,40,.55)'; g.lineWidth = 4; g.lineJoin = 'round'; g.stroke();
+  const gr = g.createLinearGradient(0, out.reduce((a, p) => Math.min(a, p[1] - p[2]), h), 0, by + bh);
+  gr.addColorStop(0, '#8A97B8'); gr.addColorStop(.55, '#566285'); gr.addColorStop(1, '#2C3352');
+  body(); g.fillStyle = gr; g.fill();
+  g.save(); body(); g.clip();
+  g.fillStyle = 'rgba(14,16,40,.3)'; g.beginPath(); g.ellipse(w / 2, by + bh * 1.05, (R - L) * .58, bh * .8, 0, 0, 7); g.fill();
+  g.strokeStyle = 'rgba(200,214,255,.55)'; g.lineWidth = h * .035; g.lineCap = 'round';
+  for (const [x, y, r] of out) if (r > h * .2) { g.beginPath(); g.arc(x, y, r * .76, Math.PI * 1.18, Math.PI * 1.45); g.stroke(); }
+  g.restore();
+}
+function earthArt(g, w) {
+  const c = w / 2, r = w * .4;
+  const at = g.createRadialGradient(c, c, r * .9, c, c, r * 1.22); at.addColorStop(0, 'rgba(120,200,255,.55)'); at.addColorStop(1, 'rgba(120,200,255,0)');
+  g.fillStyle = at; g.fillRect(0, 0, w, w);
+  g.save(); g.beginPath(); g.arc(c, c, r, 0, 7); g.clip();
+  const oc = g.createLinearGradient(0, c - r, 0, c + r); oc.addColorStop(0, '#3FA0FF'); oc.addColorStop(1, '#1B4FB8'); g.fillStyle = oc; g.fillRect(0, 0, w, w);
+  g.fillStyle = '#4CC46A';
+  for (const [x, y, rx, ry, rot] of [[.34, .36, .16, .1, .4], [.42, .5, .09, .17, -.2], [.66, .3, .13, .08, .1], [.7, .58, .1, .14, .5], [.3, .7, .12, .06, -.3]]) { g.beginPath(); g.ellipse(w * x, w * y, w * rx, w * ry, rot, 0, 7); g.fill(); }
+  g.fillStyle = 'rgba(255,255,255,.85)';
+  for (const [x, y, rx] of [[.3, .25, .14], [.6, .45, .18], [.45, .78, .16], [.75, .72, .08]]) { g.beginPath(); g.ellipse(w * x, w * y, w * rx, w * .025, -.15, 0, 7); g.fill(); }
+  const sh = g.createLinearGradient(c - r, 0, c + r, 0); sh.addColorStop(0, 'rgba(5,8,30,0)'); sh.addColorStop(.55, 'rgba(5,8,30,.1)'); sh.addColorStop(1, 'rgba(5,8,30,.78)');
+  g.fillStyle = sh; g.fillRect(0, 0, w, w); g.restore();
+  g.strokeStyle = 'rgba(27,18,64,.6)'; g.lineWidth = 3; g.beginPath(); g.arc(c, c, r, 0, 7); g.stroke();
+}
+function moonSurfArt(g, w, h) {
+  g.fillStyle = '#6E6F86'; g.strokeStyle = '#1B1240'; g.lineWidth = 3; g.beginPath(); g.moveTo(0, h);
+  for (let x = 0; x <= w; x += 20) g.lineTo(x, h * .42 + Math.sin(x / 140) * 18 + Math.sin(x / 47 + 1) * 6);
+  g.lineTo(w, h); g.closePath(); g.fill(); g.stroke();
+  const lit = g.createLinearGradient(0, h * .35, 0, h); lit.addColorStop(0, 'rgba(255,255,255,.22)'); lit.addColorStop(1, 'rgba(0,0,0,.25)'); g.fillStyle = lit; g.fill();
+  for (let i = 0; i < Math.floor(w / 70); i++) {
+    const x = hash(i * 13 + 2) * w, y = h * (.6 + hash(i * 7) * .33), r = 8 + hash(i * 3) * 26;
+    g.fillStyle = 'rgba(40,40,70,.35)'; g.beginPath(); g.ellipse(x, y, r, r * .32, 0, 0, 7); g.fill();
+    g.strokeStyle = 'rgba(255,255,255,.3)'; g.lineWidth = 2; g.beginPath(); g.ellipse(x, y + 1, r, r * .32, 0, .2, Math.PI - .2); g.stroke();
+  }
+  // Mondbasis: Kuppeln mit Licht, Röhren, Antenne, Startrampe, Fahne
+  const bx = w * .5, gy = h * .44;
+  g.lineWidth = 2.5; g.strokeStyle = '#1B1240';
+  g.fillStyle = '#C9CDE0'; g.fillRect(bx - 70, gy + 2, 140, 7); g.strokeRect(bx - 70, gy + 2, 140, 7);
+  for (const [dx, r] of [[-42, 26], [8, 34], [56, 20]]) {
+    const dg = g.createLinearGradient(0, gy - r, 0, gy); dg.addColorStop(0, '#E6F7FF'); dg.addColorStop(1, '#8FC4E8');
+    g.fillStyle = dg; g.beginPath(); g.arc(bx + dx, gy + 2, r, Math.PI, 0); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = '#FFE38A'; for (let k = -1; k <= 1; k++) g.fillRect(bx + dx + k * r * .38 - 3, gy - r * .35, 6, 6);
+  }
+  g.fillStyle = '#9AA0BA'; g.fillRect(bx + 84, gy - 52, 4, 56); g.strokeRect(bx + 84, gy - 52, 4, 56);
+  g.beginPath(); g.ellipse(bx + 86, gy - 54, 12, 5, -.4, 0, 7); g.fillStyle = '#E8ECF8'; g.fill(); g.stroke();
+  g.fillStyle = '#B9BDD2'; g.fillRect(bx - 150, gy + 4, 54, 6); g.strokeRect(bx - 150, gy + 4, 54, 6);
+  g.fillStyle = '#9AA0BA'; g.fillRect(bx + 110, gy - 30, 2, 34); g.fillStyle = '#FF5A7A'; g.fillRect(bx + 112, gy - 30, 18, 11); g.strokeRect(bx + 112, gy - 30, 18, 11);
+}
+function rocketArt(g) {
+  g.lineWidth = 2.5; g.strokeStyle = '#1B1240'; g.lineJoin = 'round';
+  g.fillStyle = '#FF5A7A'; g.beginPath(); g.moveTo(10, 52); g.lineTo(2, 64); g.lineTo(10, 60); g.closePath(); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(30, 52); g.lineTo(38, 64); g.lineTo(30, 60); g.closePath(); g.fill(); g.stroke();
+  const bg = g.createLinearGradient(10, 0, 30, 0); bg.addColorStop(0, '#FFFFFF'); bg.addColorStop(1, '#C9D2EA');
+  g.fillStyle = bg; g.beginPath(); g.moveTo(20, 4); g.quadraticCurveTo(34, 20, 30, 60); g.lineTo(10, 60); g.quadraticCurveTo(6, 20, 20, 4); g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = '#FF5A7A'; g.beginPath(); g.moveTo(20, 4); g.quadraticCurveTo(28, 12, 29, 20); g.lineTo(11, 20); g.quadraticCurveTo(12, 12, 20, 4); g.closePath(); g.fill(); g.stroke();
+  g.fillStyle = '#7FE8FF'; g.beginPath(); g.arc(20, 32, 5, 0, 7); g.fill(); g.stroke();
+}
+function iceGiantArt(g, w, H) {
+  const c = w / 2, r = w * .42;
+  g.save(); g.beginPath(); g.arc(c, c, r, 0, 7); g.clip();
+  const bands = ['#BFF4FF', '#8FE0F2', '#D6FAFF', '#6FC6E0', '#A8ECF7', '#5AB0D0'];
+  for (let k = 0; k < 14; k++) { g.fillStyle = hueRot(bands[k % bands.length], H); g.fillRect(0, c - r + k * (2 * r / 14) + Math.sin(k * 1.7) * 3, w, 2 * r / 14 + 2); }
+  const sg = g.createRadialGradient(c - r * .4, c - r * .45, r * .1, c, c, r * 1.05); sg.addColorStop(0, 'rgba(255,255,255,.35)'); sg.addColorStop(.6, 'rgba(0,0,0,0)'); sg.addColorStop(1, 'rgba(4,10,40,.65)');
+  g.fillStyle = sg; g.fillRect(0, 0, w, w); g.restore();
+  g.strokeStyle = 'rgba(27,18,64,.55)'; g.lineWidth = 4; g.beginPath(); g.arc(c, c, r, 0, 7); g.stroke();
+}
+function iceSurfArt(g, w, h, H) {
+  const base = g.createLinearGradient(0, h * .3, 0, h); base.addColorStop(0, hueRot('#9FE6FF', H)); base.addColorStop(1, hueRot('#2A5C9A', H));
+  g.strokeStyle = '#1B1240'; g.lineWidth = 3; g.lineJoin = 'round';
+  g.fillStyle = base; g.beginPath(); g.moveTo(0, h);
+  let x = 0, i = 4;
+  while (x < w) { const sw = 40 + hash(i) * 70, sh = h * (.25 + hash(i + 1) * .5); g.lineTo(x + sw * .45, h - sh); g.lineTo(x + sw * .6, h - sh * .82); g.lineTo(x + sw, h * .78 - hash(i + 2) * h * .12); x += sw; i++; }
+  g.lineTo(w, h); g.closePath(); g.fill(); g.stroke();
+  g.strokeStyle = 'rgba(255,255,255,.7)'; g.lineWidth = 2.5; g.beginPath(); x = 0; i = 4;
+  while (x < w) { const sw = 40 + hash(i) * 70, sh = h * (.25 + hash(i + 1) * .5); g.moveTo(x + sw * .45, h - sh + 4); g.lineTo(x + sw * .3, h - sh * .55); x += sw; i++; }
+  g.stroke();
+}
+function shroomArt(g, w, h, v, H) {
+  const caps = [['#7FF8FF', '#1E8FB0'], ['#FF9BE6', '#A0278F'], ['#D8FF7A', '#4E9A2E']][v % 3], cx = w / 2, capY = h * .34, cr = w * .42;
+  const gl = g.createRadialGradient(cx, capY + 10, 0, cx, capY + 10, w * .5); gl.addColorStop(0, rgbaHex(hueRot(caps[0], H), .45)); gl.addColorStop(1, rgbaHex(hueRot(caps[0], H), 0));
+  g.fillStyle = gl; g.fillRect(0, 0, w, h);
+  g.strokeStyle = '#1B1240'; g.lineWidth = 3; g.lineJoin = 'round';
+  g.strokeStyle = rgbaHex(hueRot(caps[0], H), .7); g.lineWidth = 1.6;
+  for (let k = 0; k < 4; k++) { g.beginPath(); g.moveTo(cx - 6 + k * 4, h * .86); g.quadraticCurveTo(cx - 14 + k * 9, h * .93, cx - 8 + k * 6, h * .99); g.stroke(); }
+  g.strokeStyle = '#1B1240'; g.lineWidth = 3;
+  g.fillStyle = '#EAE2FF'; g.beginPath(); g.moveTo(cx - 9, capY + 8); g.quadraticCurveTo(cx - 14, h * .6, cx - 10, h * .86); g.lineTo(cx + 10, h * .86); g.quadraticCurveTo(cx + 14, h * .6, cx + 9, capY + 8); g.closePath(); g.fill(); g.stroke();
+  const cg = g.createLinearGradient(0, capY - cr * .7, 0, capY + 10); cg.addColorStop(0, hueRot(caps[0], H)); cg.addColorStop(1, hueRot(caps[1], H));
+  g.fillStyle = cg; g.beginPath(); g.ellipse(cx, capY + 8, cr, cr * .75, 0, Math.PI, 0); g.quadraticCurveTo(cx, capY + 24, cx - cr, capY + 8); g.fill(); g.stroke();
+  g.fillStyle = 'rgba(255,255,255,.75)'; for (const [dx, dy, r] of [[-.45, -.25, .12], [.1, -.5, .09], [.45, -.2, .1], [-.1, -.1, .07]]) { g.beginPath(); g.arc(cx + cr * dx, capY + cr * dy, cr * r, 0, 7); g.fill(); }
+}
+function shroomForestArt(g, w, h, H) {
+  g.fillStyle = '#120A26'; g.beginPath(); g.moveTo(0, h);
+  for (let x = 0; x <= w; x += 24) g.lineTo(x, h * .78 + Math.sin(x / 90) * 10); g.lineTo(w, h); g.closePath(); g.fill();
+  let x = 10, i = 21;
+  while (x < w) {
+    const sh = h * (.35 + hash(i) * .55), cr = 18 + hash(i + 1) * 40, col = hueRot(['#3DF5FF', '#FF6BD6', '#B6FF5E'][i % 3], H);
+    g.fillStyle = '#1C1238'; g.fillRect(x - 4, h - sh, 8, sh);
+    const gl = g.createRadialGradient(x, h - sh, 0, x, h - sh, cr * 1.8); gl.addColorStop(0, rgbaHex(col, .35)); gl.addColorStop(1, rgbaHex(col, 0)); g.fillStyle = gl; g.fillRect(x - cr * 1.8, h - sh - cr * 1.8, cr * 3.6, cr * 3.6);
+    g.fillStyle = '#24163F'; g.beginPath(); g.ellipse(x, h - sh, cr, cr * .6, 0, Math.PI, 0); g.closePath(); g.fill();
+    g.fillStyle = rgbaHex(col, .85); g.beginPath(); g.ellipse(x, h - sh, cr * .92, cr * .12, 0, 0, Math.PI); g.fill();
+    for (let k = 0; k < 3; k++) { g.beginPath(); g.arc(x + (hash(i * 3 + k) - .5) * cr * 1.2, h - sh - cr * (.15 + hash(i + k) * .3), 2.2, 0, 7); g.fill(); }
+    x += cr * 1.6 + hash(i + 5) * 40; i++;
+  }
+}
+function sunArt(g, w, c1, c2) {
+  const c = w / 2, sg = g.createRadialGradient(c, c, 0, c, c, c); sg.addColorStop(0, '#FFFFFF'); sg.addColorStop(.16, c1); sg.addColorStop(.3, rgbaHex(c2, .55)); sg.addColorStop(1, rgbaHex(c2, 0));
+  g.fillStyle = sg; g.fillRect(0, 0, w, w);
+}
+function duneArt(g, w, h, layer, H) {
+  const cols = [['#E8A36A', '#B0603E'], ['#D98A55', '#8E4630'], ['#C2703F', '#6E3424']][layer];
+  if (layer === 0) {   // Pyramiden + Obelisk am fernen Horizont
+    g.fillStyle = hueRot('#9C5A48', H);
+    for (const [px, pw, ph] of [[.18, 110, 70], [.27, 70, 44], [.66, 130, 84]]) { g.beginPath(); g.moveTo(w * px - pw / 2, h * .5); g.lineTo(w * px, h * .5 - ph); g.lineTo(w * px + pw / 2, h * .5); g.closePath(); g.fill(); }
+    g.fillRect(w * .48, h * .5 - 76, 9, 76); g.beginPath(); g.moveTo(w * .48, h * .5 - 76); g.lineTo(w * .48 + 4.5, h * .5 - 88); g.lineTo(w * .48 + 9, h * .5 - 76); g.fill();
+  }
+  const gr = g.createLinearGradient(0, h * .35, 0, h); gr.addColorStop(0, hueRot(cols[0], H)); gr.addColorStop(1, hueRot(cols[1], H));
+  g.fillStyle = gr; g.strokeStyle = 'rgba(27,18,64,.5)'; g.lineWidth = 3; g.beginPath(); g.moveTo(0, h);
+  for (let x = 0; x <= w; x += 16) g.lineTo(x, h * (.5 + layer * .08) + Math.sin(x / (120 + layer * 40) + layer * 2) * h * .12 + Math.sin(x / 53 + layer) * h * .03);
+  g.lineTo(w, h); g.closePath(); g.fill(); g.stroke();
+  g.strokeStyle = 'rgba(255,230,190,.35)'; g.lineWidth = 2; g.beginPath();
+  for (let x = 0; x <= w; x += 16) { const y = h * (.5 + layer * .08) + Math.sin(x / (120 + layer * 40) + layer * 2) * h * .12 + Math.sin(x / 53 + layer) * h * .03 + 4; x ? g.lineTo(x, y) : g.moveTo(x, y); }
+  g.stroke();
+}
+function mesaArt(g, w, h, v) {
+  g.strokeStyle = '#1B1240'; g.lineWidth = 3; g.lineJoin = 'round';
+  const top = h * .2, gr = g.createLinearGradient(0, top, 0, h); gr.addColorStop(0, '#E9A86E'); gr.addColorStop(1, '#8A4A32');
+  g.fillStyle = gr; g.beginPath(); g.moveTo(w * .12, top);
+  for (let k = 0; k <= 6; k++) g.lineTo(w * (.12 + .76 * k / 6), top + (k % 2) * 6);
+  for (let k = 6; k >= 0; k--) { const f = k / 6; g.lineTo(w * (.12 + .76 * f) * .9 + w * .05, top + (h - top) * Math.sin(Math.PI * f) * (.75 + hash(v * 5 + k) * .3) + 10); }
+  g.closePath(); g.fill(); g.stroke();
+  g.strokeStyle = 'rgba(80,30,20,.35)'; g.lineWidth = 2; for (let k = 1; k < 4; k++) { g.beginPath(); g.moveTo(w * .2, top + k * h * .1); g.lineTo(w * .8, top + k * h * .1 + 4); g.stroke(); }
+  g.fillStyle = 'rgba(255,235,200,.35)'; g.fillRect(w * .14, top, w * .7, 5);
+}
+function coralArt(g, w, h, H) {
+  g.fillStyle = hueRot('#E8D3A3', H); g.beginPath(); g.moveTo(0, h);
+  for (let x = 0; x <= w; x += 20) g.lineTo(x, h * .86 + Math.sin(x / 70) * 6); g.lineTo(w, h); g.closePath(); g.fill();
+  g.strokeStyle = '#1B1240'; g.lineJoin = 'round'; g.lineCap = 'round';
+  let x = 14, i = 3;
+  while (x < w) {
+    const k = i % 4, col = hueRot(['#FF6F91', '#FFB347', '#B48CFF', '#5EE6C8'][Math.floor(hash(i) * 4)], H), s = .7 + hash(i + 1) * .6, by = h * .9;
+    g.fillStyle = col; g.strokeStyle = '#1B1240'; g.lineWidth = 2.5;
+    if (k === 0) {   // Geweihkoralle
+      g.strokeStyle = '#1B1240'; g.lineWidth = 11 * s; const br = (x0, y0, a, L, d) => { const x1 = x0 + Math.cos(a) * L, y1 = y0 + Math.sin(a) * L; g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke(); if (d < 3) { br(x1, y1, a - .45, L * .72, d + 1); br(x1, y1, a + .45, L * .72, d + 1); } };
+      br(x, by, -Math.PI / 2, 40 * s, 0); g.strokeStyle = col; g.lineWidth = 7 * s; br(x, by, -Math.PI / 2, 40 * s, 0);
+    } else if (k === 1) {   // Fächer
+      g.beginPath(); g.moveTo(x, by); g.arc(x, by - 4, 46 * s, Math.PI * 1.15, Math.PI * 1.85); g.closePath(); g.fill(); g.stroke();
+      g.strokeStyle = 'rgba(27,18,64,.35)'; g.lineWidth = 1.5; for (let q = 0; q < 6; q++) { const an = Math.PI * (1.2 + q * .12); g.beginPath(); g.moveTo(x, by - 4); g.lineTo(x + Math.cos(an) * 42 * s, by - 4 + Math.sin(an) * 42 * s); g.stroke(); }
+    } else if (k === 2) {   // Hirnkoralle
+      g.beginPath(); g.ellipse(x, by, 30 * s, 22 * s, 0, Math.PI, 0); g.closePath(); g.fill(); g.stroke();
+      g.strokeStyle = 'rgba(27,18,64,.3)'; g.lineWidth = 2; for (let q = 0; q < 3; q++) { g.beginPath(); g.ellipse(x, by, (24 - q * 7) * s, (16 - q * 5) * s, 0, Math.PI * 1.1, Math.PI * 1.9); g.stroke(); }
+    } else {   // Röhren + Seegras
+      for (let q = 0; q < 3; q++) { const tx = x + (q - 1) * 10 * s, th = (26 + q * 12 + hash(i + q) * 10) * s; g.fillStyle = col; rr(tx - 4.5 * s, by - th, 9 * s, th, 4 * s, g); g.fill(); g.stroke(); g.fillStyle = 'rgba(27,18,64,.35)'; g.beginPath(); g.ellipse(tx, by - th + 2, 3 * s, 1.6 * s, 0, 0, 7); g.fill(); }
+      g.strokeStyle = hueRot('#3FBF7F', H); g.lineWidth = 4; for (let q = 0; q < 2; q++) { g.beginPath(); g.moveTo(x + 22 + q * 7, by); g.bezierCurveTo(x + 12 + q * 7, by - 30, x + 34 + q * 7, by - 50, x + 22 + q * 7, by - 74 - q * 10); g.stroke(); }
+    }
+    x += (46 + hash(i + 7) * 38) * s; i++;
+  }
+}
+function raysArt(g, w, h) {
+  for (let k = 0; k < 6; k++) {
+    const x0 = w * (.08 + k * .17 + hash(k * 9) * .05), wd = w * (.04 + hash(k) * .05), lg = g.createLinearGradient(0, 0, 0, h);
+    lg.addColorStop(0, 'rgba(220,255,255,.32)'); lg.addColorStop(1, 'rgba(220,255,255,0)');
+    g.fillStyle = lg; g.beginPath(); g.moveTo(x0, 0); g.lineTo(x0 + wd, 0); g.lineTo(x0 + wd * 2.4 + w * .12, h); g.lineTo(x0 + w * .12, h); g.closePath(); g.fill();
+  }
+}
+function stationArt(g, w, H) {
+  const c = w / 2, R = w * .4;
+  g.strokeStyle = '#1B1240'; g.lineJoin = 'round';
+  g.lineWidth = 8; g.strokeStyle = '#8D94B5'; for (let k = 0; k < 4; k++) { const a = k * Math.PI / 2; g.beginPath(); g.moveTo(c + Math.cos(a) * 34, c + Math.sin(a) * 34); g.lineTo(c + Math.cos(a) * R, c + Math.sin(a) * R); g.stroke(); }
+  g.lineWidth = 34; g.strokeStyle = '#1B1240'; g.beginPath(); g.arc(c, c, R, 0, 7); g.stroke();
+  g.lineWidth = 28; g.strokeStyle = '#D9DEF0'; g.beginPath(); g.arc(c, c, R, 0, 7); g.stroke();
+  g.lineWidth = 8; g.strokeStyle = 'rgba(120,130,170,.6)'; g.beginPath(); g.arc(c, c, R + 7, 0, 7); g.stroke();
+  for (let k = 0; k < 24; k++) { const a = k / 24 * Math.PI * 2; g.save(); g.translate(c + Math.cos(a) * R, c + Math.sin(a) * R); g.rotate(a); g.fillStyle = '#1B1240'; g.fillRect(-1, -14, 2, 28); g.fillStyle = hueRot(k % 3 ? '#FFE38A' : '#7FE8FF', H); g.fillRect(-5, -6, 4, 4); g.fillRect(-5, 2, 4, 4); g.restore(); }
+  for (const sg of [-1, 1]) {
+    g.fillStyle = '#1F3F8A'; g.strokeStyle = '#1B1240'; g.lineWidth = 2.5;
+    const px = c + sg * 46, pw = sg * 120; g.fillRect(Math.min(px, px + pw), c - 18, Math.abs(pw), 36); g.strokeRect(Math.min(px, px + pw), c - 18, Math.abs(pw), 36);
+    g.strokeStyle = 'rgba(140,190,255,.7)'; g.lineWidth = 1.5; for (let q = 1; q < 6; q++) { g.beginPath(); g.moveTo(px + pw * q / 6, c - 18); g.lineTo(px + pw * q / 6, c + 18); g.stroke(); } g.beginPath(); g.moveTo(px, c); g.lineTo(px + pw, c); g.stroke();
+  }
+  const hg = g.createRadialGradient(c - 10, c - 10, 4, c, c, 40); hg.addColorStop(0, '#FFFFFF'); hg.addColorStop(1, '#9AA3C7');
+  g.fillStyle = hg; g.strokeStyle = '#1B1240'; g.lineWidth = 3; g.beginPath(); g.arc(c, c, 36, 0, 7); g.fill(); g.stroke();
+  g.fillStyle = '#7FE8FF'; g.beginPath(); g.arc(c, c, 12, 0, 7); g.fill(); g.stroke();
+}
+function satArt(g, w, h) {
+  g.strokeStyle = '#1B1240'; g.lineWidth = 2; g.fillStyle = '#2B55B0';
+  g.fillRect(2, h / 2 - 8, w * .32, 16); g.strokeRect(2, h / 2 - 8, w * .32, 16); g.fillRect(w * .66, h / 2 - 8, w * .32 - 2, 16); g.strokeRect(w * .66, h / 2 - 8, w * .32 - 2, 16);
+  g.fillStyle = '#E6C46A'; rr(w * .34, h / 2 - 12, w * .32, 24, 5, g); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(w / 2, h / 2 - 12); g.lineTo(w / 2, 3); g.stroke(); g.fillStyle = '#FFFFFF'; g.beginPath(); g.arc(w / 2, 4, 3, 0, 7); g.fill(); g.stroke();
+}
+function limbArt(g, w, h, H) {
+  const R = w * 1.4, cy = h + R - h * .55;
+  const at = g.createRadialGradient(w / 2, cy, R * .97, w / 2, cy, R * 1.08); at.addColorStop(0, rgbaHex(hueRot('#7FD3FF', H), .9)); at.addColorStop(1, rgbaHex(hueRot('#7FD3FF', H), 0));
+  g.fillStyle = at; g.fillRect(0, 0, w, h);
+  const pg = g.createLinearGradient(0, h * .45, 0, h); pg.addColorStop(0, hueRot('#2F6FD0', H)); pg.addColorStop(1, hueRot('#0E2A66', H));
+  g.fillStyle = pg; g.beginPath(); g.arc(w / 2, cy, R, 0, 7); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.55)'; for (let k = 0; k < 9; k++) { g.beginPath(); g.ellipse(w * hash(k * 7), h * (.62 + hash(k * 3) * .3), 30 + hash(k) * 50, 4, 0, 0, 7); g.fill(); }
+  g.fillStyle = 'rgba(255,220,120,.8)'; for (let k = 0; k < 40; k++) { const x = hash(k * 11 + 3) * w, y = h * (.7 + hash(k * 5) * .28); g.fillRect(x, y, 2, 2); }
+}
+function lanternArt(g, w, h) {
+  const cx = w / 2, gl = g.createRadialGradient(cx, h * .55, 0, cx, h * .55, w / 2); gl.addColorStop(0, 'rgba(255,200,110,.55)'); gl.addColorStop(1, 'rgba(255,140,60,0)');
+  g.fillStyle = gl; g.fillRect(0, 0, w, h);
+  const lw = w * .34, lh = h * .38, top = h * .36;
+  const bg = g.createLinearGradient(0, top, 0, top + lh); bg.addColorStop(0, '#FFE6A6'); bg.addColorStop(.6, '#FFB04A'); bg.addColorStop(1, '#E2582C');
+  g.fillStyle = bg; g.strokeStyle = '#7A2A14'; g.lineWidth = 2; rr(cx - lw / 2, top, lw, lh, lw * .35, g); g.fill(); g.stroke();
+  g.strokeStyle = 'rgba(160,60,20,.45)'; g.lineWidth = 1.2; for (let k = 1; k < 4; k++) { g.beginPath(); g.moveTo(cx - lw / 2 + 3, top + lh * k / 4); g.lineTo(cx + lw / 2 - 3, top + lh * k / 4); g.stroke(); }
+  g.fillStyle = '#7A2A14'; g.fillRect(cx - lw * .3, top - 3, lw * .6, 4); g.fillRect(cx - lw * .25, top + lh - 1, lw * .5, 4);
+  g.fillStyle = 'rgba(255,255,230,.9)'; g.beginPath(); g.ellipse(cx, top + lh * .62, lw * .16, lh * .14, 0, 0, 7); g.fill();
+}
+function templeHillsArt(g, w, h, H) {
+  g.fillStyle = hueRot('#2A1640', H); g.beginPath(); g.moveTo(0, h);
+  for (let x = 0; x <= w; x += 20) g.lineTo(x, h * .55 + Math.sin(x / 160) * 22 + Math.sin(x / 61) * 8); g.lineTo(w, h); g.closePath(); g.fill();
+  const px = w * .62, py = h * .5;   // Pagode
+  g.fillStyle = hueRot('#3A1E55', H);
+  for (let k = 0; k < 4; k++) { const ww = 70 - k * 14, yy = py - k * 30; g.fillRect(px - ww * .35, yy - 22, ww * .7, 22); g.beginPath(); g.moveTo(px - ww / 2 - 10, yy - 20); g.quadraticCurveTo(px, yy - 34, px + ww / 2 + 10, yy - 20); g.lineTo(px + ww / 2, yy - 16); g.lineTo(px - ww / 2, yy - 16); g.closePath(); g.fill(); }
+  g.fillRect(px - 1.5, py - 150, 3, 30);
+  g.fillStyle = 'rgba(255,190,90,.85)'; for (let k = 0; k < 4; k++) g.fillRect(px - 5, py - 14 - k * 30, 10, 6);
+  for (let i = 0; i < Math.floor(w / 60); i++) { const x = hash(i * 17 + 1) * w; if (Math.abs(x - px) < 60) continue; const y = h * .6 + Math.sin(x / 160) * 22 + 8; g.fillStyle = hueRot('#3A1E55', H); g.fillRect(x - 10, y - 12, 20, 14); g.beginPath(); g.moveTo(x - 13, y - 11); g.lineTo(x, y - 20); g.lineTo(x + 13, y - 11); g.fill(); g.fillStyle = 'rgba(255,190,90,.8)'; g.fillRect(x - 3, y - 7, 6, 5); }
+}
+function fishPath(s) { ctx.moveTo(s, 0); ctx.quadraticCurveTo(s * .2, -s * .55, -s * .6, 0); ctx.lineTo(-s * 1.05, -s * .45); ctx.lineTo(-s * 1.05, s * .45); ctx.lineTo(-s * .6, 0); ctx.quadraticCurveTo(s * .2, s * .55, s, 0); }
+function drawWorldFx4(W, a, t, viewY) {
+  const H = W.hue, seed = W.i * 101, par = cam * S, m = Math.min(cw, ch), into = Math.max(0, viewY - W.at), b = W.base;
+  const hc = (h, s, l, al) => `hsla(${((h + H) % 360 + 360) % 360},${s}%,${l}%,${al})`;
+  const sc = Math.min(1.5, S + .4), sink = (k, max) => Math.min(max, into * S * k);
+  // Horizont-Bild (cw·1,6 breit), sinkt beim Aufstieg aus dem Bild
+  const horizon = (key, h, k, art, shift = .4) => {
+    const img = layerCanvas(key, Math.ceil(cw * 1.6), h, art), y = ch - h + 10 + sink(k, h + 60);
+    if (y > ch) return null;
+    const x0 = -(img.width / dpr - cw) / 2 - bgShift * shift;
+    ctx.globalAlpha = a; ctx.drawImage(img, x0, y, img.width / dpr, h); ctx.globalAlpha = 1;
+    return { x0, y };
+  };
+  // Objekte, die in Weltkoordinaten verteilt sind (Bänder) → ziehen beim Aufstieg sauber nach unten, ohne Springen
+  const bands = (layers, each) => {
+    for (const [layer, band, f] of layers) {
+      if (lowFx && layer === 0) continue;
+      const wy0 = cam * f, first = Math.floor(wy0 / band) - 1;
+      for (let bi = first; bi < first + Math.ceil(ch / S / band) + 3; bi++) {
+        const r = hash(bi * 61 + layer * 500 + b * 7), wy = bi * band + r * band * .4, y = ch - (wy - wy0) * S;
+        if (y > -220 && y < ch + 220) each(layer, bi, r, y);
+      }
+    }
+  };
+  if (b === 19) {          // Gewitterfront: dunkle Wolkenbänke, Regen, ferne Blitze
+    const per = 2.6, cyc = Math.floor(t / per), ph = t - cyc * per, on = hash(cyc * 7 + seed) < .62, fl = on && ph < .4 ? 1 - ph / .4 : 0;
+    if (fl > 0) {
+      if (!reduceMotion) { ctx.fillStyle = `rgba(190,210,255,${.13 * fl * fl * a})`; ctx.fillRect(0, 0, cw, ch); }
+      const lx = cw * (.12 + hash(cyc * 13 + 5) * .76);
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.beginPath();
+      let x = lx, y = ch * (.05 + hash(cyc) * .15); ctx.moveTo(x, y);
+      for (let k = 0; k < 9; k++) { x += (hash(cyc * 7 + k) - .5) * 46 * sc; y += ch * .045 + hash(cyc * 3 + k) * ch * .03; ctx.lineTo(x, y); if (k === 4) { ctx.lineTo(x + 30 * sc, y + ch * .05); ctx.moveTo(x, y); } }
+      ctx.strokeStyle = `rgba(150,180,255,${.3 * fl * a})`; ctx.lineWidth = 10; ctx.stroke();
+      ctx.strokeStyle = `rgba(235,242,255,${.95 * fl * a})`; ctx.lineWidth = 2.6; ctx.stroke();
+      ctx.restore();
+    }
+    bands([[0, 300, .3], [1, 470, .58]], (layer, bi, r, y) => {
+      const s1 = (layer ? 1.25 : .8) * Math.min(1.3, S * 1.2 + .1), w = 240 * s1, h = 130 * s1, span = cw + 320;
+      const x = wrapv(hash(bi * 19 + layer * 41) * span + t * (5 + layer * 7) * (r > .5 ? 1 : -1) - bgShift * (.6 + layer * .6), span) - 160;
+      const v = Math.floor(r * 40) % 6, img = layerCanvas('storm' + v, 240, 130, (g, ww, hh) => stormCloudArt(g, ww, hh, v));
+      ctx.globalAlpha = a * ((layer ? .95 : .7) - r * .15); ctx.drawImage(img, x - w / 2, y - h * .7, w, h);
+    });
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = `rgba(185,205,245,${.32 * a})`; ctx.lineWidth = 1.4; ctx.lineCap = 'round'; ctx.beginPath();
+    for (let j = 0; j < (lowFx ? 24 : 56); j++) {
+      const sp = 620 + hash(j * 3) * 420, x = wrapv(hash(seed + j * 7) * cw * 1.3 - t * sp * .24, cw * 1.3) - cw * .15, y = wrapv(hash(j * 11) * ch + t * sp + par * .5, ch + 60) - 30;
+      ctx.moveTo(x, y); ctx.lineTo(x - 6, y + 20);
+    }
+    ctx.stroke();
+  } else if (b === 20) {   // Mondbasis: Erde am Himmel, Mondoberfläche mit Station, startende Rakete
+    const es = m * .46, img = layerCanvas('earth', 260, 260, (g, w) => earthArt(g, w));
+    ctx.globalAlpha = a; ctx.drawImage(img, cw * .7 - es / 2 - bgShift * .12, ch * .2 + sink(.012, ch * .55) - es / 2, es, es); ctx.globalAlpha = 1;
+    const hz = horizon('moonsurf', 230, .03, (g, w, h) => moonSurfArt(g, w, h));
+    if (hz) {
+      const W2 = Math.ceil(cw * 1.6), bx = hz.x0 + W2 * .5, gy = hz.y + 230 * .44;
+      const blink = Math.sin(t * 4) > .3;
+      if (blink) { ctx.drawImage(glowSprite('rgba(255,90,122,.9)', 14), bx + 86 - 14, gy - 54 - 14, 28, 28); }
+      const per = 9, ph = (t % per) / per;   // Rakete startet von der Rampe
+      if (ph < .55 && !lowFx) {
+        const k = ph / .55, ry = gy - 4 - k * k * (ch * 1.2), rx = bx - 123 + Math.sin(k * 3) * 6 * k;
+        const fl = 18 + Math.sin(t * 40) * 5, fg = glowSprite('rgba(255,170,60,.95)', 18);
+        ctx.globalAlpha = a; ctx.drawImage(fg, rx - fl * .7, ry + 2, fl * 1.4, fl * 2.2);
+        ctx.drawImage(layerCanvas('rocket', 40, 66, g => rocketArt(g)), rx - 15, ry - 50, 30, 50); ctx.globalAlpha = 1;
+        if (k < .25) for (let q = 0; q < 6; q++) { const s0 = 8 + q * 4 + k * 60; ctx.fillStyle = `rgba(220,222,240,${(.5 - k * 2) * a})`; ctx.beginPath(); ctx.arc(rx + (q - 2.5) * 9 * (1 + k * 4), gy + 2 - q % 2 * 4, s0, 0, 7); ctx.fill(); }
+      }
+    }
+  } else if (b === 21) {   // Eismond: blauer Eisriese, Eisnadeln, Geysire, schwebende Eisplatten, Schnee
+    const gs = m * .62, img = layerCanvas('icegiant' + H, 300, 300, (g, w) => iceGiantArt(g, w, H));
+    ctx.globalAlpha = a; ctx.drawImage(img, cw * .27 - gs / 2 - bgShift * .1, ch * .18 + sink(.012, ch * .5) - gs / 2, gs, gs); ctx.globalAlpha = 1;
+    const hz = horizon('icesurf' + H, 240, .03, (g, w, h) => iceSurfArt(g, w, h, H));
+    if (hz) {
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      for (let q = 0; q < 3; q++) {
+        const gx = hz.x0 + Math.ceil(cw * 1.6) * (.3 + q * .2), gy = hz.y + 240 * .72;
+        for (let j = 0; j < (lowFx ? 8 : 16); j++) {
+          const k = (t * .5 + hash(j * 5 + q) + j / 16) % 1, x = gx + (hash(j * 3 + q * 9) - .5) * 40 * k, y = gy - k * 160 * sc;
+          ctx.fillStyle = hc(190, 100, 88, (1 - k) * .7 * a); ctx.beginPath(); ctx.arc(x, y, 1.5 + k * 4, 0, 7); ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+    for (let j = 0; j < (lowFx ? 4 : 7); j++) {
+      const s0 = (12 + hash(seed + j * 5) * 18) * sc, x = hash(seed + j * 11) * cw - bgShift * (.2 + hash(j) * .3), y = loopY(hash(seed + j * 17) * ch * 1.5, par * (.16 + hash(j) * .16), s0 * 1.4), rot = t * (.2 + hash(j) * .3) * (j % 2 ? 1 : -1);
+      ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = .85 * a; ctx.fillStyle = hueRot(j % 2 ? '#CFF8FF' : '#9FE6FF', H); ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); for (let k = 0; k < 6; k++) { const an = k / 6 * Math.PI * 2; ctx.lineTo(Math.cos(an) * s0, Math.sin(an) * s0 * .55); } ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.beginPath(); ctx.moveTo(-s0 * .5, 0); ctx.lineTo(s0 * .5, 0); ctx.stroke(); ctx.restore();
+    }
+    ctx.fillStyle = `rgba(240,250,255,${.75 * a})`; ctx.beginPath();
+    for (let j = 0; j < (lowFx ? 22 : 50); j++) { const x = wrapv(hash(seed + j * 3) * cw + Math.sin(t * .7 + j) * 18 + t * 12, cw + 10) - 5, y = loopY(hash(j * 7) * ch, t * (22 + hash(j) * 22) + par * (.3 + hash(j + 1) * .3), 4), r = 1 + hash(j + 2) * 1.8; ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, 7); }
+    ctx.fill();
+  } else if (b === 22) {   // Pilzwald: leuchtender Pilzwald am Boden, schwebende Pilze, Sporen, Glühwürmchen
+    horizon('shroomwood' + H, 260, .03, (g, w, h) => shroomForestArt(g, w, h, H), .35);
+    bands([[0, 420, .22], [1, 600, .42]], (layer, bi, r, y) => {
+      const v = Math.floor(r * 30) % 3, s1 = (layer ? 1 : .65) * Math.min(1.3, S * 1.2 + .1), w = 120 * s1, h = 150 * s1, span = cw + 160;
+      const x = wrapv(hash(bi * 23 + layer * 9) * span - bgShift * (.4 + layer * .5), span) - 80;
+      ctx.globalAlpha = a * (layer ? .95 : .65); ctx.drawImage(layerCanvas('shroom' + v + ':' + H, 120, 150, (g, ww, hh) => shroomArt(g, ww, hh, v, H)), x - w / 2, y - h / 2 + Math.sin(t * .9 + bi) * 6, w, h);
+    });
+    ctx.globalAlpha = 1;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    for (let j = 0; j < (lowFx ? 24 : 54); j++) {
+      const x = hash(seed + j * 9) * cw + Math.sin(t * .8 + j) * 12, y = loopY(hash(j * 5) * ch * 1.2, par * (.25 + hash(j + 2) * .3) - t * (10 + hash(j) * 18), 4);
+      ctx.fillStyle = hc([185, 315, 95][j % 3], 100, 72, a * (.35 + .45 * hash(j + 1))); ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
+    }
+    for (let j = 0; j < (lowFx ? 6 : 14); j++) {
+      const tw = Math.max(0, Math.sin(t * 2.4 + j * 2.1)); if (tw < .1) continue;
+      const x = wrapv(hash(seed + j * 31) * cw + Math.sin(t * .6 + j) * 40, cw), y = loopY(hash(j * 13) * ch, par * (.35 + hash(j) * .2) + Math.cos(t * .7 + j) * 20, 10);
+      ctx.globalAlpha = tw * a; ctx.drawImage(glowSprite('rgba(220,255,120,.9)', 10), x - 8, y - 8, 16, 16);
+    }
+    ctx.restore(); ctx.globalAlpha = 1;
+  } else if (b === 23) {   // Wüstenplanet: zwei Sonnen, Dünen mit Pyramiden, schwebende Tafelberge, Sandschleier
+    const s1 = m * 1.1, s2 = m * .5;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = a;
+    ctx.drawImage(layerCanvas('sunA' + H, 256, 256, (g, w) => sunArt(g, w, hueRot('#FFD27A', H), hueRot('#FF7A3D', H))), cw * .3 - s1 / 2 - bgShift * .08, ch * .5 + sink(.014, ch * .6) - s1 / 2, s1, s1);
+    ctx.drawImage(layerCanvas('sunB', 256, 256, (g, w) => sunArt(g, w, '#FFF6E0', '#FFC8A0')), cw * .8 - s2 / 2 - bgShift * .05, ch * .26 + sink(.01, ch * .6) - s2 / 2, s2, s2);
+    ctx.restore(); ctx.globalAlpha = 1;
+    for (const [layer, hgt, k, sh] of [[0, 200, .02, .25], [1, 170, .035, .45], [2, 130, .05, .7]]) {
+      if (lowFx && layer === 0) continue;
+      horizon('dune' + layer + H, hgt, k, (g, w, h) => duneArt(g, w, h, layer, H), sh);
+    }
+    bands([[0, 520, .2], [1, 700, .38]], (layer, bi, r, y) => {
+      const v = Math.floor(r * 20) % 3, s0 = (layer ? 1 : .6) * Math.min(1.3, S * 1.2 + .1), w = 150 * s0, h = 110 * s0, span = cw + 200;
+      const x = wrapv(hash(bi * 17 + layer * 5) * span - bgShift * (.3 + layer * .5), span) - 100;
+      ctx.globalAlpha = a * (layer ? .95 : .6); ctx.drawImage(layerCanvas('mesa' + v, 150, 110, (g, ww, hh) => mesaArt(g, ww, hh, v)), x - w / 2, y - h / 2 + Math.sin(t * .6 + bi) * 4, w, h);
+    });
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = `rgba(255,225,180,${.28 * a})`; ctx.lineCap = 'round'; ctx.lineWidth = 2; ctx.beginPath();
+    for (let j = 0; j < (lowFx ? 8 : 16); j++) { const L = 40 + hash(j) * 90, x = wrapv(hash(seed + j * 7) * cw + t * (80 + hash(j + 1) * 120), cw + L * 2) - L, y = loopY(hash(j * 9) * ch, par * (.25 + hash(j + 3) * .25), 10); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + L * .5, y - 4, x + L, y + 2); }
+    ctx.stroke();
+  } else if (b === 24) {   // Korallenriff: Lichtstrahlen von oben, Korallen am Grund, Fischschwärme, Luftblasen
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = a * (.75 + .25 * Math.sin(t * .7));
+    ctx.drawImage(layerCanvas('rays', 260, 360, (g, w, h) => raysArt(g, w, h)), -cw * .15 + Math.sin(t * .25) * 20, 0, cw * 1.3, ch * .9);   // weiche Strahlen: klein vorgezeichnet, groß gezogen
+    ctx.restore(); ctx.globalAlpha = 1;
+    horizon('coral' + H, 220, .03, (g, w, h) => coralArt(g, w, h, H), .45);
+    const fc = ['#FFB347', '#FF6F91', '#FFE45E', '#7FE8FF', '#B48CFF'];
+    ctx.strokeStyle = '#1B1240'; ctx.lineWidth = 1.5; ctx.lineJoin = 'round';
+    for (let j = 0; j < (lowFx ? 3 : 6); j++) {
+      const dir = j % 2 ? 1 : -1, sp = 22 + hash(seed + j) * 30, span = cw + 260, cx = wrapv(hash(j * 7) * span + t * sp * dir - bgShift * .5, span) - 130;
+      const cy = loopY(hash(seed + j * 23) * ch * 1.3, par * (.18 + hash(j + 6) * .22), 60), fs = (6 + hash(j + 2) * 5) * sc, n = 4 + Math.floor(hash(j + 4) * 5);
+      ctx.fillStyle = hueRot(fc[j % fc.length], H); ctx.globalAlpha = .9 * a;
+      for (let q = 0; q < n; q++) {
+        const fx = cx - dir * (q % 3) * fs * 2.6 + Math.sin(t * 2 + q) * 3, fy = cy + (q - n / 2) * fs * 1.3 + Math.sin(t * 1.4 + q * 1.7) * 4;
+        ctx.save(); ctx.translate(fx, fy); ctx.scale(dir, 1); ctx.beginPath(); fishPath(fs); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#1B1240'; ctx.beginPath(); ctx.arc(fs * .45, -fs * .1, fs * .12, 0, 7); ctx.fill(); ctx.restore();
+        ctx.fillStyle = hueRot(fc[j % fc.length], H);
+      }
+    }
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = `rgba(220,250,255,${.6 * a})`; ctx.lineWidth = 1.5; ctx.beginPath();
+    for (let j = 0; j < (lowFx ? 16 : 36); j++) { const x = hash(seed + j * 5) * cw + Math.sin(t * 1.5 + j) * 6, y = loopY(hash(j * 3) * ch * 1.2, par * (.3 + hash(j + 1) * .3) - t * (30 + hash(j) * 40), 6), r = 2 + hash(j + 2) * 4.5; ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, 7); }
+    ctx.stroke();
+  } else if (b === 25) {   // Raumstation: Erde unten im Bild, drehende Ringstation, Satelliten, Fähren
+    const lw = Math.ceil(cw * 1.4), limb = layerCanvas('limb' + H, lw, 260, (g, w, h) => limbArt(g, w, h, H)), ly = ch - 230 + sink(.03, 320);
+    if (ly < ch) { ctx.globalAlpha = a; ctx.drawImage(limb, -(lw - cw) / 2 - bgShift * .3, ly, lw, 260); ctx.globalAlpha = 1; }
+    const ss = m * 1.05, sx0 = cw * .66 - bgShift * .15, sy0 = ch * .32 + sink(.011, ch * .55);
+    ctx.save(); ctx.translate(sx0, sy0); ctx.rotate(t * .06); ctx.globalAlpha = a;
+    ctx.drawImage(layerCanvas('station' + H, 440, 440, (g, w) => stationArt(g, w, H)), -ss / 2, -ss / 2, ss, ss);
+    if (!lowFx) for (let k = 0; k < 4; k++) if (Math.sin(t * 3 + k * 1.6) > .55) { const an = k * Math.PI / 2 + Math.PI / 4, rr0 = ss * .4; ctx.drawImage(glowSprite(k % 2 ? 'rgba(255,90,122,.95)' : 'rgba(94,242,255,.95)', 12), Math.cos(an) * rr0 - 10, Math.sin(an) * rr0 - 10, 20, 20); }
+    ctx.restore(); ctx.globalAlpha = 1;
+    for (let j = 0; j < (lowFx ? 2 : 4); j++) {
+      const s0 = (50 + hash(seed + j) * 30) * sc, x = hash(seed + j * 13) * cw - bgShift * (.3 + hash(j) * .3), y = loopY(hash(seed + j * 29) * ch * 1.4, par * (.2 + hash(j + 3) * .14), s0);
+      ctx.save(); ctx.translate(x, y); ctx.rotate(t * (.15 + hash(j) * .2) * (j % 2 ? 1 : -1) + j); ctx.globalAlpha = a * .95;
+      ctx.drawImage(layerCanvas('sat', 96, 48, (g, w, h) => satArt(g, w, h)), -s0 / 2, -s0 / 4, s0, s0 / 2); ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    for (let j = 0; j < (lowFx ? 3 : 6); j++) {
+      const dir = j % 2 ? 1 : -1, sp = 40 + hash(seed + j) * 90, span = cw + 200, x = wrapv(hash(j * 7) * span + t * sp * dir, span) - 100, y = loopY(hash(seed + j * 19) * ch, par * (.22 + hash(j + 6) * .2), 6);
+      ctx.drawImage(glowSprite('rgba(140,220,255,.9)', 10), x - 7, y - 7, 14, 14);
+      ctx.strokeStyle = `rgba(140,220,255,${.45 * a})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - dir * 34, y); ctx.stroke();
+    }
+    ctx.restore();
+  } else if (b === 26) {   // Laternenhimmel: Vollmond, Hügel mit Pagode, aufsteigende Papierlaternen
+    const ms = m * .34;
+    ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+    ctx.drawImage(layerCanvas('sunB', 256, 256, (g, w) => sunArt(g, w, '#FFF6E0', '#FFC8A0')), cw * .76 - ms - bgShift * .08, ch * .2 + sink(.012, ch * .5) - ms, ms * 2, ms * 2);
+    ctx.restore(); ctx.globalAlpha = 1;
+    horizon('temple' + H, 210, .03, (g, w, h) => templeHillsArt(g, w, h, H), .4);
+    const img = layerCanvas('lantern', 60, 80, (g, w, h) => lanternArt(g, w, h));
+    for (let j = 0; j < (lowFx ? 14 : 30); j++) {
+      const d = .35 + hash(seed + j * 3) * .65, s0 = 34 * d * sc, x = wrapv(hash(seed + j * 11) * cw + Math.sin(t * .5 + j) * 14 * d - bgShift * d * .6, cw + 40) - 20;
+      const y = loopY(hash(j * 7) * ch * 1.3, par * (.1 + d * .38) - t * (6 + d * 14), s0 * 1.4);
+      ctx.globalAlpha = a * (.55 + .45 * d) * (.85 + .15 * Math.sin(t * 6 + j * 2.3)); ctx.drawImage(img, x - s0 * .5, y - s0 * .67, s0, s0 * 1.33);
+    }
+    ctx.globalAlpha = 1;
+  }
+}
 let bgShift = 0;
 function drawBackground(t, viewY) {
   bgShift = (camX - (C.START_LANE * C.LANE_W + C.LANE_W / 2)) * S * .3;
   const [WA, WB, k] = biomeBlend(viewY);
+  const NW = C.worldAt(viewY + BLEND + 2500);
+  if (NW.i !== warmI && NW.i !== WA.i) { warmI = NW.i; (window.requestIdleCallback || setTimeout)(() => warmWorld(NW)); }
   const gk = `${WA.i}|${WB.i}|${Math.round(k * 40)}|${ch}`;   // Verlauf nur neu bauen, wenn er sich sichtbar ändert
   if (skyCache.gk !== gk) {
     const g = ctx.createLinearGradient(0, 0, 0, ch);
@@ -2116,7 +2637,7 @@ function drawBackground(t, viewY) {
     skyCache.gk = gk; skyCache.g = g;
   }
   ctx.fillStyle = skyCache.g; ctx.fillRect(0, 0, cw, ch);
-  // Besondere Welten ab 1.700 m (laufen danach endlos in Farbvarianten weiter)
+  // Welt-Grafiken (alter und neuer Welt im Übergang, weich überblendet)
   if (WA.base >= 1) drawWorldFx(WA, 1 - k, t, viewY);
   if (k > 0 && WB.base >= 1) drawWorldFx(WB, k, t, viewY);
   if (viewY > C.MILESTONE - 20000) drawHeavenGlow(t, viewY);
@@ -2129,41 +2650,31 @@ function drawBackground(t, viewY) {
     for (let j = 0; j < 24; j++) { const x = hash(WB.i * 13 + j) * cw, y = yb + (hash(j * 7) - .5) * bh * 1.2, tw = .5 + .5 * Math.sin(t * 5 + j); ctx.fillStyle = `rgba(255,255,255,${.55 * v * tw})`; ctx.beginPath(); ctx.arc(x, y, 1.2 + tw * 1.8, 0, 7); ctx.fill(); }
     ctx.restore();
   }
-  const dayW = (DAYB.has(WA.base) ? 1 - k : 0) + (DAYB.has(WB.base) ? k : 0);   // helle Welten (Bonbonwolken, Himmelsinseln)
-
-  const starA = Math.min(1, Math.max(0, (viewY - 5200) / 1200)) * (1 - dayW);
-  if (starA > 0) for (let i = 0; i < 90; i++) {
-    const x = hash(i) * cw, y = ((hash(i + 500) * ch * 2 + cam * S * .05) % (ch * 1.2)) - ch * .1, tw = .5 + .5 * Math.sin(t * 2 + i);
-    ctx.fillStyle = `rgba(255,255,255,${starA * (.3 + .7 * tw)})`; ctx.fillRect(x, y, 2, 2);
+  // Sterne, Staub und Wolken gehören zu den Welten (WP) und blenden mit dem Weltwechsel weich über
+  const starA = wpMix(WA, WB, k, 'st');
+  if (starA > .01) {
+    const sy0 = cam * S * .05;
+    for (let q = 0; q < 3; q++) {   // drei Helligkeitsstufen statt 90 einzelner Farben (funkeln bleibt)
+      ctx.fillStyle = `rgba(255,255,255,${(starA * (.42 + q * .23)).toFixed(3)})`;
+      for (let i = 0; i < 90; i++) {
+        if (Math.min(2, ((.5 + .5 * Math.sin(t * 2 + i)) * 3) | 0) !== q) continue;
+        ctx.fillRect(hash(i) * cw, ((hash(i + 500) * ch * 2 + sy0) % (ch * 1.2)) - ch * .1, 2, 2);
+      }
+    }
   }
-  // Tiefen-Staub im All: feine Teilchen in zwei Ebenen ziehen beim Aufstieg deutlich nach unten (Bewegungsgefühl in jeder Welt)
-  const dustA = Math.min(1, Math.max(0, (viewY - 11000) / 1500)) * (1 - dayW);
-  if (dustA > 0 && !lowFx) {
+  // Tiefen-Staub: feine Teilchen in zwei Ebenen ziehen beim Aufstieg deutlich nach unten (Bewegungsgefühl in jeder Welt)
+  const dustA = wpMix(WA, WB, k, 'du');
+  if (dustA > .01 && !lowFx) {
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
-    for (let j = 0; j < 34; j++) {
-      const near = j % 2, x = wrapv(hash(j * 37 + 5) * cw - bgShift * (near ? .9 : .5), cw + 20) - 10, y = loopY(hash(j * 53 + 1) * ch, cam * S * (near ? .62 : .34), 4);
-      ctx.fillStyle = `rgba(255,255,255,${dustA * (near ? .32 : .18) * (.6 + .4 * hash(j))})`; ctx.beginPath(); ctx.arc(x, y, (near ? 1.6 : 1) + hash(j + 7) * 1.2, 0, 7); ctx.fill();
+    for (const near of [0, 1]) {
+      ctx.fillStyle = `rgba(255,255,255,${(dustA * (near ? .27 : .15)).toFixed(3)})`; ctx.beginPath();
+      for (let j = near; j < 34; j += 2) {
+        const x = wrapv(hash(j * 37 + 5) * cw - bgShift * (near ? .9 : .5), cw + 20) - 10, y = loopY(hash(j * 53 + 1) * ch, cam * S * (near ? .62 : .34), 4), r = (near ? 1.6 : 1) + hash(j + 7) * 1.2;
+        ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, 7);
+      }
+      ctx.fill();
     }
     ctx.restore();
-  }
-  const aur = Math.max(0, Math.min(1, (viewY - 5400) / 900)) * Math.max(0, Math.min(1, (11500 - viewY) / 900));
-  if (aur > 0 && !lowFx) {
-    ctx.save(); ctx.globalCompositeOperation = 'lighter';
-    for (let band = 0; band < 3; band++) {
-      ctx.beginPath();
-      for (let x = 0; x <= cw; x += 12) { const y = ch * (.18 + band * .12) + Math.sin(x / 90 + t * .6 + band * 2) * 30 + Math.sin(x / 37 + t * 1.1) * 10; x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
-      ctx.strokeStyle = band === 1 ? `rgba(195,139,255,${.25 * aur})` : `rgba(59,232,164,${.3 * aur})`; ctx.lineWidth = 40 + band * 10; ctx.stroke();
-    }
-    ctx.restore();
-  }
-  const space = Math.max(0, Math.min(1, (viewY - 10500) / 900, (17000 - viewY) / 1000));
-  if (space > 0) {
-    ctx.globalAlpha = space;
-    const py = loopY(ch * .3, cam * S * .08, 120);
-    const pg = ctx.createRadialGradient(cw * .75 - 20, py - 20, 10, cw * .75, py, 70); pg.addColorStop(0, '#FFB3C7'); pg.addColorStop(1, '#7B4DFF');
-    ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(cw * .75, py, 70, 0, 7); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(cw * .75, py, 110, 22, -.3, 0, 7); ctx.stroke();
-    ctx.globalAlpha = 1;
   }
   const city = Math.max(0, 1 - viewY / 2600);
   if (city > 0) {
@@ -2180,15 +2691,16 @@ function drawBackground(t, viewY) {
     ctx.fillStyle = layer ? 'rgb(60,30,120)' : 'rgba(123,77,255,.55)'; if (base < ch) ctx.fillRect(0, base, cw, ch - base);
   }
   if (!lowFx) drawAmbient(t, viewY);
-  const cloudA = Math.max(viewY < 9000 ? (viewY < 2000 ? .65 : 1) : Math.max(0, 1 - (viewY - 9000) / 1500), dayW * .9);
-  if (cloudA > 0) {
+  const cloudA = wpMix(WA, WB, k, 'cl');
+  if (cloudA > .01) {
     const bio = C.biomeAt(viewY);
     for (const [layer, band, par, sc, al, sp] of [[0, 300, .35, .55, .55, 4], [1, 420, .6, .85, .85, 9], [2, 640, .9, 1.25, .95, 16]]) {
       if (lowFx && layer === 0) continue;
       const wy0 = cam * par, first = Math.floor((wy0 - 300) / band), span = cw + 360;
-      for (let bi = first; bi < first + Math.ceil(ch / S / par / band) + 3; bi++) {
+      for (let bi = first; bi < first + Math.ceil(ch / S / band) + 4; bi++) {
         if (bi < 2) continue;
         const r = hash(bi * 31 + 7 + layer * 1000), wy = bi * band + r * 150, y = ch - (wy - wy0) * S;
+        if (y < -200 || y > ch + 320) continue;
         let x = (hash(bi * 17 + layer * 77) * span + t * sp * (r > .5 ? 1 : -1) - bgShift * (.8 + layer * .6)) % span; if (x < 0) x += span;
         cloud(x - 180, y, (sc + r * .35) * Math.min(1.3, S * 1.2), (al - r * .15) * cloudA, Math.floor(r * 60) + layer, bio);
       }
@@ -2205,7 +2717,9 @@ const PLAT_COLORS = [['#3BE8A4', '#FFC83D', '#B98BFF', '#38C6FF'], ['#FF8FB1', '
   ['#FF6BD6', '#5EF2FF', '#FFC83D', '#B98BFF'], ['#5EF2FF', '#9FFFE0', '#C38BFF', '#7FB2FF'], ['#FFC83D', '#FF8A2B', '#FF5A7A', '#FFE066'], ['#38C6FF', '#FF6BD6', '#3BE8A4', '#FFE066'], ['#FFE066', '#FFFFFF', '#FFC83D', '#FF8FB1'],
   ['#FFB38A', '#C38BFF', '#5EF2FF', '#FFE066'], ['#FF8A2B', '#FFC83D', '#C38BFF', '#5EF2FF'], ['#7FE8FF', '#FFFFFF', '#9FB8FF', '#5EF2FF'], ['#FF6BD6', '#5EF2FF', '#B98BFF', '#3BE8A4'],
   ['#FF6BB5', '#5EE6C8', '#FFD25E', '#9C8BFF'], ['#FF3DCB', '#3DF5FF', '#FFE45E', '#9D7BFF'], ['#FFC83D', '#FF8A2B', '#FF5A7A', '#FFE066'], ['#5EF2FF', '#FF8FB1', '#FFE066', '#B98BFF'],
-  ['#FFC83D', '#E0A100', '#FFE29A', '#C77B3A'], ['#3BE8A4', '#FF8FB1', '#FFC83D', '#38C6FF']];
+  ['#FFC83D', '#E0A100', '#FFE29A', '#C77B3A'], ['#3BE8A4', '#FF8FB1', '#FFC83D', '#38C6FF'],
+  ['#FFE066', '#7FE8FF', '#FF8FB1', '#B98BFF'], ['#5EF2FF', '#FFC83D', '#C38BFF', '#3BE8A4'], ['#9FFFFF', '#FF8FB1', '#B98BFF', '#FFE066'], ['#3BE8A4', '#FF6BD6', '#FFE066', '#5EF2FF'],
+  ['#FFE066', '#FF8A2B', '#5EF2FF', '#C38BFF'], ['#FF8A80', '#FFE066', '#FF6BD6', '#B98BFF'], ['#5EF2FF', '#FFC83D', '#FF6BD6', '#3BE8A4'], ['#FFC83D', '#FF8A2B', '#FF8FB1', '#5EF2FF']];
 
 // Vorgerenderte Bilder (einmal zeichnen, danach nur noch kopieren → deutlich schneller)
 var SPR = new Map();
@@ -2972,22 +3486,34 @@ function handleEvents() {
   G.events.length = 0;
 }
 
-let perfN = 0, perfSum = 0;
+let perfN = 0, perfSum = 0, smoothN = 0, gfxDown = false;
+function setGfx(lv) {
+  gfxLv = lv; const [q, lf] = GFX[lv]; lowFx = lf;
+  if (q !== quality) { quality = q; layout(); skyCacheClear(); }
+  try { localStorage.setItem('sr_gfx', String(lv)); } catch {}
+}
 function autoQuality(rawDt) {
-  if (!running || paused || sheetOpen || document.hidden || rawDt > .25) return;
+  if (!running || paused || sheetOpen || document.hidden || rawDt > .25) { smoothN = 0; return; }
   perfSum += rawDt; perfN++;
   if (perfN < 120) return;
   const avg = perfSum / perfN; perfN = 0; perfSum = 0;
   if (avg > 1 / 45) {                       // unter ~45 fps → Schritt für Schritt entlasten
-    if (!lowFx) lowFx = true;
-    else if (quality > 1) { quality = Math.max(1, quality - .5); layout(); skyCacheClear(); }
-  }
+    smoothN = 0; if (gfxLv < 3) { gfxDown = true; setGfx(gfxLv + 1); }
+  } else if (avg < 1 / 57 && gfxLv > 0 && !gfxDown) {
+    // läuft lange völlig flüssig (z. B. Gerät war beim letzten Mal nur kurz heiß) → eine Stufe zurück nach oben, höchstens einmal pro Start
+    if (++smoothN >= 12) { smoothN = 0; gfxDown = true; setGfx(gfxLv - 1); }
+  } else smoothN = 0;
 }
 // Bildschleife: ein Fehler in einem einzelnen Bild darf das Spiel nie einfrieren – das nächste Bild kommt immer
 let frameErrs = 0;
+let lastDraw = 0;
 function frame(t) {
   requestAnimationFrame(frame);
   if (window.__freeze) return;   // nur für Screenshots/Tests
+  // 120/144-Hz-Bildschirme: höchstens ~60–72 Bilder pro Sekunde zeichnen (die Spielphysik läuft ohnehin mit festem Takt)
+  // → halbe Rechen- und Grafiklast, kühleres Handy, längerer Akku, kein Herunterdrosseln mitten im Lauf
+  if (t - lastDraw < 10.5) return;
+  lastDraw = t;
   try { frameBody(t); }
   catch (e) {
     try { ctx.reset ? ctx.reset() : ctx.restore(); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); } catch {}
@@ -2995,7 +3521,7 @@ function frame(t) {
   }
 }
 function frameBody(t) {
-  const rawDt = (t - (lastT || t)) / 1000, now = t / 1000, dt = Math.min(.05, rawDt); lastT = t;
+  const rawDt = (t - (lastT || t)) / 1000, now = t / 1000, dt = Math.min(.05, rawDt); lastT = t; frameNo++;
   autoQuality(rawDt);
   padFrame(t);
   if (bumpT > 0) bumpT = Math.max(0, bumpT - dt);
@@ -3099,7 +3625,13 @@ function hud() {
   }
   const W = C.worldAt(G.maxY);   // Neue Welt: Banner nur beim allerersten Besuch
   if (W.i !== hudW) {
-    if (hudW >= 0 && W.at > (save.worldMaxAt || 0)) { save.worldMaxAt = W.at; persist(); if (!W.special) { banner(W.name, `Neue Welt entdeckt · ${fmt(Math.floor(W.at / 10))} m`); sfx.checkpoint(); } }
+    // neue Höhe ODER eine der Welten aus Update 3.0, die man noch nie gesehen hat (auch unterhalb des eigenen Rekords)
+    const higher = W.at > (save.worldMaxAt || 0), fresh = !W.special && W.base >= 19 && !(save.newW || []).includes(W.base);
+    if (hudW >= 0 && (higher || fresh)) {
+      if (higher) save.worldMaxAt = W.at;
+      if (fresh) (save.newW ||= []).push(W.base);
+      persist(); if (!W.special) { banner(W.name, `Neue Welt entdeckt · ${fmt(Math.floor(W.at / 10))} m`); sfx.checkpoint(); }
+    }
     hudW = W.i;
   }
   // Meilenstein alle 10.000 m: großes Ereignis + Belohnung beim ersten Mal
@@ -5155,7 +5687,7 @@ if (AC.restored) setTimeout(() => toast('Spielstand wurde wiederhergestellt'), 1
 if (new URLSearchParams(location.search).has('debug') && !Monetize.portal) setTimeout(openRevenue, 300);   // nur ?debug, nie auf Portalen (dort hängt z. B. sdk_debug an der Adresse)
 if (native) cap.Plugins?.SplashScreen?.hide?.();
 if ('serviceWorker' in navigator && !native && !Monetize.portal && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
-if (DEV_HOST) window.__sky = { get G() { return G; }, paintBg: (y, t = 1, wy = null) => { const oc = cam; cam = y; drawBackground(t, y); drawWalls(t); if (wy !== null) { const p = { id: 1, lane: C.START_LANE, y: y + 200, type: '' }; for (let i = 0; i < 6; i++) drawPlatform({ id: i * 3 + 1, lane: 3 + i, y: y + 120 + i * 70, type: '' }, t, 0); } cam = oc; return cv.toDataURL('image/jpeg', .82); }, Monetize, previewChar, openTourLobby, showTourPrize, showDailyPrize, openLeaderboard, openShop, showResults, showRestore, wallBench: n => { const t0 = performance.now(); for (let i = 0; i < n; i++) drawWalls(i / 60, 1 / 60, G, G.p.x, G.p.y); return (performance.now() - t0) / n; }, train: r => startTraining(r), restore: r => { save.restoreMsg = r; showRestore(); }, duelSetup: (r) => duelSetup(r || {}, () => {}, () => {}), duelLobby: (r, q) => duelLobby(r, q), edge: (k, f = 2.5) => { edgeK = k; edgeFx = f; }, Vault, vaultFlush, eco, act, startGame, C, save, DUEL, openDuel, openShop, openSeason, closeSheet: () => closeSheet(), openChests: () => openChests(), refresh: () => refreshHome(), openAchievements, openLeaderboard, openLevel, openMissions, openSets, openSettings, openStreak, openTasks, openWheel, offerRescue: (...a) => offerRescue(...a), tutorial: () => tutorial() };
+if (DEV_HOST) window.__sky = { get G() { return G; }, bgBench: (y, n = 60, low = false) => { const oc = cam, ol = lowFx; cam = y; lowFx = low; drawBackground(0, y); ctx.getImageData(0, 0, 1, 1); const t0 = performance.now(); for (let i = 0; i < n; i++) { drawBackground(1 + i / 60, y); ctx.getImageData(0, 0, 1, 1); } const r = (performance.now() - t0) / n; cam = oc; lowFx = ol; return r; }, worldAt: y => C.worldAt(y), fnBench: (name, y, n = 40) => { const F = { glow: () => drawHeavenGlow(1, y), amb: () => drawAmbient(1, y), fx: () => { const [A] = biomeBlend(y); drawWorldFx(A, 1, 1, y); }, bg: () => drawBackground(1, y), walls: () => drawWalls(1, 1 / 60) }[name]; const oc = cam; cam = y; F(); ctx.getImageData(0, 0, 1, 1); const t0 = performance.now(); for (let i = 0; i < n; i++) { F(); ctx.getImageData(0, 0, 1, 1); } cam = oc; return (performance.now() - t0) / n; }, paintBg: (y, t = 1, wy = null) => { const oc = cam; cam = y; drawBackground(t, y); drawWalls(t); if (wy !== null) { const p = { id: 1, lane: C.START_LANE, y: y + 200, type: '' }; for (let i = 0; i < 6; i++) drawPlatform({ id: i * 3 + 1, lane: 3 + i, y: y + 120 + i * 70, type: '' }, t, 0); } cam = oc; return cv.toDataURL('image/jpeg', .82); }, Monetize, previewChar, openTourLobby, showTourPrize, showDailyPrize, openLeaderboard, openShop, showResults, showRestore, wallBench: n => { const t0 = performance.now(); for (let i = 0; i < n; i++) drawWalls(i / 60, 1 / 60, G, G.p.x, G.p.y); return (performance.now() - t0) / n; }, train: r => startTraining(r), restore: r => { save.restoreMsg = r; showRestore(); }, duelSetup: (r) => duelSetup(r || {}, () => {}, () => {}), duelLobby: (r, q) => duelLobby(r, q), edge: (k, f = 2.5) => { edgeK = k; edgeFx = f; }, Vault, vaultFlush, eco, act, startGame, C, save, DUEL, openDuel, openShop, openSeason, closeSheet: () => closeSheet(), openChests: () => openChests(), refresh: () => refreshHome(), openAchievements, openLeaderboard, openLevel, openMissions, openSets, openSettings, openStreak, openTasks, openWheel, offerRescue: (...a) => offerRescue(...a), tutorial: () => tutorial() };
 </script>
 </body>
 </html>
