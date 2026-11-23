@@ -34,13 +34,13 @@ for (const l of LANGS) {
 }
 const idx = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
 t(idx.includes('<link rel="canonical" href="https://myskyrush.com/">') && idx.includes('google-site-verification') && idx.includes('<noscript>'), 'Startseite: canonical, Google-Code, noscript');
-t(/<title>Sky Rush – [^<]+<\/title>/.test(idx) && ldOf(idx)[0]['@graph'].some(x => x['@type'] === 'VideoGame'), 'Startseite: Titel + VideoGame');
+t(/<title>Sky Duell – [^<]+<\/title>/.test(idx) && ldOf(idx)[0]['@graph'].some(x => x['@type'] === 'VideoGame'), 'Startseite: Titel + VideoGame');
 const sm = fs.readFileSync(path.join(out, 'sitemap.xml'), 'utf8');
 t((sm.match(/<url>/g) || []).length === LANGS.length + 2 && sm.includes('<image:loc>'), 'Sitemap mit allen Seiten + Bildern');
 const rb = fs.readFileSync(path.join(out, 'robots.txt'), 'utf8');
 t(rb.includes('Sitemap: https://myskyrush.com/sitemap.xml') && rb.includes('GPTBot') && rb.includes('ClaudeBot') && rb.includes('PerplexityBot') && rb.includes('Disallow: /admin.html'), 'robots.txt');
 const llms = fs.readFileSync(path.join(out, 'llms.txt'), 'utf8');
-t(llms.startsWith('# Sky Rush') && llms.includes('https://myskyrush.com/de/') && llms.includes('MySkyRush'), 'llms.txt');
+t(llms.startsWith('# Sky Duell') && llms.includes('https://myskyrush.com/de/') && llms.includes('MySkyRush'), 'llms.txt');
 t(fs.readFileSync(path.join(out, r.key + '.txt'), 'utf8') === r.key && /^[a-f0-9]{32}$/.test(r.key), 'IndexNow-Schlüssel');
 t(fs.existsSync(path.join(out, 'presse', 'index.html')) && fs.readFileSync(path.join(out, 'presse', 'index.html'), 'utf8').includes('badge-de.svg'), 'Presse-Seite mit Einbau-Code');
 // ohne eigene Domain: keine MySkyRush-Frage, keine Store-Knöpfe

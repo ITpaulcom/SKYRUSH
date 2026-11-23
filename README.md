@@ -1,4 +1,4 @@
-# Sky Rush
+# Sky Duell
 
 Doodle Jump trifft Subway Surfers: Hops springt von allein nach oben. Du lenkst ihn über 11 Bahnen. Wie viele du siehst, hängt vom Gerät ab: am Handy etwa 3, am PC fast alle. Was außerhalb des Bildes liegt, siehst du erst, wenn du hinwechselst. Web, Android und iOS laufen aus einer Codebasis, der Server läuft komplett auf Netlify.
 
@@ -96,7 +96,7 @@ Tests: `npm run test:vault`.
 Freiwillig unter **Optionen → Spielstand sichern**. Die Anmeldung läuft auf `konto.html` im Browser (Google erlaubt sie nicht in App-Ansichten); das Spiel wartet auf das Ergebnis.
 Gibt es zum Google-Konto schon einen Spielstand, zeigt das Spiel beide zum Vergleich und lädt den gespeicherten nur nach Bestätigung. Gespeichert werden nur Googles Konto-Nummer und die E-Mail-Adresse (`acct/…` in Netlify Blobs), Trennen jederzeit im Spiel oder in der Zentrale.
 Einrichten (einmalig, ca. 10 Minuten):
-1. <https://console.cloud.google.com> → Projekt anlegen → **Google Auth Platform → Branding**: App-Name „Sky Rush“, Support-E-Mail, Startseite `https://myskyrush.com`, Datenschutz `https://myskyrush.com/privacy.html`; Zielgruppe **Extern**, Status **In Produktion**. Nur die Standard-Bereiche (openid, email, profile) – dafür ist keine Google-Prüfung nötig.
+1. <https://console.cloud.google.com> → Projekt anlegen → **Google Auth Platform → Branding**: App-Name „Sky Duell“, Support-E-Mail, Startseite `https://myskyrush.com`, Datenschutz `https://myskyrush.com/privacy.html`; Zielgruppe **Extern**, Status **In Produktion**. Nur die Standard-Bereiche (openid, email, profile) – dafür ist keine Google-Prüfung nötig.
 2. **Clients → Client erstellen** → Typ **Webanwendung** → *Autorisierte JavaScript-Quellen*: `https://myskyrush.com` (und `https://myskyrush.netlify.app`) (und ggf. die eigene Domain). Weiterleitungs-URIs braucht es nicht.
 3. Client-ID kopieren → **Zentrale → Einstellungen → Google-Anmeldung** → einfügen → Speichern. Ohne Client-ID ist die Funktion im Spiel unsichtbar.
 

@@ -24,8 +24,8 @@ async function ask(key, q, check, clean = v => v) {
 const url = v => /^https:\/\/[^\s]+\.[a-z]{2,}(\/[^\s]*)?$/i.test(v);
 const meta = v => (v.match(/content="([^"]+)"/) || [])[1] || v;   // ganzes <meta …>-Tag oder nur der Code
 
-console.log('\n🔎  SKY RUSH – Sichtbarkeit (Google, Bing, KI-Suchen) einrichten\n');
-console.log('Genaue Schritte: „SICHTBARKEIT - Anleitung.html“ im Sky-Rush-Ordner auf dem Desktop.\n');
+console.log('\n🔎  SKY DUELL – Sichtbarkeit (Google, Bing, KI-Suchen) einrichten\n');
+console.log('Genaue Schritte: „SICHTBARKEIT - Anleitung.html“ im Sky-Duell-Ordner auf dem Desktop.\n');
 await ask('DOMAIN', '  Deine Domain, z. B. myskyrush.com (leer = Netlify-Adresse bzw. die in Netlify verbundene Domain)', v => /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(v), v => v.replace(/^https?:\/\//, '').replace(/\/.*$/, '').toLowerCase());
 await ask('PLAY_URL', '  Google-Play-Link (erst eintragen, wenn die App öffentlich ist)', v => url(v) && v.includes('play.google.com'));
 await ask('APPSTORE_URL', '  App-Store-Link (erst eintragen, wenn die App öffentlich ist)', v => url(v) && v.includes('apps.apple.com'));

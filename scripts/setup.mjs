@@ -19,7 +19,7 @@ const ask = async (key, q, def = '') => {
 };
 const yes = async (key, q, def = 'n') => /^j|^y/i.test(await ask(key, q + ' (j/n)', def));
 
-console.log('\n☁️  SKY RUSH – Einrichtung\n');
+console.log('\n☁️  SKY DUELL – Einrichtung\n');
 console.log('1/4  Angaben für Impressum & Datenschutz (Pflicht in DE)');
 await ask('NAME', '  Vor- und Nachname', 'Paul Jan Wielpütz');
 await ask('FIRMA', '  Firmen-/Markenname', 'ITpaul');

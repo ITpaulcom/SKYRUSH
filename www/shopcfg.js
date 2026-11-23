@@ -1,4 +1,4 @@
-// SKY RUSH – Shop-Einstellungen aus der Zentrale (Preise, Rabatte, ausgeblendete Artikel, Kaufpakete).
+// SKY DUELL – Shop-Einstellungen aus der Zentrale (Preise, Rabatte, ausgeblendete Artikel, Kaufpakete).
 // Gemeinsam für Gerät und Server: beide wenden dieselben Werte auf den Katalog an, damit Käufe überall gleich gerechnet werden.
 // Grundpreise aus catalog.js bleiben in `base` erhalten – „Standard“ in der Zentrale stellt sie wieder her.
 import { CHARS, STYLE, PACKS } from './catalog.js';

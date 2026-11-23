@@ -19,9 +19,9 @@ async function ask(key, q, def, check) {
   }
 }
 
-console.log('\n💳  SKY RUSH – Zahlungen einrichten (Google Play & Apple über RevenueCat)\n');
+console.log('\n💳  SKY DUELL – Zahlungen einrichten (Google Play & Apple über RevenueCat)\n');
 console.log('Die Schlüssel findest du in RevenueCat → Projekt → „API keys“ → „Public app-specific API keys“.');
-console.log('Genaue Schritte: „ZAHLUNGEN - Anleitung.html“ im Sky-Rush-Ordner auf dem Desktop.\n');
+console.log('Genaue Schritte: „ZAHLUNGEN - Anleitung.html“ im Sky-Duell-Ordner auf dem Desktop.\n');
 const rcA = await ask('RC_ANDROID', '  RevenueCat Google-Play-Schlüssel (goog_…)', cur(/androidKey: '([^']*)'/), v => /^goog_[A-Za-z0-9]{10,}$/.test(v));
 const rcI = await ask('RC_IOS', '  RevenueCat App-Store-Schlüssel (appl_…)', cur(/iosKey: '([^']*)'/), v => /^appl_[A-Za-z0-9]{10,}$/.test(v));
 console.log('\n🔒  Kauf-Prüfung auf dem Server (gegen gefälschte Käufe): RevenueCat → API keys → „Secret API keys“ → + New (v1)');
@@ -32,7 +32,7 @@ const rcS = await ask('_RC_SECRET', '  RevenueCat Secret Key (sk_…)', curSec ?
 delete prev._RC_SECRET;
 if (rcS && !rcS.endsWith('(gespeichert)')) { envTxt = envTxt.replace(/REVENUECAT_SECRET=.*\n?/, '') + `REVENUECAT_SECRET=${rcS}\n`; fs.writeFileSync('.env', envTxt); }
 
-console.log('\n📱  iOS-Werbung (AdMob → Apps → Sky Rush iOS) – Enter = später');
+console.log('\n📱  iOS-Werbung (AdMob → Apps → Sky Duell iOS) – Enter = später');
 const curIos = cur(/iosAppId:\s+'([^']*)'/);
 const iosApp = await ask('ADMOB_IOS_APP', '  iOS App-ID (ca-app-pub-…~…)', curIos.startsWith('ca-app-pub-3940256099942544') ? '' : curIos, v => /^ca-app-pub-\d{16}~\d{10}$/.test(v));
 rl.close();

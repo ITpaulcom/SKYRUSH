@@ -1,4 +1,4 @@
-// SKY RUSH – deterministischer Spielkern (Doodle-Jump-Aufstieg auf 11 Bahnen; sichtbar je nach Gerät 3 bis alle).
+// SKY DUELL – deterministischer Spielkern (Doodle-Jump-Aufstieg auf 11 Bahnen; sichtbar je nach Gerät 3 bis alle).
 // Läuft identisch im Client und auf dem Server (Score-Prüfung per Replay).
 // Nur + - * / und Vergleiche, feste 60 Ticks/Sekunde → bitgleiche Ergebnisse in allen JS-Engines.
 
@@ -61,24 +61,78 @@ export function powerDur(kind, lv) {
   const P = POWER[kind], a = Math.min(lv, CHEAP_LEVEL), b = Math.max(0, lv - CHEAP_LEVEL);
   return P.base + P.per * a + Math.floor(P.per * b / 2);
 }
-// Welten (nur Darstellung, beeinflusst die Simulation nicht). Nach der letzten festen Welt geht es endlos weiter:
-// Welten 4–7 wiederholen sich alle 900 m in neuen Farbvarianten (Farbton gedreht, römische Ziffer im Namen).
+// Welten (nur Darstellung, beeinflusst die Simulation nicht).
+// Bis 10.000 m: eine feste Reise durch 17 Welten, jede führt erzählerisch in die nächste
+// (Stadt → durch Wolken und Gewitter in die Nacht → ins All → zum Mond → durch Galaxien, Eis, Kometen → Wüste, Sonne, Schwarzes Loch → Hyperraum → fremde Stadt).
+// Danach je 10.000-m-Abschnitt (nach dem Himmelstor) 9 Welten à ~1.000 m. Die Reihenfolge ist keine Zufallsmischung,
+// sondern eine Wanderung über passende Nachbarwelten (NEXT): Es geht immer in eine Welt, die thematisch anschließt,
+// und zwar in die, die am längsten nicht dran war. Kommt eine Welt wieder, dann in neuer Farbe mit römischer Ziffer.
+// base = Nummer der Hintergrund-Grafik (8 = Himmelstor).
 export const BIOMES = [
-  { at: 0, name: 'Stadt' }, { at: 2500, name: 'Wolken' }, { at: 6000, name: 'Polarlicht' }, { at: 11000, name: 'Weltall' },
-  { at: 17000, name: 'Sternennebel' }, { at: 24000, name: 'Kristallgalaxie' }, { at: 32000, name: 'Sonnenkorona' }, { at: 41000, name: 'Hyperraum' },
+  { at: 0, name: 'Stadt', base: 0 }, { at: 2500, name: 'Wolken', base: 1 }, { at: 5500, name: 'Gewitterfront', base: 19 }, { at: 8500, name: 'Polarlicht', base: 2 },
+  { at: 12000, name: 'Weltall', base: 3 }, { at: 16500, name: 'Mondbasis', base: 20 }, { at: 21500, name: 'Sternennebel', base: 4 }, { at: 27000, name: 'Kristallgalaxie', base: 5 },
+  { at: 33000, name: 'Eismond', base: 21 }, { at: 39000, name: 'Kometensturm', base: 11 }, { at: 46000, name: 'Ringplanet', base: 9 }, { at: 53000, name: 'Wüstenplanet', base: 23 },
+  { at: 60000, name: 'Sonnenkorona', base: 6 }, { at: 67000, name: 'Schwarzes Loch', base: 10 }, { at: 74000, name: 'Hyperraum', base: 7 }, { at: 81000, name: 'Neonstadt', base: 14 },
+  { at: 88000, name: 'Quallenmeer', base: 12 },
 ];
-export const LOOP_AT = 51000, LOOP_LEN = 9000, LOOP_FROM = 4;
+// Hintergrund-Nummer → Grundname (für die endlosen Abschnitte)
+export const WORLD_NAMES = { 1: 'Wolken', 2: 'Polarlicht', 3: 'Weltall', 4: 'Sternennebel', 5: 'Kristallgalaxie', 6: 'Sonnenkorona', 7: 'Hyperraum', 9: 'Ringplanet', 10: 'Schwarzes Loch',
+  11: 'Kometensturm', 12: 'Quallenmeer', 13: 'Bonbonwolken', 14: 'Neonstadt', 15: 'Lavaplanet', 16: 'Prismenwelt', 17: 'Uhrwerk-Kosmos', 18: 'Himmelsinseln',
+  19: 'Gewitterfront', 20: 'Mondbasis', 21: 'Eismond', 22: 'Pilzwald', 23: 'Wüstenplanet', 24: 'Korallenriff', 25: 'Raumstation', 26: 'Laternenhimmel' };
+// Welche Welten zusammenpassen (beide Richtungen). Himmel ↔ Nacht ↔ nahes All ↔ Galaxien ↔ Eis ↔ Feuer ↔ Extreme ↔ Technik ↔ Leben
+const LINKS = [
+  [1, 19], [1, 13], [1, 18], [19, 2], [19, 26], [13, 18], [18, 26], [26, 2], [13, 24], [18, 22], [26, 14],
+  [2, 3], [2, 21], [3, 20], [3, 25], [3, 4], [20, 25], [20, 9], [20, 11], [25, 14], [25, 17], [25, 9],
+  [4, 5], [4, 16], [4, 12], [5, 16], [5, 21], [5, 11], [16, 7], [21, 11], [11, 9],
+  [9, 23], [23, 15], [23, 6], [15, 6], [6, 10], [15, 17], [10, 7], [10, 4], [7, 14],
+  [12, 22], [12, 24], [22, 24], [12, 14], [17, 16], [26, 25], [25, 16],
+];
+// Erster endloser Abschnitt (nach dem Goldenen Himmelstor): die 9 Welten, die man bis dahin noch nicht kannte – als zusammenhängende Kette
+const FIRST_BLOCK = [22, 24, 13, 18, 26, 25, 16, 17, 15];
+export const NEXT = {};
+for (const [a, b] of LINKS) { (NEXT[a] ||= []).push(b); (NEXT[b] ||= []).push(a); }
+const PER_BLOCK = 9, BLOCK_OFF = 9000, BLOCK_LEN = 100000, SLOT = Math.floor((BLOCK_LEN - BLOCK_OFF) / PER_BLOCK);
+export const LOOP_AT = BLOCK_LEN + BLOCK_OFF;   // ab 10.900 m (nach dem ersten Himmelstor)
 const ROMAN = ['', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+// Endlose Folge: deterministische Wanderung über NEXT. Nie dieselbe Welt zweimal hintereinander, nie zurück in die vorige;
+// bevorzugt nie besuchte, dann die am längsten nicht besuchte Nachbarwelt (bei Gleichstand fester Pseudozufall).
+const seq = [], last = {}, seenN = {};
+for (const b of [...BIOMES.map(w => w.base), ...FIRST_BLOCK]) { last[b] = seq.length; seenN[b] = (seenN[b] || 0) + 1; seq.push({ base: b, seen: seenN[b] - 1 }); }
+function walk(n) {
+  while (seq.length <= n) {
+    const i = seq.length, cur = seq[i - 1].base, prev = seq[i - 2]?.base;
+    let best = -1, bestScore = Infinity;
+    for (const c of NEXT[cur]) {
+      if (c === prev) continue;
+      const age = last[c] ?? -1e6, h = (Math.imul(i * 7919 + c * 104729, 2654435761) >>> 0) / 4294967296;
+      const score = age + h * .5;
+      if (score < bestScore) { bestScore = score; best = c; }
+    }
+    if (best < 0) best = NEXT[cur][0];
+    last[best] = i; seenN[best] = (seenN[best] || 0) + 1;
+    seq.push({ base: best, seen: seenN[best] - 1 });
+  }
+  return seq[n];
+}
 // Fortlaufende Welt-Nummer (0, 1, 2, … ohne Ende)
 export function worldIndexAt(y) {
-  if (y >= LOOP_AT) return BIOMES.length + Math.floor((y - LOOP_AT) / LOOP_LEN);
-  let b = 0; for (let i = 0; i < BIOMES.length; i++) if (y >= BIOMES[i].at) b = i; return b;
+  if (y < BLOCK_LEN) { let b = 0; for (let i = 0; i < BIOMES.length; i++) if (y >= BIOMES[i].at) b = i; return b; }
+  const blk = Math.floor(y / BLOCK_LEN), off = y - blk * BLOCK_LEN - BLOCK_OFF;
+  if (off < 0) return blk === 1 ? BIOMES.length - 1 : BIOMES.length + (blk - 1) * PER_BLOCK - 1;   // im Himmelstor: Welt davor
+  return BIOMES.length + (blk - 1) * PER_BLOCK + Math.min(PER_BLOCK - 1, Math.floor(off / SLOT));
 }
+const infoCache = new Map();
 export function worldInfo(i) {
-  const n = BIOMES.length, loops = BIOMES.length - LOOP_FROM;
-  if (i < n) return { i, base: i, at: BIOMES[i].at, hue: 0, name: BIOMES[i].name };
-  const k = i - n, base = LOOP_FROM + (k % loops), cycle = Math.floor(k / loops) + 1;
-  return { i, base, at: LOOP_AT + k * LOOP_LEN, hue: (cycle * 67) % 360, name: `${BIOMES[base].name} ${ROMAN[cycle] || cycle + 1}` };
+  let r = infoCache.get(i); if (r) return r;
+  const n = BIOMES.length;
+  if (i < n) r = { i, base: BIOMES[i].base, at: BIOMES[i].at, hue: 0, name: BIOMES[i].name };
+  else {
+    const s = i - n, blk = Math.floor(s / PER_BLOCK) + 1, j = s % PER_BLOCK, w = walk(i), seen = w.seen;
+    r = { i, base: w.base, at: blk * BLOCK_LEN + BLOCK_OFF + j * SLOT, hue: seen ? (seen * 67 + w.base * 23) % 360 : 0, name: seen ? `${WORLD_NAMES[w.base]} ${ROMAN[seen] || seen + 1}` : WORLD_NAMES[w.base] };
+  }
+  if (infoCache.size > 400) infoCache.clear();
+  infoCache.set(i, r);
+  return r;
 }
 // Alle 10.000 m (100.000 Einheiten) beginnt für 900 m das Himmelstor – eine besondere Meilenstein-Welt
 export const MILESTONE = 100000, SPECIAL_LEN = 9000;
@@ -86,10 +140,7 @@ const GATE_NAMES = ['Goldenes Himmelstor', 'Platin-Himmelstor', 'Kristall-Himmel
 export function worldAt(y) {
   const k = Math.floor(y / MILESTONE);
   if (k >= 1 && y - k * MILESTONE < SPECIAL_LEN) return { i: 10000 + k, base: 8, at: k * MILESTONE, hue: 0, name: k <= GATE_NAMES.length ? GATE_NAMES[k - 1] : `Sternentor ${ROMAN[k - GATE_NAMES.length] || k - GATE_NAMES.length + 1}`, special: k };
-  const w = worldInfo(worldIndexAt(y));
-  // direkt nach einem Himmelstor beginnt die nächste Welt erst am Ende des Tors (für weiche Übergänge)
-  if (k >= 1 && w.at < k * MILESTONE + SPECIAL_LEN) w.at = k * MILESTONE + SPECIAL_LEN;
-  return w;
+  return worldInfo(worldIndexAt(y));
 }
 export function biomeAt(y) { return worldAt(y).base; }
 

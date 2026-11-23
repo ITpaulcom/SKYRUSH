@@ -1,17 +1,17 @@
 {
  "name": "Français",
  "locale": "fr_FR",
- "title": "Sky Rush – Jeu de saut gratuit vers le ciel | Navigateur, Android et iPhone",
- "desc": "Sky Rush est un jeu d’arcade gratuit : saute de plateforme en plateforme vers le ciel, échappe à la tempête et remporte des duels en direct à quatre. Joue tout de suite dans ton navigateur, sans inscription.",
+ "title": "Sky Duell – Jeu de saut gratuit vers le ciel | Navigateur, Android et iPhone",
+ "desc": "Sky Duell est un jeu d’arcade gratuit : saute de plateforme en plateforme vers le ciel, échappe à la tempête et remporte des duels en direct à quatre. Joue tout de suite dans ton navigateur, sans inscription.",
  "kicker": "Jeu d’arcade gratuit",
  "h1": "Saute vers le ciel.",
  "lead": "Hops saute tout seul – toi, tu choisis où. Touche ou glisse, ramasse des pièces, évite les drones et laisse la tempête derrière toi.",
  "play": "Jouer gratuitement",
  "play_note": "Dans le navigateur · sans inscription · sans téléchargement",
  "stores_h": "Aussi en appli",
- "what_h": "Qu’est-ce que Sky Rush ?",
- "what": "Sky Rush est un jeu d’arcade de saut gratuit créé par ITpaul, un mélange de Doodle Jump et de Subway Surfers. Ton personnage saute tout seul de plateforme en plateforme, et tu changes de couloir en touchant, en glissant ou en inclinant ton téléphone. Le but : monter le plus haut possible avant que la tempête ne te rattrape. Sky Rush fonctionne directement dans le navigateur et en appli pour Android et iPhone.",
- "feat_h": "Ce qui rend Sky Rush unique",
+ "what_h": "Qu’est-ce que Sky Duell ?",
+ "what": "Sky Duell est un jeu d’arcade de saut gratuit créé par ITpaul, un mélange de Doodle Jump et de Subway Surfers. Ton personnage saute tout seul de plateforme en plateforme, et tu changes de couloir en touchant, en glissant ou en inclinant ton téléphone. Le but : monter le plus haut possible avant que la tempête ne te rattrape. Sky Duell fonctionne directement dans le navigateur et en appli pour Android et iPhone.",
+ "feat_h": "Ce qui rend Sky Duell unique",
  "feats": [
   [
    "🌌",
@@ -84,31 +84,31 @@
  ],
  "shots_h": "Captures d’écran",
  "shots_alt": [
-  "Écran d’accueil de Sky Rush",
-  "Duel en direct à quatre dans Sky Rush",
-  "Saut à travers les mondes de Sky Rush",
-  "Porte céleste dorée dans Sky Rush"
+  "Écran d’accueil de Sky Duell",
+  "Duel en direct à quatre dans Sky Duell",
+  "Saut à travers les mondes de Sky Duell",
+  "Porte céleste dorée dans Sky Duell"
  ],
  "faq_h": "Questions fréquentes",
  "faq": [
   [
-   "Sky Rush est-il gratuit ?",
-   "Oui. Sky Rush est entièrement gratuit. Il propose des vidéos facultatives contre récompense et des achats facultatifs (packs de pièces, pack de départ, sans publicité). Les pauses publicitaires n’apparaissent qu’entre deux parties."
+   "Sky Duell est-il gratuit ?",
+   "Oui. Sky Duell est entièrement gratuit. Il propose des vidéos facultatives contre récompense et des achats facultatifs (packs de pièces, pack de départ, sans publicité). Les pauses publicitaires n’apparaissent qu’entre deux parties."
   ],
   [
-   "Sur quels appareils fonctionne Sky Rush ?",
-   "Sky Rush fonctionne directement dans le navigateur sur téléphone, tablette et ordinateur sur {{HOST}}, sans téléchargement. Dans le navigateur, tu peux aussi l’ajouter à l’écran d’accueil comme une appli."
+   "Sur quels appareils fonctionne Sky Duell ?",
+   "Sky Duell fonctionne directement dans le navigateur sur téléphone, tablette et ordinateur sur {{HOST}}, sans téléchargement. Dans le navigateur, tu peux aussi l’ajouter à l’écran d’accueil comme une appli."
   ],
   [
    "Faut-il un compte ?",
-   "Non. Sky Rush démarre tout de suite, sans inscription ni adresse e-mail. Tu choisis simplement un nom de joueur."
+   "Non. Sky Duell démarre tout de suite, sans inscription ni adresse e-mail. Tu choisis simplement un nom de joueur."
   ],
   [
    "Puis-je jouer contre mes amis ?",
    "Oui. En duel, jusqu’à quatre joueurs s’affrontent en direct. Invite tes amis avec un code de salon et choisis la course contre la montre (1 à 5 minutes), le K.O. avec une seule vie ou les collisions. Hors ligne, tu t’entraînes contre des bots."
   ],
   [
-   "Sky Rush fonctionne-t-il hors ligne ?",
+   "Sky Duell fonctionne-t-il hors ligne ?",
    "Oui. Le mode infini et l’entraînement contre les bots fonctionnent sans internet. Les classements et les duels en direct nécessitent une connexion."
   ],
   [
@@ -116,20 +116,20 @@
    "Non. Les coffres et la roue ne contiennent que des objets du jeu, ne s’achètent pas et leurs chances sont affichées dans le jeu. Chaque record est vérifié sur le serveur : tricher ne sert à rien."
   ],
   [
-   "Qui a créé Sky Rush ?",
-   "Sky Rush est développé par ITpaul, un développeur indépendant basé en Allemagne."
+   "Qui a créé Sky Duell ?",
+   "Sky Duell est développé par ITpaul, un développeur indépendant basé en Allemagne."
   ],
   [
-   "En quelles langues Sky Rush est-il disponible ?",
+   "En quelles langues Sky Duell est-il disponible ?",
    "En 11 langues : allemand, anglais, espagnol, français, italien, portugais, turc, polonais, indonésien, japonais et coréen."
   ]
  ],
- "faq_apps": "Sky Rush existe aussi en appli pour Android et iPhone.",
+ "faq_apps": "Sky Duell existe aussi en appli pour Android et iPhone.",
  "faq_brand": [
   "Qu’est-ce que MySkyRush ?",
-  "MySkyRush ({{HOST}}) est le site officiel de Sky Rush. Tu y joues directement dans le navigateur et tu y trouves toutes les infos et les liens vers les applis."
+  "MySkyRush ({{HOST}}) est le site officiel de Sky Duell. Tu y joues directement dans le navigateur et tu y trouves toutes les infos et les liens vers les applis."
  ],
- "about_h": "Tout sur Sky Rush",
+ "about_h": "Tout sur Sky Duell",
  "cta_h": "Prêt pour le décollage ?",
  "cta_t": "Une seule touche suffit.",
  "press": "Presse et liens",

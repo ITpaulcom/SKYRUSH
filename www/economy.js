@@ -1,4 +1,4 @@
-// SKY RUSH – Spielökonomie: Münzen, Käufe, Freischaltungen, Belohnungen.
+// SKY DUELL – Spielökonomie: Münzen, Käufe, Freischaltungen, Belohnungen.
 // Dieselben Regeln laufen auf dem Gerät (sofortige Anzeige) und auf dem Server (verbindlich).
 // Der Server hält den echten Spielstand („Tresor“): Das Gerät schickt nur Aktionen („kaufe X“, „Lauf mit diesen Eingaben“),
 // der Server prüft und rechnet sie mit seinen eigenen Werten nach. Was auf dem Gerät verändert wird, zählt nicht.

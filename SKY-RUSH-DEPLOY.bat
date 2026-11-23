@@ -1,11 +1,11 @@
 @echo off
 chcp 65001 >nul
-title Sky Rush - Online stellen
+title Sky Duell - Online stellen
 cd /d "%~dp0"
 
 echo.
 echo  ==============================
-echo   SKY RUSH - online stellen
+echo   SKY DUELL - online stellen
 echo  ==============================
 echo.
 

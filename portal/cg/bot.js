@@ -1,4 +1,4 @@
-// SKY RUSH – Trainings-Bot für Duelle, wenn gerade kein Mensch online ist.
+// SKY DUELL – Trainings-Bot für Duelle, wenn gerade kein Mensch online ist.
 // Spielt mit denselben Regeln und Eingaben wie ein Mensch (nur L/R/U/D über C.input), sieht aber nur,
 // was ein Spieler auch sehen könnte. „skill“ 0–1 bestimmt Reaktionszeit und Fehlerquote.
 import * as C from './core.js';

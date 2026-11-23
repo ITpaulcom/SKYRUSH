@@ -1,4 +1,4 @@
-// SKY RUSH – Tresor: der verbindliche Spielstand jedes Spielers liegt auf dem Server.
+// SKY DUELL – Tresor: der verbindliche Spielstand jedes Spielers liegt auf dem Server.
 // Das Gerät schickt Aktionen, der Server rechnet sie mit den gemeinsamen Regeln (www/economy.js) nach.
 // • Münzen aus Läufen: nur aus dem nachgerechneten Lauf (mit Ticket: voll, ohne Ticket/offline: begrenzt)
 // • Käufe: nur wenn der Server-Kontostand reicht

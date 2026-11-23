@@ -20,7 +20,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# ---- Sky Rush: R8 sicher fuer Capacitor ----
+# ---- Sky Duell: R8 sicher fuer Capacitor ----
 # Annotationen/Signaturen behalten (Capacitor liest Plugin-Annotationen per Reflection)
 -keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod,Exceptions,SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile

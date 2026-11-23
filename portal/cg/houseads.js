@@ -1,5 +1,5 @@
 // Eigenwerbung (nur Web, solange kein Werbe-Partner wie AdSense eingerichtet ist)
-// 9 verschiedene, interaktive Spots: FAX Messenger (4), ITpaul (4, nur DE/EN) und Sky Rush selbst (Freunde einladen).
+// 9 verschiedene, interaktive Spots: FAX Messenger (4), ITpaul (4, nur DE/EN) und Sky Duell selbst (Freunde einladen).
 // Regeln: klar als Anzeige gekennzeichnet · gleiche Stellen und Obergrenzen wie echte Werbung · nur der Knopf in der
 // Anzeige öffnet eine Seite (nie versehentlich) · kein Werbeumsatz wird gezählt · Rotation ohne Wiederholung.
 const UTM = (url, id, placement) => `${url}?utm_source=skyrush&utm_medium=house_ad&utm_campaign=${encodeURIComponent(placement || 'pause')}&utm_content=${id}`;
@@ -149,7 +149,7 @@ export const SPOTS = [
       bs.forEach((b, i) => b.onclick = () => { x.interact(); x.clear(); set(i); });
       let i = -1; x.every(1600, () => set(i = (i + 1) % 4));
     } },
-  // ---------- Sky Rush: Freund herausfordern ----------
+  // ---------- Sky Duell: Freund herausfordern ----------
   { id: 'sky-invite', url: null, html: () => `<div class="hx hx-sky">
       <span class="hx-mono">⚔️ DUELL</span>
       <strong class="hx-h">Zu zweit macht’s doppelt Spaß.</strong>
@@ -159,8 +159,8 @@ export const SPOTS = [
     mount(el, x) {
       el.querySelector('[data-share]').onclick = async () => {
         x.interact(); x.cta();
-        const url = x.site + '/', text = x.tr('Spring mit mir in den Himmel: Sky Rush – kostenlos im Browser und als App.');
-        try { if (navigator.share) await navigator.share({ title: 'Sky Rush', text, url }); else { await navigator.clipboard.writeText(text + ' ' + url); el.querySelector('[data-share]').textContent = x.tr('Link kopiert!'); } } catch {}
+        const url = x.site + '/', text = x.tr('Spring mit mir in den Himmel: Sky Duell – kostenlos im Browser und als App.');
+        try { if (navigator.share) await navigator.share({ title: 'Sky Duell', text, url }); else { await navigator.clipboard.writeText(text + ' ' + url); el.querySelector('[data-share]').textContent = x.tr('Link kopiert!'); } } catch {}
       };
     } },
 ];
@@ -193,7 +193,7 @@ export function showHouseAd({ seconds, reward, placement, st, save, site = locat
     const stats = (st.hxStats ||= {}), my = (stats[spot.id] ||= { v: 0, i: 0, c: 0 }); my.v++; save();
     const el = document.createElement('div');
     el.className = 'hx-wrap';
-    el.innerHTML = `<div class="hx-box"><div class="hx-label">Anzeige · vom Macher von Sky Rush</div>${spot.html()}<button class="btn hx-go" disabled></button></div>`;
+    el.innerHTML = `<div class="hx-box"><div class="hx-label">Anzeige · vom Macher von Sky Duell</div>${spot.html()}<button class="btn hx-go" disabled></button></div>`;
     const cta = el.querySelector('a.hx-cta');
     if (cta && spot.url) { cta.href = UTM(spot.url, spot.id, placement); cta.target = '_blank'; cta.rel = 'noopener'; cta.addEventListener('click', () => { my.c++; save(); }); }
     document.body.appendChild(el);
@@ -316,7 +316,7 @@ const CSS = `
 .hx-itp .hx-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .hx-itp .hx-grid button{font-size:12.5px;line-height:1.25;padding:8px;text-align:left}
 .ip-det{min-height:2.8em}
-/* Sky Rush */
+/* Sky Duell */
 .hx-sky{background:linear-gradient(180deg,#3DA9FF,#7FD3FF 60%,#D6F4FF);color:var(--ink)}
 .hx-sky .hx-mono{font:700 11px var(--mono);letter-spacing:.14em}
 .hx-sky .hx-cta{background:var(--sun);color:var(--ink);border:3px solid var(--ink);box-shadow:0 4px 0 var(--ink)}

@@ -15,7 +15,7 @@ Google prüft neue Konten, das kann einige Tage dauern. Ausgezahlt wird monatlic
 Für **Android** und **iOS** je einmal:
 1. **Apps → App hinzufügen**.
 2. Plattform wählen. Bei „Ist die App in einem App-Shop gelistet?“ **Nein** wählen (noch nicht veröffentlicht).
-3. App-Name **Sky Rush** eingeben, Nutzermesswerte eingeschaltet lassen, dann **App hinzufügen**.
+3. App-Name **Sky Duell** eingeben, Nutzermesswerte eingeschaltet lassen, dann **App hinzufügen**.
 4. Die **App-ID** notieren (`ca-app-pub-…~…`, mit Tilde).
 
 ## C. Anzeigenblöcke anlegen

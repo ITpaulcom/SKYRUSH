@@ -1,8 +1,9 @@
-// SKY RUSH – Einstellungen aus der Zentrale (Werbung, Werbe-Anbieter, Google-Anmeldung).
+// SKY DUELL – Einstellungen aus der Zentrale (Werbung, Werbe-Anbieter, Google-Anmeldung).
 // Beim Start sofort die zuletzt bekannte Fassung anwenden (auch offline), im Hintergrund die neue holen und für den nächsten Start merken.
 // Leere Felder in der Zentrale bedeuten: Wert aus config.js behalten.
 import { CONFIG } from './config.js';
-import { applyShop } from './shopcfg.js';
+import { applyShop, customNames } from './shopcfg.js';
+import { addWords } from './i18n.js';
 
 const LS = 'skyrush.cfg.v1';
 const str = v => (typeof v === 'string' && v.trim() ? v.trim() : null);
@@ -21,7 +22,7 @@ export function applyRemote(c) {
   if (n(a.rewardedMaxPerDay) !== null) A.rewardedMaxPerDay = a.rewardedMaxPerDay;
   if (a.placements && typeof a.placements === 'object') A.placements = { ...a.placements };
   if (a.estimatedEcpm) { A.estimatedEcpm = { ...(A.estimatedEcpm || {}) }; for (const k of ['rewarded', 'interstitial']) if (n(a.estimatedEcpm[k]) !== null) A.estimatedEcpm[k] = a.estimatedEcpm[k]; }
-  try { applyShop(c.shop); } catch {}
+  try { applyShop(c.shop); addWords(customNames()); } catch {}
   const g = c.google || {};
   CONFIG.google = { ...(CONFIG.google || {}), ...(str(g.clientId) ? { clientId: str(g.clientId) } : {}) };
 }

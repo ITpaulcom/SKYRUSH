@@ -25,7 +25,7 @@ if (!fs.existsSync('.netlify/state.json')) {
   let existing = saved.SITE_NAME;
   if (existing === undefined) {
     const rl = (await import('node:readline/promises')).createInterface({ input: process.stdin, output: process.stdout });
-    existing = await rl.question('\nHast du schon eine Netlify-Seite für Sky Rush? Dann ihren Namen eingeben (z. B. skyrush-ab12c aus skyrush-ab12c.netlify.app), sonst Enter: ');
+    existing = await rl.question('\nHast du schon eine Netlify-Seite für Sky Duell? Dann ihren Namen eingeben (z. B. skyrush-ab12c aus skyrush-ab12c.netlify.app), sonst Enter: ');
     rl.close();
   }
   existing = String(existing || '').trim().replace(/^https?:\/\//, '').replace(/\.netlify\.app.*$/, '');
@@ -81,7 +81,7 @@ if (sv.INDEXNOW_KEY !== built.key) { sv.INDEXNOW_KEY = built.key; fs.writeFileSy
 console.log(`  ${built.pages} Seiten für ${built.host}${live ? '' : '   (Tipp: eigene Domain in Netlify verbinden → dann zählt die)'}`);
 
 step('Veröffentlichen');
-run(`${NL} deploy --prod --no-build --dir .publish --functions netlify/functions --message "Sky Rush ${new Date().toISOString().slice(0, 16)}"`);
+run(`${NL} deploy --prod --no-build --dir .publish --functions netlify/functions --message "Sky Duell ${new Date().toISOString().slice(0, 16)}"`);
 
 step('Suchmaschinen benachrichtigen (IndexNow: Bing, Copilot, Yandex, Naver …)');
 try { const st = await seo.pingIndexNow({ host: built.host, key: built.key, urls: built.urls }); console.log(st === 200 || st === 202 ? `  ✔ ${built.urls.length} Seiten gemeldet` : `  Antwort ${st} – nicht schlimm, die Sitemap wird trotzdem gefunden`); }

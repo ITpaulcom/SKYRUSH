@@ -1,4 +1,4 @@
-# Sky Rush auf Netlify: Web-Version (www) + Server (netlify/functions, Speicher: Netlify Blobs)
+# Sky Duell auf Netlify: Web-Version (www) + Server (netlify/functions, Speicher: Netlify Blobs)
 # Alles läuft über `npm run deploy` – hier muss nichts angepasst werden.
 [build]
   publish = "www"

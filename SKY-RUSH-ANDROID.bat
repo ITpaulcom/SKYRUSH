@@ -1,9 +1,9 @@
 @echo off
 chcp 65001 >nul
-title Sky Rush - Android-App bauen
+title Sky Duell - Android-App bauen
 cd /d "%~dp0"
 echo.
-echo  SKY RUSH - Android-App fuer den Play Store
+echo  SKY DUELL - Android-App fuer den Play Store
 echo  Beim ersten Mal werden Java und das Android-SDK in den Ordner .tools geladen (ca. 1 GB).
 echo.
 where node >nul 2>&1

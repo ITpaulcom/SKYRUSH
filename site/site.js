@@ -1,4 +1,4 @@
-// Sky Rush – Info-Seiten: Live-Spiel im Handy-Rahmen, Hops hüpft über die Seite (Münzen sammeln), Live-Rangliste.
+// Sky Duell – Info-Seiten: Live-Spiel im Handy-Rahmen, Hops hüpft über die Seite (Münzen sammeln), Live-Rangliste.
 // Kein Framework, keine Tracker. Läuft auch ohne JavaScript nicht schlechter: alle Inhalte stehen im HTML.
 (() => {
   const T = JSON.parse(document.getElementById('site-i18n')?.textContent || '{}');
@@ -14,7 +14,7 @@
     const url = demo.dataset.demo;
     if (innerWidth < 760) { location.href = url; return; }   // auf dem Handy direkt im Vollbild
     demo.classList.add('live');
-    demo.querySelector('.screen').innerHTML = `<iframe src="${url}" title="Sky Rush" allow="autoplay; fullscreen; gamepad" loading="eager"></iframe>`;
+    demo.querySelector('.screen').innerHTML = `<iframe src="${url}" title="Sky Duell" allow="autoplay; fullscreen; gamepad" loading="eager"></iframe>`;
     demo.querySelector('iframe').focus();
     window.hops?.cheer();
   });
@@ -135,7 +135,7 @@
     m.innerHTML = `<div class="card"><img src="/site/img/hops.png" alt="" width="80" height="89"><h2></h2><p></p><a class="btn go big" href="/?lang=${lang}">▶ </a><button type="button" class="btn sm" data-x>OK</button></div>`;
     m.querySelector('h2').textContent = T.hop_done_h || 'Alle Münzen gesammelt!';
     m.querySelector('p').textContent = T.hop_done_t || '';
-    m.querySelector('a').append(T.play || 'Sky Rush');
+    m.querySelector('a').append(T.play || 'Sky Duell');
     m.querySelector('[data-x]').onclick = () => m.remove();
     m.addEventListener('click', e => { if (e.target === m) m.remove(); });
     document.body.appendChild(m);

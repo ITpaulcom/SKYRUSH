@@ -1,4 +1,4 @@
-// SKY RUSH – Controller-Steuerung (Gamepad API)
+// SKY DUELL – Controller-Steuerung (Gamepad API)
 // Läuft mit allen gängigen Controllern: Xbox (One/Series/360), PlayStation (DualShock 4, DualSense), Nintendo Switch Pro & Joy-Con,
 // 8BitDo, Logitech, Stadia, Steam Controller, Backbone/Kishi u. a. Handy-Controller sowie generische USB-/Bluetooth-Pads.
 //

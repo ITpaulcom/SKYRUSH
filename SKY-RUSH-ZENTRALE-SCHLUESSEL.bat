@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-title Sky Rush - Neuer Zentrale-Schluessel
+title Sky Duell - Neuer Zentrale-Schluessel
 cd /d "%~dp0"
 echo.
 echo  Erzeugt einen neuen Schluessel fuer die Zentrale (/admin.html) und stellt ihn online.

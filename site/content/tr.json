@@ -1,17 +1,17 @@
 {
  "name": "Türkçe",
  "locale": "tr_TR",
- "title": "Sky Rush – Gökyüzüne ücretsiz zıplama oyunu | Tarayıcı, Android ve iPhone",
- "desc": "Sky Rush ücretsiz bir arcade zıplama oyunu: platformdan platforma gökyüzüne zıpla, fırtınadan kaç ve dört kişilik canlı düelloları kazan. Kayıt olmadan hemen tarayıcında oyna.",
+ "title": "Sky Duell – Gökyüzüne ücretsiz zıplama oyunu | Tarayıcı, Android ve iPhone",
+ "desc": "Sky Duell ücretsiz bir arcade zıplama oyunu: platformdan platforma gökyüzüne zıpla, fırtınadan kaç ve dört kişilik canlı düelloları kazan. Kayıt olmadan hemen tarayıcında oyna.",
  "kicker": "Ücretsiz arcade oyunu",
  "h1": "Gökyüzüne zıpla.",
  "lead": "Hops kendi kendine zıplar – sen sadece nereye gideceğine karar verirsin. Dokun ya da kaydır, jeton topla, dronlardan kaç ve fırtınayı geride bırak.",
  "play": "Hemen ücretsiz oyna",
  "play_note": "Tarayıcıda · kayıt yok · indirme yok",
  "stores_h": "Uygulama olarak da",
- "what_h": "Sky Rush nedir?",
- "what": "Sky Rush, ITpaul tarafından geliştirilen ücretsiz bir arcade zıplama oyunudur; Doodle Jump ile Subway Surfers’ın karışımı. Karakterin platformdan platforma kendiliğinden zıplar, sen de dokunarak, kaydırarak ya da telefonu eğerek şerit değiştirirsin. Amaç: aşağıdaki fırtına sana yetişmeden olabildiğince yükseğe çıkmak. Sky Rush doğrudan tarayıcıda ve Android ile iPhone için uygulama olarak çalışır.",
- "feat_h": "Sky Rush’ı özel yapan şeyler",
+ "what_h": "Sky Duell nedir?",
+ "what": "Sky Duell, ITpaul tarafından geliştirilen ücretsiz bir arcade zıplama oyunudur; Doodle Jump ile Subway Surfers’ın karışımı. Karakterin platformdan platforma kendiliğinden zıplar, sen de dokunarak, kaydırarak ya da telefonu eğerek şerit değiştirirsin. Amaç: aşağıdaki fırtına sana yetişmeden olabildiğince yükseğe çıkmak. Sky Duell doğrudan tarayıcıda ve Android ile iPhone için uygulama olarak çalışır.",
+ "feat_h": "Sky Duell’ı özel yapan şeyler",
  "feats": [
   [
    "🌌",
@@ -84,31 +84,31 @@
  ],
  "shots_h": "Ekran görüntüleri",
  "shots_alt": [
-  "Sky Rush ana ekranı",
-  "Sky Rush’ta dört kişilik canlı düello",
-  "Sky Rush dünyalarında zıplama",
-  "Sky Rush’ta altın Gök Kapısı"
+  "Sky Duell ana ekranı",
+  "Sky Duell’ta dört kişilik canlı düello",
+  "Sky Duell dünyalarında zıplama",
+  "Sky Duell’ta altın Gök Kapısı"
  ],
  "faq_h": "Sık sorulan sorular",
  "faq": [
   [
-   "Sky Rush ücretsiz mi?",
-   "Evet. Sky Rush tamamen ücretsiz oynanır. İsteğe bağlı ödüllü videolar ve isteğe bağlı satın alımlar (jeton paketleri, başlangıç paketi, reklamsız) vardır. Reklam araları sadece iki koşu arasında gelir."
+   "Sky Duell ücretsiz mi?",
+   "Evet. Sky Duell tamamen ücretsiz oynanır. İsteğe bağlı ödüllü videolar ve isteğe bağlı satın alımlar (jeton paketleri, başlangıç paketi, reklamsız) vardır. Reklam araları sadece iki koşu arasında gelir."
   ],
   [
-   "Sky Rush hangi cihazlarda çalışır?",
-   "Sky Rush, {{HOST}} adresinde telefon, tablet ve bilgisayarda doğrudan tarayıcıda çalışır; indirme gerekmez. Tarayıcıda onu uygulama olarak ana ekrana da ekleyebilirsin."
+   "Sky Duell hangi cihazlarda çalışır?",
+   "Sky Duell, {{HOST}} adresinde telefon, tablet ve bilgisayarda doğrudan tarayıcıda çalışır; indirme gerekmez. Tarayıcıda onu uygulama olarak ana ekrana da ekleyebilirsin."
   ],
   [
    "Hesap gerekiyor mu?",
-   "Hayır. Sky Rush kayıt ve e-posta olmadan hemen başlar. Sadece bir oyuncu adı seçersin."
+   "Hayır. Sky Duell kayıt ve e-posta olmadan hemen başlar. Sadece bir oyuncu adı seçersin."
   ],
   [
    "Arkadaşlarıma karşı oynayabilir miyim?",
    "Evet. Düelloda dört oyuncuya kadar canlı yarışır. Arkadaşlarını oda koduyla davet et ve zamana karşı (1–5 dakika), tek canlı nakavt ya da çarpışma modunu seç. İnternetsiz botlara karşı antrenman yaparsın."
   ],
   [
-   "Sky Rush çevrimdışı çalışır mı?",
+   "Sky Duell çevrimdışı çalışır mı?",
    "Evet. Sonsuz mod ve botlara karşı antrenman internetsiz de çalışır. Sıralamalar ve canlı düellolar bağlantı gerektirir."
   ],
   [
@@ -116,20 +116,20 @@
    "Hayır. Sandıklar ve çark sadece oyun içi eşyalar içerir, satın alınamaz ve şansları oyunda görülebilir. Her rekor sunucuda kontrol edilir – hile işe yaramaz."
   ],
   [
-   "Sky Rush’ı kim geliştirdi?",
-   "Sky Rush, Almanya’dan bağımsız bir geliştirici olan ITpaul tarafından geliştiriliyor."
+   "Sky Duell’ı kim geliştirdi?",
+   "Sky Duell, Almanya’dan bağımsız bir geliştirici olan ITpaul tarafından geliştiriliyor."
   ],
   [
-   "Sky Rush hangi dillerde var?",
+   "Sky Duell hangi dillerde var?",
    "11 dilde: Almanca, İngilizce, İspanyolca, Fransızca, İtalyanca, Portekizce, Türkçe, Lehçe, Endonezce, Japonca ve Korece."
   ]
  ],
- "faq_apps": "Sky Rush, Android ve iPhone için uygulama olarak da mevcut.",
+ "faq_apps": "Sky Duell, Android ve iPhone için uygulama olarak da mevcut.",
  "faq_brand": [
   "MySkyRush nedir?",
-  "MySkyRush ({{HOST}}) Sky Rush’ın resmi web sitesidir. Orada doğrudan tarayıcıda oynar, tüm bilgileri ve uygulama bağlantılarını bulursun."
+  "MySkyRush ({{HOST}}) Sky Duell’ın resmi web sitesidir. Orada doğrudan tarayıcıda oynar, tüm bilgileri ve uygulama bağlantılarını bulursun."
  ],
- "about_h": "Sky Rush hakkında her şey",
+ "about_h": "Sky Duell hakkında her şey",
  "cta_h": "Kalkışa hazır mısın?",
  "cta_t": "Tek dokunuş yeter.",
  "press": "Basın ve bağlantılar",

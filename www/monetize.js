@@ -1,4 +1,4 @@
-// SKY RUSH – Werbung, In-App-Käufe und Umsatz-Tracking.
+// SKY DUELL – Werbung, In-App-Käufe und Umsatz-Tracking.
 // Native (iOS/Android): AdMob über @capacitor-community/admob, Käufe über RevenueCat.
 // Web: Google H5 Games Ads (adBreak). Ohne Konfiguration: Simulations-Modus für Tests.
 

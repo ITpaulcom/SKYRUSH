@@ -1,12 +1,12 @@
 @echo off
 chcp 65001 >nul
-title Sky Rush - Steuerzentrale
+title Sky Duell - Steuerzentrale
 cd /d "%~dp0"
 :menu
 cls
 echo.
 echo   =============================================
-echo     SKY RUSH - STEUERZENTRALE
+echo     SKY DUELL - STEUERZENTRALE
 echo   =============================================
 echo     Projektordner: %~dp0
 echo.
@@ -19,7 +19,7 @@ echo       P  Web-Portal-Pakete bauen  (CrazyGames + Poki, ZIP in builds\)
 echo.
 echo     OEFFNEN
 echo       4  Spiel im Browser
-echo       5  Sky Rush Zentrale (Admin)
+echo       5  Sky Duell Zentrale (Admin)
 echo       6  Google Play Console
 echo       7  AdMob
 echo       8  Ordner builds  (fertige .aab-Dateien)

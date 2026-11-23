@@ -1,17 +1,17 @@
 {
  "name": "Bahasa Indonesia",
  "locale": "id_ID",
- "title": "Sky Rush – Game lompat gratis ke langit | Browser, Android & iPhone",
- "desc": "Sky Rush adalah game arcade lompat gratis: lompat dari platform ke platform menuju langit, kabur dari badai, dan menangkan duel langsung berempat. Main langsung di browser, tanpa daftar.",
+ "title": "Sky Duell – Game lompat gratis ke langit | Browser, Android & iPhone",
+ "desc": "Sky Duell adalah game arcade lompat gratis: lompat dari platform ke platform menuju langit, kabur dari badai, dan menangkan duel langsung berempat. Main langsung di browser, tanpa daftar.",
  "kicker": "Game arcade gratis",
  "h1": "Lompat ke langit.",
  "lead": "Hops melompat sendiri – kamu cukup menentukan arahnya. Ketuk atau geser, kumpulkan koin, hindari drone, dan tinggalkan badai di bawah.",
  "play": "Main gratis sekarang",
  "play_note": "Di browser · tanpa daftar · tanpa unduhan",
  "stores_h": "Juga sebagai aplikasi",
- "what_h": "Apa itu Sky Rush?",
- "what": "Sky Rush adalah game arcade lompat gratis dari ITpaul – perpaduan Doodle Jump dan Subway Surfers. Karaktermu melompat otomatis dari platform ke platform, dan kamu berpindah jalur dengan mengetuk, menggeser, atau memiringkan HP. Tujuannya: naik setinggi mungkin sebelum badai dari bawah menyusulmu. Sky Rush berjalan langsung di browser dan sebagai aplikasi untuk Android dan iPhone.",
- "feat_h": "Kenapa Sky Rush seru",
+ "what_h": "Apa itu Sky Duell?",
+ "what": "Sky Duell adalah game arcade lompat gratis dari ITpaul – perpaduan Doodle Jump dan Subway Surfers. Karaktermu melompat otomatis dari platform ke platform, dan kamu berpindah jalur dengan mengetuk, menggeser, atau memiringkan HP. Tujuannya: naik setinggi mungkin sebelum badai dari bawah menyusulmu. Sky Duell berjalan langsung di browser dan sebagai aplikasi untuk Android dan iPhone.",
+ "feat_h": "Kenapa Sky Duell seru",
  "feats": [
   [
    "🌌",
@@ -84,31 +84,31 @@
  ],
  "shots_h": "Tangkapan layar",
  "shots_alt": [
-  "Layar utama Sky Rush",
-  "Duel langsung berempat di Sky Rush",
-  "Melompat menembus dunia Sky Rush",
-  "Gerbang Langit emas di Sky Rush"
+  "Layar utama Sky Duell",
+  "Duel langsung berempat di Sky Duell",
+  "Melompat menembus dunia Sky Duell",
+  "Gerbang Langit emas di Sky Duell"
  ],
  "faq_h": "Pertanyaan umum",
  "faq": [
   [
-   "Apakah Sky Rush gratis?",
-   "Ya. Sky Rush bisa dimainkan sepenuhnya gratis. Ada video berhadiah opsional dan pembelian opsional (paket koin, paket pemula, bebas iklan). Jeda iklan hanya muncul di antara dua permainan."
+   "Apakah Sky Duell gratis?",
+   "Ya. Sky Duell bisa dimainkan sepenuhnya gratis. Ada video berhadiah opsional dan pembelian opsional (paket koin, paket pemula, bebas iklan). Jeda iklan hanya muncul di antara dua permainan."
   ],
   [
-   "Sky Rush jalan di perangkat apa saja?",
-   "Sky Rush berjalan langsung di browser HP, tablet, dan komputer di {{HOST}} – tanpa unduhan. Di browser kamu juga bisa menambahkannya ke layar utama sebagai aplikasi."
+   "Sky Duell jalan di perangkat apa saja?",
+   "Sky Duell berjalan langsung di browser HP, tablet, dan komputer di {{HOST}} – tanpa unduhan. Di browser kamu juga bisa menambahkannya ke layar utama sebagai aplikasi."
   ],
   [
    "Apakah perlu akun?",
-   "Tidak. Sky Rush langsung mulai, tanpa daftar dan tanpa email. Kamu cukup memilih nama pemain."
+   "Tidak. Sky Duell langsung mulai, tanpa daftar dan tanpa email. Kamu cukup memilih nama pemain."
   ],
   [
    "Bisakah main melawan teman?",
    "Bisa. Di duel, sampai empat pemain bertanding langsung. Ajak teman dengan kode ruangan dan pilih balapan waktu (1–5 menit), K.O. dengan satu nyawa, atau tabrakan. Tanpa internet kamu berlatih melawan bot."
   ],
   [
-   "Apakah Sky Rush bisa offline?",
+   "Apakah Sky Duell bisa offline?",
    "Bisa. Mode tanpa akhir dan latihan melawan bot jalan tanpa internet. Papan peringkat dan duel langsung butuh koneksi."
   ],
   [
@@ -116,20 +116,20 @@
    "Tidak. Peti dan roda hanya berisi item dalam game, tidak bisa dibeli, dan peluangnya terlihat di game. Setiap rekor diperiksa di server – curang tidak ada gunanya."
   ],
   [
-   "Siapa pembuat Sky Rush?",
-   "Sky Rush dikembangkan oleh ITpaul, pengembang independen dari Jerman."
+   "Siapa pembuat Sky Duell?",
+   "Sky Duell dikembangkan oleh ITpaul, pengembang independen dari Jerman."
   ],
   [
-   "Sky Rush tersedia dalam bahasa apa saja?",
+   "Sky Duell tersedia dalam bahasa apa saja?",
    "Dalam 11 bahasa: Jerman, Inggris, Spanyol, Prancis, Italia, Portugis, Turki, Polandia, Indonesia, Jepang, dan Korea."
   ]
  ],
- "faq_apps": "Sky Rush juga tersedia sebagai aplikasi untuk Android dan iPhone.",
+ "faq_apps": "Sky Duell juga tersedia sebagai aplikasi untuk Android dan iPhone.",
  "faq_brand": [
   "Apa itu MySkyRush?",
-  "MySkyRush ({{HOST}}) adalah situs resmi Sky Rush. Di sana kamu bisa main langsung di browser dan menemukan semua info serta tautan ke aplikasi."
+  "MySkyRush ({{HOST}}) adalah situs resmi Sky Duell. Di sana kamu bisa main langsung di browser dan menemukan semua info serta tautan ke aplikasi."
  ],
- "about_h": "Semua tentang Sky Rush",
+ "about_h": "Semua tentang Sky Duell",
  "cta_h": "Siap lepas landas?",
  "cta_t": "Cukup satu ketukan.",
  "press": "Pers & tautan",

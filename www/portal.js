@@ -1,4 +1,4 @@
-// SKY RUSH – Web-Spieleportale (CrazyGames, Poki). Werbung läuft dort ausschließlich über das SDK des Portals.
+// SKY DUELL – Web-Spieleportale (CrazyGames, Poki). Werbung läuft dort ausschließlich über das SDK des Portals.
 // Außerhalb eines Portal-Builds ist alles hier wirkungslos.
 import { CHANNEL } from './channel.js';
 

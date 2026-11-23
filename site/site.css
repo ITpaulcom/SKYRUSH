@@ -1,4 +1,4 @@
-/* Sky Rush – Info-Seiten. Gleiche Bildsprache wie das Spiel: Tinte, dicke Ränder, harte Schatten, knallige Farben. */
+/* Sky Duell – Info-Seiten. Gleiche Bildsprache wie das Spiel: Tinte, dicke Ränder, harte Schatten, knallige Farben. */
 @font-face{font-family:'Space Grotesk';font-weight:500;font-display:swap;src:url(/fonts/space-grotesk-latin-500-normal.woff2) format('woff2')}
 @font-face{font-family:'Space Grotesk';font-weight:700;font-display:swap;src:url(/fonts/space-grotesk-latin-700-normal.woff2) format('woff2')}
 @font-face{font-family:'JetBrains Mono';font-weight:500;font-display:swap;src:url(/fonts/jetbrains-mono-latin-500-normal.woff2) format('woff2')}
@@ -182,7 +182,7 @@ body.hop-on .card.what>h2,body.hop-on .card.about>h2,body.hop-on .end>h2,body.ho
 .phone .s1{animation-delay:4s}.phone .s2{animation-delay:8s}.phone .s3{animation-delay:12s}
 @keyframes slide{0%,3%{opacity:0}6%,25%{opacity:1}28%,100%{opacity:0}}
 .phone.live .sl{display:none}
-/* Was ist Sky Rush + Live-Rangliste nebeneinander */
+/* Was ist Sky Duell + Live-Rangliste nebeneinander */
 .duo{display:grid;gap:22px;margin:56px 0}
 .duo>section{margin:0}
 /* Tastatur am PC */

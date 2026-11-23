@@ -1,4 +1,4 @@
-// SKY RUSH – Zentrale (Server-Seite): Anmeldung mit Sperre, Sitzungen, Protokoll, Spielerverzeichnis, Änderungen am Spielstand.
+// SKY DUELL – Zentrale (Server-Seite): Anmeldung mit Sperre, Sitzungen, Protokoll, Spielerverzeichnis, Änderungen am Spielstand.
 //
 // Sicherheit
 // • Anmeldung nur mit dem Zentrale-Schlüssel (ADMIN_TOKEN, mind. 24 Zeichen). Danach gibt es eine Sitzung (8 Stunden),

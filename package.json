@@ -2,7 +2,7 @@
   "name": "sky-rush",
   "version": "1.5.0",
   "private": true,
-  "description": "SKY RUSH – Doodle-Jump trifft Subway Surfers",
+  "description": "SKY DUELL – Doodle-Jump trifft Subway Surfers",
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "deploy": "node scripts/deploy.mjs",

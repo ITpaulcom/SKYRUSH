@@ -2,17 +2,17 @@
  "name": "English",
  "locale": "en_US",
  "num": "10,000",
- "title": "Sky Rush – Free Sky Jumping Game | Play in Browser, Android & iPhone",
- "desc": "Sky Rush is a free arcade jumping game: hop from platform to platform into the sky, outrun the storm and win live 4-player duels. Play instantly in your browser – no sign-up.",
+ "title": "Sky Duell – Free Sky Jumping Game | Play in Browser, Android & iPhone",
+ "desc": "Sky Duell is a free arcade jumping game: hop from platform to platform into the sky, outrun the storm and win live 4-player duels. Play instantly in your browser – no sign-up.",
  "kicker": "Free arcade game",
  "h1": "Jump into the sky.",
  "lead": "Hops jumps all by himself – you just decide where. Tap or swipe, grab coins, dodge drones and leave the storm behind.",
  "play": "Play free now",
  "play_note": "In your browser · no sign-up · no download",
  "stores_h": "Also as an app",
- "what_h": "What is Sky Rush?",
- "what": "Sky Rush is a free arcade jumping game by ITpaul – a mix of Doodle Jump and Subway Surfers. Your character jumps automatically from platform to platform while you switch lanes by tapping, swiping or tilting. The goal: get as high as you can before the storm below catches up. Sky Rush runs right in your browser and as an app for Android and iPhone.",
- "feat_h": "Why players love Sky Rush",
+ "what_h": "What is Sky Duell?",
+ "what": "Sky Duell is a free arcade jumping game by ITpaul – a mix of Doodle Jump and Subway Surfers. Your character jumps automatically from platform to platform while you switch lanes by tapping, swiping or tilting. The goal: get as high as you can before the storm below catches up. Sky Duell runs right in your browser and as an app for Android and iPhone.",
+ "feat_h": "Why players love Sky Duell",
  "feats": [
   [
    "🌌",
@@ -85,31 +85,31 @@
  ],
  "shots_h": "Screenshots",
  "shots_alt": [
-  "Sky Rush home screen",
-  "Live 4-player duel in Sky Rush",
-  "Jumping through the worlds of Sky Rush",
-  "Golden Sky Gate in Sky Rush"
+  "Sky Duell home screen",
+  "Live 4-player duel in Sky Duell",
+  "Jumping through the worlds of Sky Duell",
+  "Golden Sky Gate in Sky Duell"
  ],
  "faq_h": "FAQ",
  "faq": [
   [
-   "Is Sky Rush free?",
-   "Yes. Sky Rush is completely free to play. There are optional reward videos and optional purchases (coin packs, starter pack, remove ads). Ad breaks only appear between two runs."
+   "Is Sky Duell free?",
+   "Yes. Sky Duell is completely free to play. There are optional reward videos and optional purchases (coin packs, starter pack, remove ads). Ad breaks only appear between two runs."
   ],
   [
-   "Which devices does Sky Rush run on?",
-   "Sky Rush runs right in the browser on phones, tablets and computers at {{HOST}} – no download needed. In the browser you can also add it to your home screen as an app."
+   "Which devices does Sky Duell run on?",
+   "Sky Duell runs right in the browser on phones, tablets and computers at {{HOST}} – no download needed. In the browser you can also add it to your home screen as an app."
   ],
   [
    "Do I need an account?",
-   "No. Sky Rush starts instantly, without sign-up or email address. You just pick a player name."
+   "No. Sky Duell starts instantly, without sign-up or email address. You just pick a player name."
   ],
   [
    "Can I play against friends?",
    "Yes. In Duel mode up to four players race live. Invite friends with a room code and choose a time race (1 to 5 minutes), knockout with only one life, or collisions. Offline you can train against bots."
   ],
   [
-   "Does Sky Rush work offline?",
+   "Does Sky Duell work offline?",
    "Yes. Endless mode and training against bots work without internet. Leaderboards and live duels need a connection."
   ],
   [
@@ -117,20 +117,20 @@
    "No. Chests and the wheel only contain in-game items, cannot be bought, and their odds are shown in the game. Every record is verified on the server – cheating gets you nowhere."
   ],
   [
-   "Who made Sky Rush?",
-   "Sky Rush is developed by ITpaul, an independent developer from Germany."
+   "Who made Sky Duell?",
+   "Sky Duell is developed by ITpaul, an independent developer from Germany."
   ],
   [
-   "Which languages is Sky Rush available in?",
+   "Which languages is Sky Duell available in?",
    "In 11 languages: German, English, Spanish, French, Italian, Portuguese, Turkish, Polish, Indonesian, Japanese and Korean."
   ]
  ],
- "faq_apps": "Sky Rush is also available as an app for Android and iPhone.",
+ "faq_apps": "Sky Duell is also available as an app for Android and iPhone.",
  "faq_brand": [
   "What is MySkyRush?",
-  "MySkyRush ({{HOST}}) is the official website of Sky Rush. Play right in your browser and find all info and links to the apps."
+  "MySkyRush ({{HOST}}) is the official website of Sky Duell. Play right in your browser and find all info and links to the apps."
  ],
- "about_h": "All about Sky Rush",
+ "about_h": "All about Sky Duell",
  "cta_h": "Ready for take-off?",
  "cta_t": "One tap is all it takes.",
  "press": "Press & linking",

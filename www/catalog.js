@@ -1,4 +1,4 @@
-// SKY RUSH – Katalog (Preise, Freischaltungen, Sets, Missionen, Kaufpakete). Gemeinsam für Gerät und Server:
+// SKY DUELL – Katalog (Preise, Freischaltungen, Sets, Missionen, Kaufpakete). Gemeinsam für Gerät und Server:
 // Der Server rechnet mit genau diesen Werten – ein verändertes Gerät kann daran nichts drehen.
 export const CHARS = {
   hops:    { name: 'Hops', price: 0, body: ['#FFE066', '#FFB020'], acc: 'none' },

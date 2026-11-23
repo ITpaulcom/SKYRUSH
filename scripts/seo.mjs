@@ -53,7 +53,7 @@ export function build({ origin, out = path.join(ROOT, '.publish'), cfg = readCfg
   const brandSite = /myskyrush/i.test(host);
   const play = cfg.PLAY_URL || '', ios = cfg.APPSTORE_URL || '', social = [].concat(cfg.SOCIAL || []).filter(u => /^https:\/\//.test(u));
   const publisher = { '@type': 'Organization', '@id': origin + '/#org', name: cfg.PUBLISHER || 'ITpaul', url: cfg.PUBLISHER_URL || 'https://itpaul.com', logo: origin + '/icons/icon-512.png' };
-  const altNames = ['SkyRush', 'MySkyRush', 'My Sky Rush', 'Sky Rush Game', 'Sky Rush: Jump & Duel'];
+  const altNames = ['SkyRush', 'MySkyRush', 'My Sky Duell', 'Sky Duell Game', 'Sky Duell: Jump & Duel'];
   const store = JSON.parse(fs.readFileSync(path.join(SITE, 'content', '_store.json'), 'utf8'));
   const T = Object.fromEntries(LANGS.map(l => [l, JSON.parse(fs.readFileSync(path.join(SITE, 'content', l + '.json'), 'utf8'))]));
   const day = date.toISOString().slice(0, 10), year = date.getFullYear();
@@ -68,7 +68,7 @@ export function build({ origin, out = path.join(ROOT, '.publish'), cfg = readCfg
 
   const hreflang = () => LANGS.map(l => `<link rel="alternate" hreflang="${HREF[l] || l}" href="${origin}/${l}/">`).join('\n') + `\n<link rel="alternate" hreflang="x-default" href="${origin}/">`;
   const game = (l, t) => ({
-    '@type': 'VideoGame', '@id': origin + '/#game', name: 'Sky Rush', alternateName: altNames, url: origin + '/',
+    '@type': 'VideoGame', '@id': origin + '/#game', name: 'Sky Duell', alternateName: altNames, url: origin + '/',
     description: t.desc, image: `${origin}/site/img/og-${l}.jpg`, screenshot: [1, 2, 3, 4].map(i => `${origin}/site/img/${l}/${i}.webp`),
     genre: ['Arcade', 'Jump and Run', 'Platformer', 'Endless Runner', 'Casual'], gamePlatform: ['Web browser', 'Android', 'iOS'],
     applicationCategory: 'GameApplication', operatingSystem: 'Web, Android, iOS', playMode: ['SinglePlayer', 'MultiPlayer'],
@@ -76,7 +76,7 @@ export function build({ origin, out = path.join(ROOT, '.publish'), cfg = readCfg
     isAccessibleForFree: true, offers: { '@type': 'Offer', price: 0, priceCurrency: 'EUR', availability: 'https://schema.org/InStock', url: origin + '/' },
     author: { '@id': origin + '/#org' }, publisher: { '@id': origin + '/#org' }, ...(sameAs.length ? { sameAs } : {}),
   });
-  const website = { '@type': 'WebSite', '@id': origin + '/#website', name: 'Sky Rush', alternateName: altNames, url: origin + '/', inLanguage: LANGS.map(x => HREF[x] || x), publisher: { '@id': origin + '/#org' } };
+  const website = { '@type': 'WebSite', '@id': origin + '/#website', name: 'Sky Duell', alternateName: altNames, url: origin + '/', inLanguage: LANGS.map(x => HREF[x] || x), publisher: { '@id': origin + '/#org' } };
   const faqOf = t => { const f = t.faq.map(([q, a], i) => [q, i === 1 && (play || ios) ? a + ' ' + t.faq_apps : a]); if (brandSite) f.push(t.faq_brand); return f.map(([q, a]) => [H(q), H(a)]); };
   const storeBtns = t => (play || ios) ? `<div class="stores"><span>${esc(t.stores_h)}</span>${play ? `<a class="btn sm" href="${esc(play)}" rel="noopener">▶ Google Play</a>` : ''}${ios ? `<a class="btn sm" href="${esc(ios)}" rel="noopener"> App Store</a>` : ''}</div>` : '';
   const urls = [];
@@ -91,7 +91,7 @@ export function build({ origin, out = path.join(ROOT, '.publish'), cfg = readCfg
     const ld = { '@context': 'https://schema.org', '@graph': [publisher, website, game(l, t),
       { '@type': 'WebPage', '@id': url, url, name: t.title, description: t.desc, inLanguage: HREF[l] || l, isPartOf: { '@id': origin + '/#website' }, about: { '@id': origin + '/#game' }, primaryImageOfPage: `${origin}/site/img/og-${l}.jpg`, dateModified: day },
       { '@type': 'FAQPage', '@id': url + '#faq', inLanguage: HREF[l] || l, mainEntity: faq.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) },
-      { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Sky Rush', item: origin + '/' }, { '@type': 'ListItem', position: 2, name: DIR_NAMES[l], item: url }] }] };
+      { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Sky Duell', item: origin + '/' }, { '@type': 'ListItem', position: 2, name: DIR_NAMES[l], item: url }] }] };
     const html = `<!doctype html>
 <html lang="${HREF[l] || l}">
 <head>
@@ -107,13 +107,13 @@ ${hreflang()}
 <link rel="icon" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Sky Rush">
+<meta property="og:site_name" content="Sky Duell">
 <meta property="og:title" content="${esc(t.title)}">
 <meta property="og:description" content="${esc(t.desc)}">
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${origin}/site/img/og-${l}.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Sky Rush – ${esc(t.h1)}">
+<meta property="og:image:alt" content="Sky Duell – ${esc(t.h1)}">
 <meta property="og:locale" content="${t.locale}">
 ${LANGS.filter(x => x !== l).map(x => `<meta property="og:locale:alternate" content="${T[x].locale}">`).join('')}
 <meta name="twitter:card" content="summary_large_image">
@@ -125,7 +125,7 @@ ${LANGS.filter(x => x !== l).map(x => `<meta property="og:locale:alternate" cont
 ${jsonld(ld)}
 </head>
 <body>
-<header class="top"><a class="brand" href="/${l}/"><img src="/icons/icon-192.png" width="36" height="36" alt="">Sky Rush</a><nav><a class="lang" href="#langs" aria-label="${esc(t.langs_h)}">🌐 ${l.toUpperCase()}</a><a class="btn sm go" href="${playUrl}">${esc(t.play_short)}</a></nav></header>
+<header class="top"><a class="brand" href="/${l}/"><img src="/icons/icon-192.png" width="36" height="36" alt="">Sky Duell</a><nav><a class="lang" href="#langs" aria-label="${esc(t.langs_h)}">🌐 ${l.toUpperCase()}</a><a class="btn sm go" href="${playUrl}">${esc(t.play_short)}</a></nav></header>
 <main>
 <section class="hero">
   <div class="sky" aria-hidden="true"><i class="cl c1"></i><i class="cl c2"></i><i class="cl c3"></i><i class="pl p1"></i><i class="pl p2"></i><i class="pl p3"></i><i class="cn n1"></i><i class="cn n2"></i></div>
@@ -160,7 +160,7 @@ ${jsonld(ld)}
 <footer>
   <nav id="langs" aria-label="${esc(t.langs_h)}"><b>${esc(t.langs_h)}</b>${LANGS.map(x => `<a href="/${x}/" hreflang="${HREF[x] || x}" lang="${HREF[x] || x}"${x === l ? ' aria-current="page"' : ''}>${DIR_NAMES[x]}</a>`).join('')}</nav>
   <nav class="links"><a href="/">${esc(t.play_short)}</a><a href="/presse/">${esc(t.press)}</a><a href="/impressum.html">${esc(t.imprint)}</a><a href="/privacy.html">${esc(t.privacy)}</a></nav>
-  <p>© ${year} Sky Rush · ${esc(t.made_by)} · <a href="${esc(publisher.url)}">${esc(publisher.url.replace(/^https?:\/\//, ''))}</a></p>
+  <p>© ${year} Sky Duell · ${esc(t.made_by)} · <a href="${esc(publisher.url)}">${esc(publisher.url.replace(/^https?:\/\//, ''))}</a></p>
 </footer>
 <script type="application/json" id="site-i18n">${JSON.stringify({ play: t.play, hop_done_h: t.hop_done_h, hop_done_t: t.hop_done_t, hop_hide: t.hop_hide, hop_show: t.hop_show, hop_hint: t.hop_hint }).replace(/</g, '\\u003c')}</script>
 <script src="/site/site.js" defer></script>
@@ -177,7 +177,7 @@ ${jsonld(ld)}
   const headSeo = `<link rel="canonical" href="${origin}/">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
 ${hreflang()}
-<meta property="og:type" content="website"><meta property="og:site_name" content="Sky Rush">
+<meta property="og:type" content="website"><meta property="og:site_name" content="Sky Duell">
 <meta property="og:title" content="${esc(en.title)}"><meta property="og:description" content="${esc(en.desc)}">
 <meta property="og:url" content="${origin}/"><meta property="og:image" content="${origin}/site/img/og-en.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
@@ -188,7 +188,7 @@ ${jsonld({ '@context': 'https://schema.org', '@graph': [publisher, website, game
   idx = idx.replace(/<title>[^<]*<\/title>/, `<title>${esc(en.title)}</title>`);
   idx = idx.replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${esc(en.desc)}">`);
   // Für Besucher ohne JavaScript (und Crawler): kurze Beschreibung + Links zu allen Sprachen
-  const nos = `<noscript><div style="max-width:640px;margin:40px auto;padding:20px;font:16px/1.5 system-ui;color:#fff"><h1>Sky Rush</h1><p>${esc(en.what)}</p><p>${LANGS.map(x => `<a style="color:#FFC83D" href="/${x}/">${DIR_NAMES[x]}</a>`).join(' · ')}</p></div></noscript>`;
+  const nos = `<noscript><div style="max-width:640px;margin:40px auto;padding:20px;font:16px/1.5 system-ui;color:#fff"><h1>Sky Duell</h1><p>${esc(en.what)}</p><p>${LANGS.map(x => `<a style="color:#FFC83D" href="/${x}/">${DIR_NAMES[x]}</a>`).join(' · ')}</p></div></noscript>`;
   idx = idx.replace('<body>', '<body>\n' + nos);
   fs.writeFileSync(idxPath, idx);
   urls.unshift(origin + '/');
@@ -212,7 +212,7 @@ ${LANGS.map(l => `<url><loc>${origin}/${l}/</loc><lastmod>${day}</lastmod><chang
 
   // ---------- robots.txt: alle willkommen, KI-Suchen ausdrücklich ----------
   const ai = ['GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'Google-Extended', 'Applebot', 'Applebot-Extended', 'Bingbot', 'DuckAssistBot', 'meta-externalagent', 'MistralAI-User', 'cohere-ai', 'YouBot', 'CCBot'];
-  fs.writeFileSync(path.join(out, 'robots.txt'), `# Sky Rush – ${origin}
+  fs.writeFileSync(path.join(out, 'robots.txt'), `# Sky Duell – ${origin}
 User-agent: *
 Allow: /
 Disallow: /admin.html
@@ -231,7 +231,7 @@ Sitemap: ${origin}/sitemap.xml
 
   // ---------- llms.txt / llms-full.txt (für KI-Assistenten, siehe llmstxt.org) ----------
   const facts = [
-    `Name: Sky Rush (also written SkyRush; website: MySkyRush${brandSite ? ' – ' + host : ''})`,
+    `Name: Sky Duell (also written SkyRush; website: MySkyRush${brandSite ? ' – ' + host : ''})`,
     `Type: free arcade jumping game (Doodle Jump meets Subway Surfers)`,
     `Platforms: web browser (${origin}/), Android, iPhone/iOS${play ? ' – Google Play: ' + play : ''}${ios ? ' – App Store: ' + ios : ''}`,
     `Developer / publisher: ${publisher.name} (${publisher.url}), independent developer from Germany`,
@@ -240,18 +240,18 @@ Sitemap: ${origin}/sitemap.xml
     `Languages: German, English, Spanish, French, Italian, Portuguese (Brazil), Turkish, Polish, Indonesian, Japanese, Korean`,
     `No account needed; works offline (endless mode, bot training); every leaderboard record is verified on the server`,
   ];
-  fs.writeFileSync(path.join(out, 'llms.txt'), `# Sky Rush
+  fs.writeFileSync(path.join(out, 'llms.txt'), `# Sky Duell
 
 > ${en.what}
 
 ## Play
-- [Play Sky Rush in the browser](${origin}/): starts instantly, no sign-up, no download${play ? `\n- [Sky Rush on Google Play](${play})` : ''}${ios ? `\n- [Sky Rush on the App Store](${ios})` : ''}
+- [Play Sky Duell in the browser](${origin}/): starts instantly, no sign-up, no download${play ? `\n- [Sky Duell on Google Play](${play})` : ''}${ios ? `\n- [Sky Duell on the App Store](${ios})` : ''}
 
 ## Key facts
 ${facts.map(f => '- ' + f).join('\n')}
 
 ## Pages
-${LANGS.map(l => `- [Sky Rush – ${DIR_NAMES[l]}](${origin}/${l}/): ${T[l].desc}`).join('\n')}
+${LANGS.map(l => `- [Sky Duell – ${DIR_NAMES[l]}](${origin}/${l}/): ${T[l].desc}`).join('\n')}
 - [Press kit & linking](${origin}/presse/)
 
 ## FAQ
@@ -260,7 +260,7 @@ ${faqOf(en).map(([q, a]) => `- **${q}** ${a}`).join('\n')}
 ## Optional
 - [Full description](${origin}/llms-full.txt)
 `);
-  fs.writeFileSync(path.join(out, 'llms-full.txt'), `# Sky Rush – full description\n\n${facts.map(f => '- ' + f).join('\n')}\n\n## English\n\n${en.what}\n\n${store.en.about}\n\n## FAQ\n\n${faqOf(en).map(([q, a]) => `### ${q}\n${a}`).join('\n\n')}\n\n## Deutsch\n\n${T.de.what}\n\n${store.de.about}\n\n${faqOf(T.de).map(([q, a]) => `### ${q}\n${a}`).join('\n\n')}\n`);
+  fs.writeFileSync(path.join(out, 'llms-full.txt'), `# Sky Duell – full description\n\n${facts.map(f => '- ' + f).join('\n')}\n\n## English\n\n${en.what}\n\n${store.en.about}\n\n## FAQ\n\n${faqOf(en).map(([q, a]) => `### ${q}\n${a}`).join('\n\n')}\n\n## Deutsch\n\n${T.de.what}\n\n${store.de.about}\n\n${faqOf(T.de).map(([q, a]) => `### ${q}\n${a}`).join('\n\n')}\n`);
 
   // ---------- IndexNow-Schlüssel + Kopfzeilen ----------
   let key = cfg.INDEXNOW_KEY;
@@ -289,26 +289,26 @@ ${faqOf(en).map(([q, a]) => `- **${q}** ${a}`).join('\n')}
 
 function pressPage({ origin, host, T, store, year, publisher }) {
   const de = T.de, en = T.en;
-  const badge = (l, rel) => `<a href="${origin}/${l}/" title="${l === 'de' ? 'Sky Rush – das kostenlose Sprungspiel' : 'Sky Rush – the free sky jumping game'}"><img src="${rel ? '' : origin}/site/badge-${l}.svg" width="220" height="64" alt="${l === 'de' ? 'Sky Rush kostenlos spielen' : 'Play Sky Rush for free'}"></a>`;
-  const textLink = l => `<a href="${origin}/${l}/">${l === 'de' ? 'Sky Rush – das kostenlose Sprungspiel' : 'Sky Rush – the free sky jumping game'}</a>`;
+  const badge = (l, rel) => `<a href="${origin}/${l}/" title="${l === 'de' ? 'Sky Duell – das kostenlose Sprungspiel' : 'Sky Duell – the free sky jumping game'}"><img src="${rel ? '' : origin}/site/badge-${l}.svg" width="220" height="64" alt="${l === 'de' ? 'Sky Duell kostenlos spielen' : 'Play Sky Duell for free'}"></a>`;
+  const textLink = l => `<a href="${origin}/${l}/">${l === 'de' ? 'Sky Duell – das kostenlose Sprungspiel' : 'Sky Duell – the free sky jumping game'}</a>`;
   return `<!doctype html>
 <html lang="de">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sky Rush – Presse, Fakten & Verlinken · Press kit</title>
-<meta name="description" content="Pressematerial zu Sky Rush: Fakten, Beschreibungen, Logo, Screenshots und Einbau-Code für Verlinkungen. Press kit for Sky Rush: facts, descriptions, logo, screenshots and link badges.">
+<title>Sky Duell – Presse, Fakten & Verlinken · Press kit</title>
+<meta name="description" content="Pressematerial zu Sky Duell: Fakten, Beschreibungen, Logo, Screenshots und Einbau-Code für Verlinkungen. Press kit for Sky Duell: facts, descriptions, logo, screenshots and link badges.">
 <link rel="canonical" href="${origin}/presse/">
 <link rel="icon" href="/icons/icon-192.png">
-<meta property="og:title" content="Sky Rush – Presse & Verlinken"><meta property="og:image" content="${origin}/site/img/og-de.jpg"><meta property="og:url" content="${origin}/presse/">
+<meta property="og:title" content="Sky Duell – Presse & Verlinken"><meta property="og:image" content="${origin}/site/img/og-de.jpg"><meta property="og:url" content="${origin}/presse/">
 <link rel="stylesheet" href="/site/site.css">
-${jsonld({ '@context': 'https://schema.org', '@type': 'WebPage', '@id': origin + '/presse/', name: 'Sky Rush – Presse & Verlinken', inLanguage: ['de', 'en'], about: { '@id': origin + '/#game' }, isPartOf: { '@id': origin + '/#website' }, publisher: { '@type': 'Organization', name: publisher.name, url: publisher.url } })}
+${jsonld({ '@context': 'https://schema.org', '@type': 'WebPage', '@id': origin + '/presse/', name: 'Sky Duell – Presse & Verlinken', inLanguage: ['de', 'en'], about: { '@id': origin + '/#game' }, isPartOf: { '@id': origin + '/#website' }, publisher: { '@type': 'Organization', name: publisher.name, url: publisher.url } })}
 </head>
 <body>
-<header class="top"><a class="brand" href="/de/"><img src="/icons/icon-192.png" width="36" height="36" alt="">Sky Rush</a><nav><a class="btn sm go" href="/">Spielen</a></nav></header>
+<header class="top"><a class="brand" href="/de/"><img src="/icons/icon-192.png" width="36" height="36" alt="">Sky Duell</a><nav><a class="btn sm go" href="/">Spielen</a></nav></header>
 <main>
-<section class="hero slim"><div class="hero-text"><p class="kicker">Presse · Press kit</p><h1 class="logo"><span>Sky</span> <span>Rush</span></h1><p class="lead">Alles, um über Sky Rush zu berichten oder darauf zu verlinken. Everything you need to write about or link to Sky Rush.</p></div></section>
+<section class="hero slim"><div class="hero-text"><p class="kicker">Presse · Press kit</p><h1 class="logo"><span>Sky</span> <span>Rush</span></h1><p class="lead">Alles, um über Sky Duell zu berichten oder darauf zu verlinken. Everything you need to write about or link to Sky Duell.</p></div></section>
 <section class="card"><h2>Fakten · Fact sheet</h2><dl class="facts">
-<dt>Name</dt><dd>Sky Rush (SkyRush, MySkyRush)</dd>
+<dt>Name</dt><dd>Sky Duell (SkyRush, MySkyRush)</dd>
 <dt>Website</dt><dd><a href="${origin}/">${host}</a></dd>
 <dt>Entwickler · Developer</dt><dd>${esc(publisher.name)} – <a href="${esc(publisher.url)}">${esc(publisher.url.replace(/^https?:\/\//, ''))}</a> (Deutschland · Germany)</dd>
 <dt>Genre</dt><dd>Arcade · Jump &amp; Run · Endless Runner · Casual</dd>
@@ -328,7 +328,7 @@ ${[1, 2, 3, 4].map(i => `<a class="btn sm" href="/site/img/de/${i}.webp" downloa
 ${[1, 2, 3, 4].map(i => `<a class="btn sm" href="/site/img/en/${i}.webp" download>Screenshot EN ${i}</a>`).join('')}
 </div></section>
 <section class="card"><h2>Verlinken · Link to us</h2>
-<p>Du möchtest Sky Rush auf deiner Seite empfehlen? Kopiere einfach einen der Codes. · Want to recommend Sky Rush on your site? Just copy one of the snippets.</p>
+<p>Du möchtest Sky Duell auf deiner Seite empfehlen? Kopiere einfach einen der Codes. · Want to recommend Sky Duell on your site? Just copy one of the snippets.</p>
 <div class="embed"><div class="prev">${badge('de', 1)}</div><textarea readonly rows="3">${esc(badge('de'))}</textarea></div>
 <div class="embed"><div class="prev">${badge('en', 1)}</div><textarea readonly rows="3">${esc(badge('en'))}</textarea></div>
 <h3>Text-Link</h3>
@@ -336,7 +336,7 @@ ${[1, 2, 3, 4].map(i => `<a class="btn sm" href="/site/img/en/${i}.webp" downloa
 <div class="embed"><div class="prev">${textLink('en')}</div><textarea readonly rows="2">${esc(textLink('en'))}</textarea></div>
 </section>
 </main>
-<footer><nav class="links"><a href="/de/">Deutsch</a><a href="/en/">English</a><a href="/impressum.html">Impressum</a><a href="/privacy.html">Datenschutz</a></nav><p>© ${year} Sky Rush · ${esc(publisher.name)}</p></footer>
+<footer><nav class="links"><a href="/de/">Deutsch</a><a href="/en/">English</a><a href="/impressum.html">Impressum</a><a href="/privacy.html">Datenschutz</a></nav><p>© ${year} Sky Duell · ${esc(publisher.name)}</p></footer>
 <script>document.querySelectorAll('textarea').forEach(t => t.onclick = () => { t.select(); navigator.clipboard && navigator.clipboard.writeText(t.value); });</script>
 </body>
 </html>

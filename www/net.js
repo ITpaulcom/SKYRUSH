@@ -1,4 +1,4 @@
-// SKY RUSH – Online-Funktionen über die eigenen Netlify Functions (/api/…).
+// SKY DUELL – Online-Funktionen über die eigenen Netlify Functions (/api/…).
 // Kein Konto nötig: Das Gerät erzeugt einmalig eine zufällige ID und ein Geheimnis.
 
 import { CONFIG } from './config.js';

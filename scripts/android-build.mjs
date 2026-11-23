@@ -113,7 +113,7 @@ if (!fs.existsSync(KSP)) {
     '-storepass', pw, '-keypass', pw, '-dname', 'CN=Paul Jan Wielpuetz, O=ITpaul, L=Roesrath, C=DE']);
   fs.writeFileSync(KSP, `storeFile=../../skyrush-upload.jks\nstorePassword=${pw}\nkeyAlias=upload\nkeyPassword=${pw}\n`);
   fs.writeFileSync(path.join(ROOT, 'SCHLUESSEL-SICHERN.txt'),
-    `SKY RUSH – UPLOAD-SCHLÜSSEL (sicher aufbewahren, z. B. USB-Stick + Passwort-Manager)\r\n\r\nDatei:    skyrush-upload.jks\r\nAlias:    upload\r\nPasswort: ${pw}\r\n\r\nOhne Datei + Passwort kannst du keine Updates hochladen.\r\n(Bei Verlust: Google Play Console → App-Signatur → Upload-Schlüssel zurücksetzen.)\r\n`);
+    `SKY DUELL – UPLOAD-SCHLÜSSEL (sicher aufbewahren, z. B. USB-Stick + Passwort-Manager)\r\n\r\nDatei:    skyrush-upload.jks\r\nAlias:    upload\r\nPasswort: ${pw}\r\n\r\nOhne Datei + Passwort kannst du keine Updates hochladen.\r\n(Bei Verlust: Google Play Console → App-Signatur → Upload-Schlüssel zurücksetzen.)\r\n`);
   log('  ✔ neu erzeugt – siehe SCHLUESSEL-SICHERN.txt');
 } else log('  ✔ vorhanden');
 

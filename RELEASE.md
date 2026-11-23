@@ -1,4 +1,4 @@
-# Sky Rush – in die Stores
+# Sky Duell – in die Stores
 
 Preise und Regeln der Stores ändern sich. Im Zweifel gilt, was in der jeweiligen Konsole steht.
 

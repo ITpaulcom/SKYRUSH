@@ -1,4 +1,4 @@
-// SKY RUSH – Anti-Cheat (Server). Grundsatz: Der Server glaubt dem Gerät nichts.
+// SKY DUELL – Anti-Cheat (Server). Grundsatz: Der Server glaubt dem Gerät nichts.
 // 1) Lauf-Ticket: Welt (Seed), Aufrüstungen und Startzeit legt der Server VOR dem Lauf fest – nachträglich nichts änderbar,
 //    kein Aussuchen leichter Welten, jedes Ticket gilt genau einmal.
 // 2) Replay: Jeder Lauf wird mit dem Spielkern nachgerechnet (submit-score / duel) – erfundene Punkte sind unmöglich.

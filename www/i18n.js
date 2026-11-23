@@ -1,4 +1,4 @@
-// SKY RUSH – Mehrsprachigkeit.
+// SKY DUELL – Mehrsprachigkeit.
 // Das Spiel ist auf Deutsch geschrieben; dieses Modul übersetzt alles Sichtbare automatisch in die gewählte Sprache:
 // • Texte im Menü (DOM) über einen MutationObserver – auch alles, was später per innerHTML/textContent entsteht
 // • Texte im Spielfeld (Canvas fillText/strokeText/measureText)
@@ -77,7 +77,7 @@ export function addWords(pairs) {
 const ATTRS = ['title', 'placeholder', 'aria-label'];
 function walk(node) {
   if (node.nodeType === 3) { const v = node.data, t = tr(v); if (t !== v) node.data = t; return; }
-  if (node.nodeType !== 1 || node.nodeName === 'SCRIPT' || node.nodeName === 'STYLE' || node.nodeName === 'CANVAS') return;
+  if (node.nodeType !== 1 || node.nodeName === 'SCRIPT' || node.nodeName === 'STYLE' || node.nodeName === 'CANVAS' || node.getAttribute('translate') === 'no') return;   // translate="no": Markenname/Logo bleibt in jeder Sprache gleich
   for (const a of ATTRS) { const v = node.getAttribute(a); if (v) { const t = tr(v); if (t !== v) node.setAttribute(a, t); } }
   if ((node.nodeName === 'INPUT' && (node.type === 'button' || node.type === 'submit')) && node.value) node.value = tr(node.value);
   for (let c = node.firstChild; c; c = c.nextSibling) walk(c);

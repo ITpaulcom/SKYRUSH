@@ -1,4 +1,4 @@
-// SKY RUSH – deterministischer Spielkern (Doodle-Jump-Aufstieg auf 11 Bahnen; sichtbar je nach Gerät 3 bis alle).
+// SKY DUELL – deterministischer Spielkern (Doodle-Jump-Aufstieg auf 11 Bahnen; sichtbar je nach Gerät 3 bis alle).
 // Läuft identisch im Client und auf dem Server (Score-Prüfung per Replay).
 // Nur + - * / und Vergleiche, feste 60 Ticks/Sekunde → bitgleiche Ergebnisse in allen JS-Engines.
 

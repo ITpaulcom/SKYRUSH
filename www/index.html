@@ -36,8 +36,8 @@
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>Sky Rush</title>
-<meta name="description" content="Sky Rush – das kostenlose Sprungspiel: Hüpf von Plattform zu Plattform in den Himmel, entkomme dem Sturm und gewinne Live-Duelle zu viert. Sofort im Browser spielen.">
+<title>Sky Duell</title>
+<meta name="description" content="Sky Duell – das kostenlose Sprungspiel: Hüpf von Plattform zu Plattform in den Himmel, entkomme dem Sturm und gewinne Live-Duelle zu viert. Sofort im Browser spielen.">
 <!--seo--><!--/seo-->
 <meta name="theme-color" content="#2A1B5C">
 <meta name="google-adsense-account" content="ca-pub-1764627877115679">
@@ -726,7 +726,7 @@ input.txt{font:inherit;font-size:18px;width:100%;padding:12px;border:3px solid v
     <button class="pill" id="h-full" title="Vollbild (F)" hidden>⛶</button>
     <div class="grow"></div><div class="pill"><i class="coin"></i><span id="h-coins">0</span></div>
   </div>
-  <div class="title"><b>SKY</b><b>RUSH</b></div>
+  <div class="title" translate="no"><b>SKY</b><b>DUELL</b></div>
   <div class="goal" id="h-goal"></div>
   <div class="modes">
     <div class="mode big" id="m-endless" tabindex="0"><div class="ico" style="background:#fff">🚀</div><div class="grow"><h3>Spielen</h3><div class="mono" id="m-endless-sub">Endlos</div></div><button class="boost" id="h-boost" title="Kopfstart: mit Jetpack starten">🚀 <span id="h-boost-t">Kopfstart</span></button></div>
@@ -770,7 +770,7 @@ input.txt{font:inherit;font-size:18px;width:100%;padding:12px;border:3px solid v
 <div class="sheet-bg" id="sheet-bg"><div class="sheet" id="sheet" role="dialog"></div></div>
 
 <!-- Start-Wächter: Startet das Spiel nicht (sehr alter Browser, kaputte Verbindung, Fehler), gibt es einen klaren Ausweg statt toter Knöpfe -->
-<div id="bootfail" hidden><div class="bf"><div class="title"><b>SKY</b><b>RUSH</b></div><p>Das Spiel ist nicht richtig gestartet.<br><span>The game didn't start properly.</span></p><button class="btn go" onclick="location.reload()">Neu laden · Reload</button><p class="small">Hilft das nicht: Internet prüfen oder Browser aktualisieren.<br><span>Still stuck? Check your connection or update your browser.</span></p></div></div>
+<div id="bootfail" hidden><div class="bf"><div class="title" translate="no"><b>SKY</b><b>DUELL</b></div><p>Das Spiel ist nicht richtig gestartet.<br><span>The game didn't start properly.</span></p><button class="btn go" onclick="location.reload()">Neu laden · Reload</button><p class="small">Hilft das nicht: Internet prüfen oder Browser aktualisieren.<br><span>Still stuck? Check your connection or update your browser.</span></p></div></div>
 <script>
 (function () {
   var show = function () { if (window.__ready) return; var b = document.getElementById('bootfail'); if (b) b.hidden = false; };
@@ -3836,9 +3836,11 @@ function drawMarks(dt) {
   ctx.globalAlpha = 1; marks = marks.filter(m => m.t < .35);
 }
 addEventListener('keydown', e => {
-  const m = { ArrowLeft: 'L', a: 'L', A: 'L', ArrowRight: 'R', d: 'R', D: 'R', ArrowUp: 'U', w: 'U', W: 'U', ' ': 'U', ArrowDown: 'D', s: 'D', S: 'D' }[e.key];
+  if (e.target.closest?.('input,textarea')) return;
+  // WASD + Pfeile, für französische Tastaturen (AZERTY) auch Q = links und Z = hoch
+  const m = { ArrowLeft: 'L', a: 'L', A: 'L', q: 'L', Q: 'L', ArrowRight: 'R', d: 'R', D: 'R', ArrowUp: 'U', w: 'U', W: 'U', z: 'U', Z: 'U', ' ': 'U', ArrowDown: 'D', s: 'D', S: 'D' }[e.key];
   if (m && G && !e.repeat) { e.preventDefault(); const t = performance.now(); if (t - (padHit[m] || 0) > 150) { keyHit[m] = t; act(m); } }
-  if (e.key === 'Escape' && G && running) pause();
+  if ((e.key === 'Escape' || e.key === 'p' || e.key === 'P') && G && running) pause();
 });
 
 // ================= Controller (Xbox, PlayStation, Switch, 8BitDo, Logitech, Handy-Controller …) =================
@@ -3964,12 +3966,22 @@ function startGame(m) {
   $('g-hint').hidden = save.hintRuns > 3 && !tiltHint; $('g-hint').classList.remove('gone');
   const udm = save.tiltUD || (save.tiltFlick === false ? 'off' : 'flick');
   $('g-hint').innerHTML = save.tilt ? `<div class="hchip"><b>📱</b>Neigen <span class="hk">← →</span></div>${udm === 'off' ? '<div class="hchip"><b class="hk">↑↓</b>Wischen: Sprung / Fallen</div>' : udm === 'nod' ? '<div class="hchip"><b class="hk">↑</b>Oberkante zu dir: Doppelsprung</div><div class="hchip"><b class="hk">↓</b>Weg von dir: Durchfallen</div>' : '<div class="hchip"><b class="hk">↑</b>Hoch schnippen: Doppelsprung</div><div class="hchip"><b class="hk">↓</b>Runter: Durchfallen</div>'}`
+    : kbFirst() ? '<div class="hchip"><b class="hk">← →</b>Bahn wechseln</div><div class="hchip"><b class="hk">↑</b>Doppelsprung</div><div class="hchip"><b class="hk">↓</b>Durchfallen</div>'
     : '<div class="hchip"><b>👆</b>Tippen oder wischen <span class="hk">← →</span></div><div class="hchip"><b class="hk">↑</b>Doppelsprung</div><div class="hchip"><b class="hk">↓</b>Durchfallen</div>';
   if (Pad.recent(120000) && (save.padHints || 0) < 3) { save.padHints = (save.padHints || 0) + 1; $('g-hint').innerHTML = padHintHtml(); $('g-hint').hidden = false; }
   else if (Pad.recent(120000)) $('g-hint').hidden = true;
   running = true; paused = false;
-  if (!save.tutorial) { paused = true; tutorial(() => { paused = false; }); }
+  // Erster Lauf: sofort losspielen (Steuerung steht unten als Hinweis), die Extras erklären zwei kurze Einblendungen im Lauf.
+  // Die ausführliche Anleitung bleibt in den Einstellungen („So geht’s“).
+  if (!save.tutorial) {
+    save.tutorial = true; persist();
+    const g0 = G;
+    for (const [ms, txt] of [[9000, '⭐ Sterne & Münzen füllen die Rush-Leiste'], [19000, '🤖 Drohnen: von oben draufspringen']])
+      setTimeout(() => { if (G === g0 && running && !paused && !G.over) hintPill(txt); }, ms);
+  }
 }
+// Spielt jemand mit Tastatur/Maus (PC, Laptop)? Dann zeigen die Hinweise Tasten statt Tippen.
+const kbFirst = () => { try { return matchMedia('(pointer: fine)').matches; } catch { return false; } };
 // Lauf beim Server anmelden (läuft im Hintergrund, der Start wartet nicht darauf; bei Funkloch zwei weitere Versuche)
 function acBegin(m, seed, opts) {
   const id = Net.rid(), body = { id, mode: m, seed, opts, flags: save.acf ? ['save'] : [] };
@@ -4258,8 +4270,8 @@ function duelLobby(room, quick, rematch = false) {
     if ($('du-startfill')) $('du-startfill').onclick = () => go(true);
     if ($('du-share')) $('du-share').onclick = () => {
       // Auf Portalen (CrazyGames, Poki) nur den Raum-Code teilen – keine Links, die Spieler vom Portal wegführen
-      const url = Monetize.portal ? '' : `${CONFIG.apiBase || location.origin}/?duell=${rm.code}`, text = url ? `Rennen in Sky Rush! Code ${rm.code} – ${url}` : `Sky Rush · Duell-Code ${rm.code}`;
-      if (navigator.share) navigator.share(url ? { title: 'Sky Rush Duell', text, url } : { title: 'Sky Rush Duell', text }).catch(() => {});
+      const url = Monetize.portal ? '' : `${CONFIG.apiBase || location.origin}/?duell=${rm.code}`, text = url ? `Rennen in Sky Duell! Code ${rm.code} – ${url}` : `Sky Duell · Code ${rm.code}`;
+      if (navigator.share) navigator.share(url ? { title: 'Sky Duell', text, url } : { title: 'Sky Duell', text }).catch(() => {});
       else navigator.clipboard?.writeText(text).then(() => toast('Einladung kopiert!'), () => toast(`Code: ${rm.code}`));
     };
     if ($('du-cancel')) $('du-cancel').onclick = () => { duelStop(); duelCall('leave', { code: rm.code }).catch(() => {}); DUEL.room = null; openDuel(); };
@@ -5170,7 +5182,7 @@ function acctAdopt(uid, secret, name) {
   persist();   // neu unterschrieben mit dem Geheimnis dieses Geräts für den geladenen Spielstand
   try { localStorage.setItem(SAVE + '.ok', localStorage.getItem(SAVE)); } catch {}
   try { sessionStorage.setItem('skyrush.adopting', '1'); localStorage.setItem('skyrush.adopting', String(Date.now())); localStorage.removeItem(ACCT_LS); } catch {}
-  openSheet('<div class="mono">Spielstand</div><h2>Wird geladen …</h2><p class="muted">Einen Moment – Sky Rush startet neu.</p>', false);
+  openSheet('<div class="mono">Spielstand</div><h2>Wird geladen …</h2><p class="muted">Einen Moment – Sky Duell startet neu.</p>', false);
   setTimeout(() => location.reload(), 600);
 }
 function openSettings() {
@@ -5193,8 +5205,8 @@ function openSettings() {
     <div class="set"><span>${fmt(CONFIG.economy.coinPack)} Münzen</span><button class="btn" id="s-coins">Kaufen</button></div>` : ''}
     ${Monetize.hasPrivacyOptions() ? '<div class="set"><span>Datenschutz-Einstellungen (Werbung)</span><button class="btn" id="s-priv">Öffnen</button></div>' : ''}
     <div class="set"><span>Spielanleitung</span><button class="btn" id="s-tut">Ansehen</button></div>
-    ${Monetize.portal ? '' : `<div class="set"><span>Sky Rush empfehlen<br><span class="muted small">Schick Freunden den Link – gemeinsam macht’s mehr Spaß</span></span><button class="btn" id="s-share">Teilen</button></div>`}
-    <div class="set">${Monetize.portal ? '' : `<a href="${siteBase()}/${uiLang}/" target="_blank" rel="noopener">Über Sky Rush</a>`}<a href="${CONFIG.links.privacy}" target="_blank" rel="noopener">Datenschutz</a><a href="${CONFIG.links.imprint}" target="_blank" rel="noopener">Impressum</a></div>
+    ${Monetize.portal ? '' : `<div class="set"><span>Sky Duell empfehlen<br><span class="muted small">Schick Freunden den Link – gemeinsam macht’s mehr Spaß</span></span><button class="btn" id="s-share">Teilen</button></div>`}
+    <div class="set">${Monetize.portal ? '' : `<a href="${siteBase()}/${uiLang}/" target="_blank" rel="noopener">Über Sky Duell</a>`}<a href="${CONFIG.links.privacy}" target="_blank" rel="noopener">Datenschutz</a><a href="${CONFIG.links.imprint}" target="_blank" rel="noopener">Impressum</a></div>
     <div class="set"><a href="${CONFIG.links.support}">Support</a><span class="mono" id="s-ver">v${CONFIG.version}</span></div>
     <p class="muted small" id="s-msg"></p>`);
   const tog = (id, key) => $(id).onclick = () => { save[key] = !save[key]; persist(); $(id).classList.toggle('on', save[key]); $(id).setAttribute('aria-checked', save[key]); };
@@ -5204,8 +5216,8 @@ function openSettings() {
   acctRow();
   $('s-lang').onchange = e => setLang(e.target.value);
   if ($('s-share')) $('s-share').onclick = () => {
-    const url = siteBase() + '/', text = tr('Spring mit mir in den Himmel: Sky Rush – kostenlos im Browser und als App.');
-    if (navigator.share) navigator.share({ title: 'Sky Rush', text, url }).catch(() => {});
+    const url = siteBase() + '/', text = tr('Spring mit mir in den Himmel: Sky Duell – kostenlos im Browser und als App.');
+    if (navigator.share) navigator.share({ title: 'Sky Duell', text, url }).catch(() => {});
     else navigator.clipboard?.writeText(text + ' ' + url).then(() => toast('Link kopiert!'), () => toast(url));
   };
   $('s-tilt').onclick = async () => {
@@ -5570,7 +5582,7 @@ function fitBoost() {
   t.classList.remove('tight');
   if (sub.scrollWidth > sub.clientWidth + 1 || t.querySelector('h3').scrollWidth > t.querySelector('h3').clientWidth + 1) t.classList.add('tight');
 }
-addEventListener('resize', () => requestAnimationFrame(fitBoost));
+addEventListener('resize', () => requestAnimationFrame(() => { fitBoost(); fitWords(); }));
 function fitHome() {
   const h = $('home'), w = h && h.querySelector('.wrap'); if (!w || h.hidden || !w.clientHeight) return;
   h.style.setProperty('--hz', '1');
@@ -5578,7 +5590,16 @@ function fitHome() {
   if (need > have + 1) h.style.setProperty('--hz', String(Math.max(0.72, Math.floor((have - 2) / need * 1000) / 1000)));
 }
 var fitT = 0;
-function fitSoon() { cancelAnimationFrame(fitT); fitT = requestAnimationFrame(() => { fitBoost(); fitHome(); }); }
+const fitCv = document.createElement('canvas').getContext('2d');
+function fitWords() {
+  for (const h of document.querySelectorAll('#home .mode.mini.arc h3')) {
+    h.style.fontSize = ''; const cs = getComputedStyle(h), avail = h.clientWidth - 4; if (avail <= 0) continue;
+    fitCv.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    const widest = Math.max(...h.textContent.trim().split(/\s+/).map(w => fitCv.measureText(w).width));
+    if (widest > avail) h.style.fontSize = Math.max(11, Math.floor(parseFloat(cs.fontSize) * avail / widest * 10) / 10) + 'px';
+  }
+}
+function fitSoon() { cancelAnimationFrame(fitT); fitT = requestAnimationFrame(() => { fitBoost(); fitWords(); fitHome(); }); }
 addEventListener('resize', fitSoon); addEventListener('orientationchange', () => setTimeout(fitSoon, 300));
 try { document.fonts && document.fonts.ready.then(fitSoon); } catch {}
 function refreshHome() {

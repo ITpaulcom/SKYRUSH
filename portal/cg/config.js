@@ -1,8 +1,8 @@
-// SKY RUSH – zentrale Konfiguration. Am einfachsten über `npm run setup` ausfüllen.
+// SKY DUELL – zentrale Konfiguration. Am einfachsten über `npm run setup` ausfüllen.
 // Solange testMode=true, werden ausschließlich Googles offizielle Test-Anzeigen geladen.
 
 export const CONFIG = {
-  appName: 'SKY RUSH',
+  appName: 'SKY DUELL',
   version: '1.0.0',
 
   // ---------- Server (Netlify) ----------
@@ -14,8 +14,8 @@ export const CONFIG = {
   ads: {
     testMode: false,        // false = echte Werbung (Geld verdienen). true = nur Google-Test-Anzeigen
     // AdMob-App-IDs (nicht Anzeigenblock-IDs). Werden per `npm run configure` in die nativen Projekte geschrieben.
-    androidAppId: 'ca-app-pub-1764627877115679~2249290128', // Sky Rush Android
-    iosAppId:     'ca-app-pub-1764627877115679~5334561968', // Sky Rush iOS
+    androidAppId: 'ca-app-pub-1764627877115679~2249290128', // Sky Duell Android
+    iosAppId:     'ca-app-pub-1764627877115679~5334561968', // Sky Duell iOS
     android: {
       rewarded:     'ca-app-pub-1764627877115679/6549984440', // Android Rewarded
       interstitial: 'ca-app-pub-1764627877115679/6741556130', // Android Interstitial

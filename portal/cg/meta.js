@@ -1,4 +1,4 @@
-// SKY RUSH – Fortschritt & Belohnungen (reine Logik, ohne Oberfläche).
+// SKY DUELL – Fortschritt & Belohnungen (reine Logik, ohne Oberfläche).
 // Level/XP, Tagesserie, Tagesaufgaben, Truhen, Glücksrad, Erfolge, Kopfstart-Marken.
 
 export const day = (d = new Date()) => d.toISOString().slice(0, 10);

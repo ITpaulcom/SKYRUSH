@@ -1,4 +1,4 @@
-// SKY RUSH – Einstellungen aus der Zentrale (Werbung, Werbe-Anbieter, Google-Anmeldung).
+// SKY DUELL – Einstellungen aus der Zentrale (Werbung, Werbe-Anbieter, Google-Anmeldung).
 // Beim Start sofort die zuletzt bekannte Fassung anwenden (auch offline), im Hintergrund die neue holen und für den nächsten Start merken.
 // Leere Felder in der Zentrale bedeuten: Wert aus config.js behalten.
 import { CONFIG } from './config.js';

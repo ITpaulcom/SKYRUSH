@@ -1,12 +1,12 @@
-# Sky Rush – Store-Einträge
+# Sky Duell – Store-Einträge
 
-**Am einfachsten:** Ordner „Store-Paket“ im Desktop-Ordner „Sky Rush“ → `START - Store-Veröffentlichung.html` öffnen. Dort sind alle Texte (mit Kopieren-Knopf), Screenshots, Grafiken und Schritte für Google Play und den App Store.
+**Am einfachsten:** Ordner „Store-Paket“ im Desktop-Ordner „Sky Duell“ → `START - Store-Veröffentlichung.html` öffnen. Dort sind alle Texte (mit Kopieren-Knopf), Screenshots, Grafiken und Schritte für Google Play und den App Store.
 
 App-ID / Bundle-ID: `com.itpaul.skyrush` · Kategorie: **Spiele → Arcade** (Apple: Spiele / Arcade + Casual)
 
 ## Deutsch
 
-**Name (30):** Sky Rush: Jump & Duell
+**Name (30):** Sky Duell
 **Untertitel iOS (30):** Hüpf hoch, gewinn Duelle!
 **Kurzbeschreibung Play (80):** Spring in den Himmel, sammle Münzen und gewinne Live-Duelle zu viert!
 **Werbetext iOS (170):** Neu: Live-Duelle zu viert, Himmelstore alle 10.000 m, Gesichter, Bewegungssteuerung und ein Saison-Pfad mit 100 Stufen!
@@ -47,7 +47,7 @@ WELTWEIT GEGENEINANDER
 • Wochenturnier mit eigener Rangliste
 • Globale Höhen-Rangliste – jeder Lauf wird auf dem Server geprüft
 
-Sky Rush ist kostenlos spielbar und enthält Werbung sowie optionale In-App-Käufe (Münzpakete, Starterpaket, Werbefrei). Werbevideos schaust du freiwillig gegen eine Belohnung, Werbepausen gibt es nur zwischen zwei Läufen.
+Sky Duell ist kostenlos spielbar und enthält Werbung sowie optionale In-App-Käufe (Münzpakete, Starterpaket, Werbefrei). Werbevideos schaust du freiwillig gegen eine Belohnung, Werbepausen gibt es nur zwischen zwei Läufen.
 
 **Neu in dieser Version:** Live-Duelle ohne Hänger · Himmelstore alle 10.000 m mit Höhen-Figuren · Saison-Pfad mit 100 Stufen · neue Gesichter · Bewegungssteuerung und Querformat · Mega-Sprung · neuer Shop · viele Verbesserungen.
 
@@ -55,7 +55,7 @@ Sky Rush ist kostenlos spielbar und enthält Werbung sowie optionale In-App-Käu
 
 ## English
 
-**Name (30):** Sky Rush: Jump & Duel
+**Name (30):** Sky Duell: Jump & Duel
 **Untertitel iOS (30):** Bounce high, win live duels!
 **Kurzbeschreibung Play (80):** Bounce into the sky, collect coins and win live 4-player duels!
 **Werbetext iOS (170):** New: live 4-player duels, Sky Gates every 10,000 m, faces, motion controls and a 100-tier season path!
@@ -96,7 +96,7 @@ COMPETE WORLDWIDE
 • Weekly tournament with its own leaderboard
 • Global height leaderboard – every run is verified on the server
 
-Sky Rush is free to play and contains ads and optional in-app purchases (coin packs, starter pack, remove ads). Reward videos are always optional, ad breaks only appear between runs.
+Sky Duell is free to play and contains ads and optional in-app purchases (coin packs, starter pack, remove ads). Reward videos are always optional, ad breaks only appear between runs.
 
 **Neu in dieser Version:** Smooth live duels · Sky Gates every 10,000 m with height characters · 100-tier season path · new faces · motion controls and landscape mode · Mega Jump · new shop · lots of improvements.
 
