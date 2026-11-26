@@ -3,10 +3,29 @@
   "appName": "Sky Duell",
   "webDir": "www",
   "backgroundColor": "#2A1B5C",
-  "android": { "backgroundColor": "#2A1B5C" },
-  "ios": { "backgroundColor": "#2A1B5C", "contentInset": "never" },
+  "android": {
+    "backgroundColor": "#2A1B5C",
+    "includePlugins": [
+      "@capacitor-community/admob",
+      "@capacitor/haptics",
+      "@revenuecat/purchases-capacitor"
+    ]
+  },
+  "ios": {
+    "backgroundColor": "#2A1B5C",
+    "contentInset": "never"
+  },
   "plugins": {
-    "SplashScreen": { "launchShowDuration": 1200, "launchAutoHide": false, "backgroundColor": "#2A1B5C", "showSpinner": false },
-    "AdMob": {}
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": false,
+      "backgroundColor": "#2A1B5C",
+      "showSpinner": false
+    },
+    "AdMob": {},
+    "SystemBars": {
+      "style": "DARK",
+      "initialViewportFitValueHint": "cover"
+    }
   }
 }

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spielfarbe hinter Statusleiste, Navigationsleiste und Startbildschirm -->
+    <color name="sd_bg">#2A1B5C</color>
+</resources>
