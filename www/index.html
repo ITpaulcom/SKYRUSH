@@ -4893,7 +4893,7 @@ function openShop(tab = 'chars', sub = 'jet') {
   if (tab === 'buy' && !Monetize.iapChannel) tab = 'chars';   // Galaxy Store / Web-Portale: kein Echtgeld-Shop
   openSheet(`<div class="row shophead"><h2 class="grow">🛒 Shop</h2><div class="pill"><i class="coin"></i>${fmt(save.coins)}</div></div>
     <div class="qrow">
-      <button class="qchip ad" id="sh-free"><span>🎬</span><div><b>Gratis</b><small id="sh-free-t"></small></div></button>
+      ${Monetize.adsOff ? '' : '<button class="qchip ad" id="sh-free"><span>🎬</span><div><b>Gratis</b><small id="sh-free-t"></small></div></button>'}
       <button class="qchip" id="sh-boost"><span>🚀</span><div><b>Kopfstart</b><small><i class="coin sm"></i>${fmt(CONFIG.economy.headstartPrice)} · hast ${save.tokens.headstart}</small></div></button>
     </div>
     <div class="tabs"><button class="tab ${tab === 'chars' ? 'on' : ''}" data-t="chars">Figuren</button><button class="tab ${tab === 'style' ? 'on' : ''}" data-t="style">Style ✨</button><button class="tab ${tab === 'ups' ? 'on' : ''}" data-t="ups">Power-ups</button>${Monetize.iapChannel ? `<button class="tab buy ${tab === 'buy' ? 'on' : ''}" data-t="buy">💎 Kaufen</button>` : ''}</div>
@@ -4905,11 +4905,13 @@ function openShop(tab = 'chars', sub = 'jet') {
   const box = $('shop'), msg = t => ($('shop-msg').textContent = t);
   if (save.freeCoins.day !== M.day()) save.freeCoins = { day: M.day(), n: 0 };
   const freeLeft = CONFIG.economy.freeCoinsPerDay - save.freeCoins.n;
+  if ($('sh-free')) {
   $('sh-free-t').textContent = freeLeft > 0 && Monetize.canShowRewarded('free_coins') ? `▶ +${CONFIG.economy.freeCoins} · noch ${freeLeft}× heute` : 'Morgen wieder';
   $('sh-free').onclick = async () => {
     if (freeLeft <= 0) return msg('Für heute aufgebraucht – morgen gibt es neue.');
     if (await Monetize.rewarded('free_coins')) { const r = eco({ t: 'adFree' }); if (!r.ok) return msg(failMsg(r.err)); sfx.cash(); refreshHome(); openShop(tab, sub); }
   };
+  }
   $('sh-boost').onclick = () => {
     if (save.coins < CONFIG.economy.headstartPrice) return msg(`Dir fehlen noch ${fmt(CONFIG.economy.headstartPrice - save.coins)} Münzen.`);
     const r = eco({ t: 'buyHead' }); if (!r.ok) return msg(failMsg(r.err)); sfx.cash(); refreshHome(); openShop(tab, sub);

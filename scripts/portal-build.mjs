@@ -1,6 +1,6 @@
-// node scripts/portal-build.mjs [crazygames|poki|alle] – baut die ZIP-Datei für Web-Spieleportale.
+// node scripts/portal-build.mjs [crazygames|crazygames-full|poki|alle] – baut die ZIP-Datei für Web-Spieleportale.
 // Kopie von www mit: Vertriebsweg gesetzt (Werbung über das Portal-SDK, kein Echtgeld-Shop, keine fremden Links),
-// Server-Adresse fest auf myskyrush.netlify.app (funktioniert immer, auch für alte Apps), ohne Zentrale. Ergebnis: builds\SkyRush-<Portal>.zip
+// Server-Adresse fest auf myskyrush.netlify.app (funktioniert immer, auch für alte Apps), ohne Zentrale. Ergebnis: builds\SkyDuell-<Portal>.zip
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
@@ -13,9 +13,10 @@ const SKIP = new Set(['admin.html', 'sw.js', 'konto.html', 'store-import', 'ads.
   'assets', 'js', 'css', 'multiplayer', 'game.html']);
 // Nur Spieldateien mit diesen Endungen kommen ins Paket (keine versehentlich abgelegten Dokumente)
 const ALLOW = /\.(html|js|json|webmanifest|png|jpg|jpeg|webp|svg|woff2|mp3|ogg|wav|txt)$/i;
+// crazygames = „Basic Launch“ (ohne Werbung, so verlangt es CrazyGames) · crazygames-full = erst nach Freigabe für „Full Launch“ (mit Werbung über das SDK)
 const arg = (process.argv[2] || 'alle').toLowerCase();
 const list = arg === 'alle' ? ['crazygames', 'poki'] : [arg];
-if (!list.every(p => ['crazygames', 'poki'].includes(p))) { console.log('Unbekanntes Portal. Erlaubt: crazygames, poki, alle'); process.exit(1); }
+if (!list.every(p => ['crazygames', 'crazygames-full', 'poki'].includes(p))) { console.log('Unbekanntes Portal. Erlaubt: crazygames, crazygames-full, poki, alle'); process.exit(1); }
 
 function files(dir, base = '') {
   const out = [];
@@ -48,11 +49,12 @@ function zip(entries) {
 
 const WWW = path.join(ROOT, 'www');
 fs.mkdirSync(path.join(ROOT, 'builds'), { recursive: true });
-for (const portal of list) {
+for (const target of list) {
+  const portal = target.replace('-full', ''), ads = target !== 'crazygames';
   const entries = [];
   for (const rel of files(WWW)) {
     let data = fs.readFileSync(path.join(WWW, rel));
-    if (rel === 'channel.js') data = Buffer.from(`// Portal-Build (${portal}) – automatisch erzeugt\nexport const CHANNEL = '${portal}';\n`);
+    if (rel === 'channel.js') data = Buffer.from(`// Portal-Build (${target}) – automatisch erzeugt\nexport const CHANNEL = '${portal}';\nexport const PORTAL_ADS = ${ads};\n`);
     if (rel === 'config.js') {
       let t = data.toString('utf8');
       if (!/apiBase:\s*'https?:/.test(t)) t = t.replace(/apiBase:\s*'[^']*'/, `apiBase: '${SITE}'`);
@@ -64,7 +66,7 @@ for (const portal of list) {
     }
     entries.push([rel, data]);
   }
-  const out = path.join(ROOT, 'builds', `SkyRush-${portal === 'crazygames' ? 'CrazyGames' : 'Poki'}.zip`);
+  const out = path.join(ROOT, 'builds', `SkyDuell-${portal === 'crazygames' ? (ads ? 'CrazyGames-Full' : 'CrazyGames') : 'Poki'}.zip`);
   fs.writeFileSync(out, zip(entries));
   console.log(`✅ ${path.relative(ROOT, out)}  (${entries.length} Dateien, ${(fs.statSync(out).size / 1048576).toFixed(1)} MB)`);
 }
