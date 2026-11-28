@@ -1,6 +1,6 @@
 // SKY DUELL – Web-Spieleportale (CrazyGames, Poki). Werbung läuft dort ausschließlich über das SDK des Portals.
 // Außerhalb eines Portal-Builds ist alles hier wirkungslos.
-import { CHANNEL } from './channel.js';
+import { CHANNEL, PORTAL_ADS } from './channel.js';
 
 export const PORTAL = CHANNEL === 'crazygames' || CHANNEL === 'poki' ? CHANNEL : '';
 const SRC = { crazygames: 'https://sdk.crazygames.com/crazygames-sdk-v3.js', poki: 'https://game-cdn.poki.com/scripts/v2/poki-sdk.js' };
@@ -65,11 +65,11 @@ export function gameplay(on) {
 // Kommt kein Video (z. B. CrazyGames „Basic Launch“: dort liefert das Portal noch keine Werbung aus),
 // werden Video-Knöpfe 3 Minuten lang ausgeblendet statt ins Leere zu führen
 let noAdUntil = 0;
-export const portalReady = () => !!sdk && Date.now() >= noAdUntil;
+export const portalReady = () => !!sdk && PORTAL_ADS && Date.now() >= noAdUntil;
 
 // type: 'rewarded' | 'interstitial' → true, wenn die Anzeige gezeigt (bzw. das Video bis zum Ende geschaut) wurde
 export async function portalAd(type) {
-  if (!sdk || inAd) return false;
+  if (!sdk || inAd || !PORTAL_ADS) return false;
   const wasPlaying = playing; gameplay(false);
   let ok = false;
   try {

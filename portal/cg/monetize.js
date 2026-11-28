@@ -5,7 +5,7 @@
 import { PACKS } from './catalog.js';
 import { CONFIG } from './config.js';
 import { showHouseAd, closeHouseAd } from './houseads.js';
-import { CHANNEL } from './channel.js';
+import { CHANNEL, PORTAL_ADS } from './channel.js';
 import { PORTAL, initPortal, portalAd, portalReady, gameplay, loadingDone } from './portal.js';
 // Echtgeld-Käufe nur im Standard-Vertriebsweg (Google Play / App Store); Galaxy Store und Web-Portale: nur Werbung
 const IAP_CHANNEL = CHANNEL === 'store';
@@ -51,6 +51,8 @@ export const Monetize = {
   platform, isNative, channel: CHANNEL, portal: PORTAL, iapChannel: IAP_CHANNEL,
   gameStart: () => gameplay(true), loadingDone,
   get noAds() { return st.noAds; },
+  // Web-Portal ohne Werbung (CrazyGames „Basic Launch“): Video-Angebote gar nicht erst zeigen
+  get adsOff() { return !!PORTAL && !PORTAL_ADS; },
   get revenue() { return st.revenue; },
   onRevenue(fn) { listeners.revenue.push(fn); },
   init, setUser, rewarded: track(rewarded), maybeInterstitial: track(maybeInterstitial), gameFinished, buyNoAds, buyCoins, restore, privacyOptions, onGrant, shopInfo, loadProducts,
